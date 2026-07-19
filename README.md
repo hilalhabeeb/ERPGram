@@ -68,8 +68,24 @@ Emails (invitations, password resets) print to the `web` container logs in dev
 | Run app + Tailwind watch | `make dev`           | `./tasks.ps1 dev`             |
 | Tests                    | `make test`          | `./tasks.ps1 test`            |
 | Lint / format            | `make lint` / `fmt`  | `./tasks.ps1 lint` / `fmt`    |
+| Full CI gate locally     | `make ci`            | `./tasks.ps1 ci`              |
 | Extract translations     | `make messages`      | `./tasks.ps1 messages`        |
 | Compile translations     | `make compilemessages` | `./tasks.ps1 compilemessages` |
+
+## Continuous integration
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to
+`main` and on every pull request: ruff lint, ruff format check, a
+missing-migrations guard, Django system checks, and the full test suite against
+Postgres 16.
+
+`make ci` / `./tasks.ps1 ci` runs the identical set of checks locally, so you
+can catch a red build before pushing.
+
+CI deliberately creates the same non-superuser `erpgram_app` role used in
+development and asserts it cannot bypass row-level security. Running the tests
+as the Postgres superuser would ignore the RLS policies and the tenant-isolation
+tests would pass without proving anything.
 
 The Django admin ("back office") is at **`/backoffice/`** (configurable via
 `DJANGO_ADMIN_URL`), staff-only. It is the internal tool for seeding tenants and

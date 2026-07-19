@@ -27,6 +27,7 @@ switch ($Command) {
         "test     Run the test suite",
         "lint     Lint with ruff",
         "fmt      Format with ruff",
+        "ci       Run the full CI gate locally (same checks as GitHub Actions)",
         "messages Extract translations (en + ar)",
         "compilemessages  Compile .po to .mo",
         "tailwind Rebuild CSS once" | ForEach-Object { Write-Host "  $_" }
@@ -43,6 +44,9 @@ switch ($Command) {
     "test"    { Invoke-Web @("uv", "run", "pytest") }
     "lint"    { Invoke-Web @("uv", "run", "ruff", "check", ".") }
     "fmt"     { Invoke-Web @("uv", "run", "ruff", "format", ".") }
+    "ci" {
+        & docker compose run --rm web sh -c "uv run ruff check . && uv run ruff format --check . && uv run python manage.py makemigrations --check --dry-run && uv run python manage.py check && uv run pytest -q"
+    }
     "messages" { Invoke-Web @("uv", "run", "python", "manage.py", "makemessages", "-l", "ar", "-l", "en", "--ignore=.venv") }
     "compilemessages" { Invoke-Web @("uv", "run", "python", "manage.py", "compilemessages") }
     "tailwind" { Invoke-Web @("tailwindcss", "-i", "static/src/input.css", "-o", "static/css/app.css", "--minify") }

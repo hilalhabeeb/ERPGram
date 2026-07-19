@@ -7,7 +7,7 @@ RUN := docker compose run --rm web
 EXEC := docker compose exec web
 
 .DEFAULT_GOAL := help
-.PHONY: help install up down migrate seed dev test lint fmt messages compilemessages tailwind shell logs
+.PHONY: help install up down migrate seed dev test lint fmt ci messages compilemessages tailwind shell logs
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  %-16s %s\n", $$1, $$2}'
@@ -41,6 +41,13 @@ lint: ## Lint with ruff
 
 fmt: ## Format with ruff
 	$(RUN) uv run ruff format .
+
+ci: ## Run the full CI gate locally (same checks as GitHub Actions)
+	$(RUN) sh -c "uv run ruff check . \
+		&& uv run ruff format --check . \
+		&& uv run python manage.py makemigrations --check --dry-run \
+		&& uv run python manage.py check \
+		&& uv run pytest -q"
 
 messages: ## Extract translatable strings for en + ar
 	$(RUN) uv run python manage.py makemessages -l ar -l en --ignore=.venv
