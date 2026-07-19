@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch makes an in-flight run obsolete.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: lint + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      SECRET_KEY: ci-insecure-not-a-real-key
+      DEBUG: "true"
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      DATABASE_URL: postgres://erpgram_app:erpgram_app_pw@localhost:5432/erpgram
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Create the application database role
+        # Mirrors docker/postgres-init.sql. The app role must NOT be a superuser
+        # and must NOT have BYPASSRLS, or the row-level-security policies are
+        # ignored and the isolation tests would prove nothing. CREATEDB lets the
+        # test runner build test_erpgram owned by this same role, which is what
+        # makes FORCE ROW LEVEL SECURITY actually apply to it.
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE erpgram_app WITH LOGIN PASSWORD 'erpgram_app_pw'
+              NOSUPERUSER CREATEDB NOBYPASSRLS NOCREATEROLE;
+          CREATE DATABASE erpgram OWNER erpgram_app;
+          GRANT ALL PRIVILEGES ON DATABASE erpgram TO erpgram_app;
+          SQL
+
+      - name: Verify the role cannot bypass RLS
+        # Cheap guard against a future edit quietly granting SUPERUSER/BYPASSRLS,
+        # which would make every isolation test pass for the wrong reason.
+        env:
+          PGPASSWORD: postgres
+        run: |
+          result=$(psql -h localhost -U postgres -tAc \
+            "SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname='erpgram_app';")
+          echo "erpgram_app can bypass RLS: $result"
+          if [ "$result" != "f" ]; then
+            echo "::error::erpgram_app must not be SUPERUSER or BYPASSRLS — RLS would be silently ignored"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Lint (ruff)
+        run: uv run ruff check --output-format=github .
+
+      - name: Format check (ruff)
+        run: uv run ruff format --check .
+
+      - name: Check for missing migrations
+        # Fails if a model changed without a matching migration.
+        run: uv run python manage.py makemigrations --check --dry-run
+
+      - name: Django system checks
+        run: uv run python manage.py check
+
+      - name: Tests
+        run: uv run pytest -q --no-header

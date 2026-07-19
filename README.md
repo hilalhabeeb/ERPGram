@@ -1,5 +1,7 @@
 # ERPGRAM
 
+[![CI](https://github.com/hilalhabeeb/ERPGram/actions/workflows/ci.yml/badge.svg)](https://github.com/hilalhabeeb/ERPGram/actions/workflows/ci.yml)
+
 A multi-tenant ERP platform. **Step 1** is the foundation: project scaffold,
 tenancy model with two-layer isolation, email/password auth, and a polished,
 RTL-ready, internationalised app shell with a reusable component library.
