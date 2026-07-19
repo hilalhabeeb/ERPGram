@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from django.http import HttpRequest
 
+from apps.accounts.permissions import request_permissions
 from apps.accounts.services import memberships_for
 from apps.ui.navigation import active_nav_key, nav_for
 
@@ -18,9 +19,12 @@ def shell(request: HttpRequest) -> dict:
     current = next((m for m in memberships if tenant and m.tenant_id == tenant.id), None)
 
     match = getattr(request, "resolver_match", None)
+    permissions = request_permissions(request)
 
     return {
-        "nav_items": nav_for(is_owner=bool(current and current.is_owner)),
+        # Templates gate actions with `{% if "code" in user_permissions %}`.
+        "user_permissions": permissions,
+        "nav_items": nav_for(permissions),
         "active_nav": active_nav_key(
             getattr(match, "view_name", None), getattr(match, "namespace", None)
         ),

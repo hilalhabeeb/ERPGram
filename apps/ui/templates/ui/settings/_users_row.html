@@ -16,8 +16,26 @@
   </td>
   <td class="px-4 py-3 text-text-secondary">{{ obj.user.email }}</td>
   <td class="px-4 py-3">
-    {% if obj.is_owner %}{% include "ui/badge.html" with label=_("Owner") tone="accent" %}
-    {% else %}{% include "ui/badge.html" with label=_("Member") tone="neutral" %}{% endif %}
+    {% if obj.is_owner %}
+      {# Owners hold every permission implicitly, so there is nothing to pick. #}
+      {% include "ui/badge.html" with label=_("Owner") tone="accent" %}
+    {% elif can_manage_members %}
+      <form method="post" action="{% url 'ui:member_role_update' membership_id=obj.pk %}">
+        {% csrf_token %}
+        <select name="role" class="select h-8 py-0 text-xs" onchange="this.form.submit()"
+                aria-label="{% blocktrans with name=obj.user.display_name %}Role for {{ name }}{% endblocktrans %}">
+          <option value="">{% trans "No access yet" %}</option>
+          {% for role in assignable_roles %}
+            <option value="{{ role.id }}" {% if obj.role_id == role.id %}selected{% endif %}>{{ role.name }}</option>
+          {% endfor %}
+        </select>
+        <noscript><button type="submit" class="text-xs underline">{% trans "Save" %}</button></noscript>
+      </form>
+    {% elif obj.role %}
+      {% include "ui/badge.html" with label=obj.role.name tone="neutral" %}
+    {% else %}
+      <span class="text-xs text-text-muted">{% trans "No access yet" %}</span>
+    {% endif %}
   </td>
   <td class="px-4 py-3">
     {% if obj.user.is_active %}{% include "ui/badge.html" with label=_("Active") tone="success" %}

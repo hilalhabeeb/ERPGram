@@ -3,39 +3,44 @@
 from __future__ import annotations
 
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 
-from apps.accounts.forms import InviteForm, OrganizationForm, ProfileForm
-from apps.accounts.models import Membership
-from apps.accounts.services import invite_member, send_invitation_email
+from apps.accounts.forms import InviteForm, OrganizationForm, ProfileForm, RoleForm
+from apps.accounts.models import Membership, Role
+from apps.accounts.permissions import request_permissions, require_permission
+from apps.accounts.services import (
+    create_role,
+    invite_member,
+    roles_for,
+    send_invitation_email,
+    update_role,
+)
+from apps.core.permissions import (
+    MANAGE_MEMBERS,
+    MANAGE_ORGANIZATION,
+    MANAGE_ROLES,
+    grouped_permissions,
+)
 from apps.tenancy.services import update_organization
 from apps.ui.services import dashboard_stats, paginate, settings_tabs
 
 
-def _owner_membership(request: HttpRequest) -> Membership | None:
-    return Membership.objects.filter(
-        user=request.user, tenant=request.tenant, is_owner=True
-    ).first()
-
-
-def _require_owner(request: HttpRequest) -> Membership:
-    membership = _owner_membership(request)
-    if membership is None:
-        raise PermissionDenied(_("Owner access is required for this page."))
-    return membership
-
-
 def _settings_context(request: HttpRequest, active: str) -> dict:
-    """Shared chrome for every settings page: breadcrumb trail and sub-nav tabs."""
-    is_owner = _owner_membership(request) is not None
+    """Shared chrome for every settings page: sub-nav tabs and action gating."""
+    permissions = request_permissions(request)
     return {
         "active": active,
-        "is_owner": is_owner,
-        "tabs": settings_tabs(is_owner=is_owner),
+        "can_manage_organization": MANAGE_ORGANIZATION in permissions,
+        "can_manage_members": MANAGE_MEMBERS in permissions,
+        "can_manage_roles": MANAGE_ROLES in permissions,
+        "tabs": settings_tabs(
+            can_manage_organization=MANAGE_ORGANIZATION in permissions,
+            can_manage_roles=MANAGE_ROLES in permissions,
+        ),
     }
 
 
@@ -78,7 +83,7 @@ def settings_profile(request: HttpRequest) -> HttpResponse:
 
 @require_http_methods(["GET", "POST"])
 def settings_organization(request: HttpRequest) -> HttpResponse:
-    _require_owner(request)
+    require_permission(request, MANAGE_ORGANIZATION)
     tenant = request.tenant
     initial = {
         "name": tenant.name,
@@ -109,16 +114,16 @@ def settings_organization(request: HttpRequest) -> HttpResponse:
 
 @require_http_methods(["GET", "POST"])
 def settings_users(request: HttpRequest) -> HttpResponse:
-    form = InviteForm(request.POST or None)
+    form = InviteForm(request.POST or None, tenant=request.tenant)
     if request.method == "POST":
-        _require_owner(request)
+        require_permission(request, MANAGE_MEMBERS)
         if form.is_valid():
             membership, created_user = invite_member(
                 tenant=request.tenant,
                 email=form.cleaned_data["email"],
                 full_name=form.cleaned_data["full_name"],
                 invited_by=request.user,
-                is_owner=form.cleaned_data["is_owner"],
+                role=form.cleaned_data["role"],
             )
             if created_user:
                 send_invitation_email(request, membership.user, request.tenant)
@@ -133,7 +138,7 @@ def settings_users(request: HttpRequest) -> HttpResponse:
                 )
             return redirect("ui:settings_users")
 
-    members = Membership.objects.filter(tenant=request.tenant).select_related("user")
+    members = Membership.objects.filter(tenant=request.tenant).select_related("user", "role")
     page, sort_key, direction = paginate(
         request,
         members,
@@ -161,11 +166,77 @@ def settings_users(request: HttpRequest) -> HttpResponse:
         "page_obj": page,
         "sort_key": sort_key,
         "direction": direction,
+        "assignable_roles": roles_for(request.tenant),
         **_settings_context(request, "users"),
     }
     if request.htmx and request.htmx.target == "users-table":
         return render(request, "ui/settings/_users_table.html", context)
     return render(request, "ui/settings/users.html", context)
+
+
+@require_http_methods(["GET", "POST"])
+def settings_roles(request: HttpRequest) -> HttpResponse:
+    """List and edit the tenant's roles."""
+    require_permission(request, MANAGE_ROLES)
+    tenant = request.tenant
+
+    if request.method == "POST":
+        role_id = request.POST.get("role_id")
+        selected = request.POST.getlist("permissions")
+
+        if role_id:
+            role = get_object_or_404(Role.objects.filter(tenant=tenant), pk=role_id)
+            if role.slug == "owner":
+                # Owners hold every permission implicitly; letting this role be
+                # weakened would imply a restriction the code does not honour.
+                messages.error(request, _("The Owner role always has full access."))
+                return redirect("ui:settings_roles")
+            form = RoleForm(request.POST, instance=role)
+            if form.is_valid():
+                update_role(role, name=form.cleaned_data["name"], permissions=selected)
+                messages.success(request, _("Role updated."))
+                return redirect("ui:settings_roles")
+        else:
+            form = RoleForm(request.POST)
+            if form.is_valid():
+                create_role(tenant=tenant, name=form.cleaned_data["name"], permissions=selected)
+                messages.success(request, _("Role created."))
+                return redirect("ui:settings_roles")
+        messages.error(request, _("Please correct the errors and try again."))
+        return redirect("ui:settings_roles")
+
+    roles = roles_for(tenant).annotate(member_count=Count("memberships"))
+    return render(
+        request,
+        "ui/settings/roles.html",
+        {
+            "page_title": _("Roles"),
+            "breadcrumb": [_("Settings"), _("Roles")],
+            "roles": roles,
+            "groups": grouped_permissions(),
+            "form": RoleForm(),
+            **_settings_context(request, "roles"),
+        },
+    )
+
+
+@require_POST
+def member_role_update(request: HttpRequest, membership_id) -> HttpResponse:
+    """Change one member's role from the users table."""
+    require_permission(request, MANAGE_MEMBERS)
+    membership = get_object_or_404(
+        Membership.objects.filter(tenant=request.tenant), pk=membership_id
+    )
+    if membership.is_owner:
+        messages.error(request, _("Owners always have full access; their role cannot limit it."))
+        return redirect("ui:settings_users")
+
+    role_id = request.POST.get("role") or None
+    role = Role.objects.filter(tenant=request.tenant, pk=role_id).first() if role_id else None
+    membership.role = role
+    membership.save(update_fields=["role"])
+    messages.success(request, _("Role updated."))
+    return redirect("ui:settings_users")
 
 
 # --- error handlers ---------------------------------------------------------

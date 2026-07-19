@@ -2,7 +2,7 @@
 
 Views orchestrate only: they resolve objects, check permission, and hand off to
 ``apps.tenancy.services``. Reads are open to any member of the tenant; every
-mutation is owner-only.
+mutation requires the manage-structure permission.
 
 Object lookups go through the tenant-filtered default manager, so a URL carrying
 another tenant's UUID 404s rather than leaking anything.
@@ -11,32 +11,27 @@ another tenant's UUID 404s rather than leaking anything.
 from __future__ import annotations
 
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.accounts.models import Membership
+from apps.accounts.permissions import has_permission, require_permission
+from apps.core.permissions import MANAGE_STRUCTURE
 from apps.tenancy import services
 from apps.tenancy.forms import BranchForm, CompanyForm, DepartmentForm
 from apps.tenancy.models import Branch, Company, Department
 from apps.ui.services import paginate
 
 
-def _require_owner(request: HttpRequest) -> Membership:
-    membership = Membership.objects.filter(
-        user=request.user, tenant=request.tenant, is_owner=True
-    ).first()
-    if membership is None:
-        raise PermissionDenied(_("Owner access is required to change the organisation structure."))
-    return membership
+def _require_manage_structure(request: HttpRequest) -> None:
+    """Structural changes need the manage-structure permission."""
+    require_permission(request, MANAGE_STRUCTURE)
 
 
-def _is_owner(request: HttpRequest) -> bool:
-    return Membership.objects.filter(
-        user=request.user, tenant=request.tenant, is_owner=True
-    ).exists()
+def _can_manage_structure(request: HttpRequest) -> bool:
+    """Template flag: may this user change the structure?"""
+    return has_permission(request, MANAGE_STRUCTURE)
 
 
 def _get_company(request: HttpRequest, pk) -> Company:
@@ -84,7 +79,7 @@ def company_list(request: HttpRequest) -> HttpResponse:
         "direction": direction,
         "search": search,
         "include_archived": include_archived,
-        "is_owner": _is_owner(request),
+        "can_manage": _can_manage_structure(request),
         "form": CompanyForm(),
     }
     if request.htmx and request.htmx.target == "companies-table":
@@ -94,7 +89,7 @@ def company_list(request: HttpRequest) -> HttpResponse:
 
 @require_POST
 def company_create(request: HttpRequest) -> HttpResponse:
-    _require_owner(request)
+    _require_manage_structure(request)
     form = CompanyForm(request.POST)
     if form.is_valid():
         company = services.create_company(
@@ -108,7 +103,7 @@ def company_create(request: HttpRequest) -> HttpResponse:
 
 @require_POST
 def company_update(request: HttpRequest, pk) -> HttpResponse:
-    _require_owner(request)
+    _require_manage_structure(request)
     company = _get_company(request, pk)
     form = CompanyForm(request.POST)
     if form.is_valid():
@@ -121,7 +116,7 @@ def company_update(request: HttpRequest, pk) -> HttpResponse:
 
 @require_POST
 def company_archive(request: HttpRequest, pk) -> HttpResponse:
-    _require_owner(request)
+    _require_manage_structure(request)
     company = _get_company(request, pk)
     if company.is_active:
         services.archive_company(company, user=request.user)
@@ -162,7 +157,7 @@ def company_detail(request: HttpRequest, pk) -> HttpResponse:
         "sort_key": sort_key,
         "direction": direction,
         "include_archived": include_archived,
-        "is_owner": _is_owner(request),
+        "can_manage": _can_manage_structure(request),
         "form": BranchForm(),
         "company_form": CompanyForm(
             initial={
@@ -182,7 +177,7 @@ def company_detail(request: HttpRequest, pk) -> HttpResponse:
 
 @require_POST
 def branch_create(request: HttpRequest, pk) -> HttpResponse:
-    _require_owner(request)
+    _require_manage_structure(request)
     company = _get_company(request, pk)
     form = BranchForm(request.POST)
     if form.is_valid():
@@ -195,7 +190,7 @@ def branch_create(request: HttpRequest, pk) -> HttpResponse:
 
 @require_POST
 def branch_update(request: HttpRequest, pk, branch_pk) -> HttpResponse:
-    _require_owner(request)
+    _require_manage_structure(request)
     company = _get_company(request, pk)
     branch = _get_branch(request, company, branch_pk)
     form = BranchForm(request.POST)
@@ -209,7 +204,7 @@ def branch_update(request: HttpRequest, pk, branch_pk) -> HttpResponse:
 
 @require_POST
 def branch_archive(request: HttpRequest, pk, branch_pk) -> HttpResponse:
-    _require_owner(request)
+    _require_manage_structure(request)
     company = _get_company(request, pk)
     branch = _get_branch(request, company, branch_pk)
     if branch.is_active:
@@ -233,7 +228,7 @@ def branch_detail(request: HttpRequest, pk, branch_pk) -> HttpResponse:
         "branch": branch,
         "rows": services.department_tree(branch, include_archived=include_archived),
         "include_archived": include_archived,
-        "is_owner": _is_owner(request),
+        "can_manage": _can_manage_structure(request),
         "form": DepartmentForm(branch=branch),
         "branch_form": BranchForm(
             initial={"name": branch.name, "code": branch.code, "address": branch.address}
@@ -247,7 +242,7 @@ def branch_detail(request: HttpRequest, pk, branch_pk) -> HttpResponse:
 
 @require_POST
 def department_create(request: HttpRequest, pk, branch_pk) -> HttpResponse:
-    _require_owner(request)
+    _require_manage_structure(request)
     company = _get_company(request, pk)
     branch = _get_branch(request, company, branch_pk)
     form = DepartmentForm(request.POST, branch=branch)
@@ -261,7 +256,7 @@ def department_create(request: HttpRequest, pk, branch_pk) -> HttpResponse:
 
 @require_POST
 def department_update(request: HttpRequest, pk, branch_pk, department_pk) -> HttpResponse:
-    _require_owner(request)
+    _require_manage_structure(request)
     company = _get_company(request, pk)
     branch = _get_branch(request, company, branch_pk)
     department = get_object_or_404(Department.objects.filter(branch=branch), pk=department_pk)
@@ -277,7 +272,7 @@ def department_update(request: HttpRequest, pk, branch_pk, department_pk) -> Htt
 
 @require_POST
 def department_archive(request: HttpRequest, pk, branch_pk, department_pk) -> HttpResponse:
-    _require_owner(request)
+    _require_manage_structure(request)
     company = _get_company(request, pk)
     branch = _get_branch(request, company, branch_pk)
     department = get_object_or_404(Department.objects.filter(branch=branch), pk=department_pk)

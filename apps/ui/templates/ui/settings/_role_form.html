@@ -1,0 +1,31 @@
+{% comment %}New-role form body, rendered inside the modal.{% endcomment %}
+{% load i18n %}
+<form method="post" action="{% url 'ui:settings_roles' %}" class="space-y-4">
+  {% csrf_token %}
+  {% include "partials/_field.html" with field=form.name %}
+
+  {% for group, permissions in groups.items %}
+    <fieldset class="border-t border-border pt-3">
+      <legend class="text-xs font-medium text-text-muted">{{ group }}</legend>
+      <div class="mt-2 space-y-2">
+        {% for permission in permissions %}
+          <label class="flex items-start gap-2.5">
+            <input type="checkbox" name="permissions" value="{{ permission.codename }}" class="checkbox mt-0.5">
+            <span>
+              <span class="block text-sm text-text-primary">{{ permission.label }}</span>
+              <span class="block text-xs text-text-muted">{{ permission.description }}</span>
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+  {% endfor %}
+
+  <div class="flex justify-end gap-2 pt-2">
+    <button type="button" @click="open = false"
+            class="rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle">
+      {% trans "Cancel" %}
+    </button>
+    {% include "ui/button.html" with label=_("Create role") type="submit" variant="primary" icon="plus" %}
+  </div>
+</form>

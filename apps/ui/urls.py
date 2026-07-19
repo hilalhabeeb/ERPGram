@@ -13,4 +13,10 @@ urlpatterns = [
     path("settings/profile/", views.settings_profile, name="settings_profile"),
     path("settings/organization/", views.settings_organization, name="settings_organization"),
     path("settings/users/", views.settings_users, name="settings_users"),
+    path("settings/roles/", views.settings_roles, name="settings_roles"),
+    path(
+        "settings/users/<uuid:membership_id>/role/",
+        views.member_role_update,
+        name="member_role_update",
+    ),
 ]

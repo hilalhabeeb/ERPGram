@@ -9,7 +9,9 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.accounts.models import Membership
+from apps.accounts.models import Membership, Role
+from apps.accounts.services import ensure_system_roles
+from apps.core.permissions import MANAGE_STRUCTURE
 from apps.core.tenant import activate_tenant
 from apps.tenancy.models import Branch, Company, Department, Tenant
 
@@ -61,14 +63,35 @@ class Command(BaseCommand):
             defaults={"name": spec["name"], "timezone": spec["timezone"]},
         )
 
+        roles = ensure_system_roles(tenant)
+        # A third role so the demo shows partial access, not just all-or-nothing.
+        staff_role, _ = Role.objects.get_or_create(
+            tenant=tenant,
+            slug="structure-editor",
+            defaults={
+                "name": "Structure editor",
+                "permissions": [MANAGE_STRUCTURE],
+                "is_system": False,
+            },
+        )
+
         owner = self._ensure_user(*spec["owner"])
         Membership.objects.get_or_create(
-            user=owner, tenant=tenant, defaults={"is_owner": True, "is_default": True}
+            user=owner,
+            tenant=tenant,
+            defaults={"is_owner": True, "is_default": True, "role": roles["owner"]},
         )
-        for email, name in spec["members"]:
+        for index, (email, name) in enumerate(spec["members"]):
             member = self._ensure_user(email, name)
             Membership.objects.get_or_create(
-                user=member, tenant=tenant, defaults={"is_owner": False, "is_default": True}
+                user=member,
+                tenant=tenant,
+                defaults={
+                    "is_owner": False,
+                    "is_default": True,
+                    # First member can edit structure, the rest are read-only.
+                    "role": staff_role if index == 0 else roles["member"],
+                },
             )
 
         # Tenant-scoped rows: bind the tenant at the DB layer (FORCE RLS).

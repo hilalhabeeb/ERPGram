@@ -3,7 +3,7 @@ Settings sub-navigation. Renders as a tab row linking the settings pages.
 
 Context:
   active     (str)  one of "profile" | "organization" | "users"
-  is_owner   (bool) show owner-only tabs
+  tabs       (list) already filtered to what this user may open
 
 Owner-only pages are hidden rather than shown-and-403'd — the view still
 enforces access, this only keeps the nav honest about what you can reach.

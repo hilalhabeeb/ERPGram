@@ -10,6 +10,8 @@ from dataclasses import dataclass
 
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.permissions import MANAGE_ORGANIZATION
+
 
 @dataclass(frozen=True)
 class NavItem:
@@ -17,7 +19,8 @@ class NavItem:
     label: str
     icon: str
     url_name: str
-    owner_only: bool = False
+    # Codename from apps.core.permissions; None means every member may open it.
+    requires: str | None = None
 
 
 # icon= is passed by keyword so the icon-audit test (tests/test_icons.py) sees it.
@@ -31,15 +34,16 @@ PRIMARY_NAV: list[NavItem] = [
         # "building" now belongs to Companies; settings uses the gear.
         icon="settings",
         url_name="ui:settings_organization",
-        owner_only=True,
+        requires=MANAGE_ORGANIZATION,
     ),
     NavItem("users", _("Users"), icon="users", url_name="ui:settings_users"),
 ]
 
 
-def nav_for(*, is_owner: bool) -> list[NavItem]:
+def nav_for(permissions) -> list[NavItem]:
     """Rail entries this user can actually reach — never advertise a 403."""
-    return [item for item in PRIMARY_NAV if not item.owner_only or is_owner]
+    held = frozenset(permissions or ())
+    return [item for item in PRIMARY_NAV if item.requires is None or item.requires in held]
 
 
 def active_nav_key(view_name: str | None, namespace: str | None) -> str | None:

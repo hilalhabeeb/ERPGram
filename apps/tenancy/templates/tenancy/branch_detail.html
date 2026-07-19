@@ -4,7 +4,7 @@
 {% block title %}{{ branch.name }} · Erpgram{% endblock %}
 
 {% block content %}
-  {% if is_owner %}
+  {% if can_manage %}
     {% include "ui/page_header.html" with title=branch.name subtitle=company.name action_label=_("Add department") action_icon="plus" action_event="open-modal-department" %}
   {% else %}
     {% include "ui/page_header.html" with title=branch.name subtitle=company.name %}
@@ -21,7 +21,7 @@
         <dd class="mt-0.5 whitespace-pre-line text-sm text-text-primary">{{ branch.address|default:"—" }}</dd>
       </div>
     </dl>
-    {% if is_owner %}
+    {% if can_manage %}
       <div class="mt-4 border-t border-border pt-4">
         {% include "ui/button.html" with label=_("Edit branch") variant="secondary" size="sm" icon="pencil" event="open-modal-branch-edit" %}
       </div>
@@ -51,7 +51,7 @@
                 {% include "ui/badge.html" with label=_("Archived") tone="neutral" %}
               {% endif %}
             </div>
-            {% if is_owner %}
+            {% if can_manage %}
               <form method="post" action="{% url 'tenancy:department_archive' pk=company.pk branch_pk=branch.pk department_pk=row.department.pk %}">
                 {% csrf_token %}
                 <button type="submit"
@@ -74,7 +74,7 @@
     {% endif %}
   </section>
 
-  {% if is_owner %}
+  {% if can_manage %}
     {% include "ui/modal.html" with name="department" title=_("Add a department") include_body="tenancy/_department_form.html" %}
     {% include "ui/modal.html" with name="branch-edit" title=_("Edit branch") include_body="tenancy/_branch_edit_form.html" %}
   {% endif %}

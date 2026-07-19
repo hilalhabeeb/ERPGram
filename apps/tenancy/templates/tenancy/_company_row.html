@@ -1,4 +1,4 @@
-{% comment %}One company row. Context: obj (Company), is_owner (bool).{% endcomment %}
+{% comment %}One company row. Context: obj (Company), can_manage (bool).{% endcomment %}
 {% load i18n ui %}
 <tr class="hover:bg-subtle {% if not obj.is_active %}opacity-60{% endif %}">
   <td class="px-4 py-3">
@@ -18,7 +18,7 @@
     {% endif %}
   </td>
   <td class="px-4 py-3">
-    {% if is_owner %}
+    {% if can_manage %}
       <form method="post" action="{% url 'tenancy:company_archive' pk=obj.pk %}" class="flex justify-end">
         {% csrf_token %}
         <button type="submit"

@@ -12,6 +12,9 @@ from apps.accounts.models import LoginAttempt, Membership, User
 class MembershipInline(admin.TabularInline):
     model = Membership
     extra = 0
+    # Membership has two FKs to User (the member, and who invited them), so the
+    # inline has to say which one it is listing.
+    fk_name = "user"
     autocomplete_fields = ["tenant"]
 
 

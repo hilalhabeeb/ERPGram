@@ -4,7 +4,7 @@
 {% block title %}{% trans "Companies" %} · Erpgram{% endblock %}
 
 {% block content %}
-  {% if is_owner %}
+  {% if can_manage %}
     {% include "ui/page_header.html" with title=_("Companies") subtitle=_("Legal entities in this organisation.") action_label=_("Add company") action_icon="plus" action_event="open-modal-company" %}
   {% else %}
     {% include "ui/page_header.html" with title=_("Companies") subtitle=_("Legal entities in this organisation.") %}
@@ -18,7 +18,7 @@
 
   {% include "tenancy/_companies_table.html" %}
 
-  {% if is_owner %}
+  {% if can_manage %}
     {% include "ui/modal.html" with name="company" title=_("Add a company") include_body="tenancy/_company_form.html" %}
   {% endif %}
 {% endblock %}

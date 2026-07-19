@@ -4,7 +4,7 @@
 {% block title %}{% trans "Users" %} · Erpgram{% endblock %}
 
 {% block content %}
-  {% if is_owner %}
+  {% if can_manage_members %}
     {% include "ui/page_header.html" with title=_("Settings") subtitle=_("Manage your account and this organisation.") action_label=_("Invite user") action_icon="plus" action_event="open-modal-invite" %}
   {% else %}
     {% include "ui/page_header.html" with title=_("Settings") subtitle=_("Manage your account and this organisation.") %}
@@ -18,7 +18,7 @@
 
   {% include "ui/settings/_users_table.html" %}
 
-  {% if is_owner %}
+  {% if can_manage_members %}
     {% include "ui/modal.html" with name="invite" title=_("Invite a user") include_body="ui/settings/_invite_form.html" %}
   {% endif %}
 {% endblock %}

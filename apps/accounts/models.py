@@ -64,6 +64,49 @@ class User(AbstractBaseUser, PermissionsMixin):
         return source[:2].upper()
 
 
+class Role(models.Model):
+    """A named set of permissions inside one tenant.
+
+    Like ``Membership`` — and unlike the business tables — this is a plain model
+    with a tenant FK rather than a ``TenantScopedModel``. Both are consulted
+    outside a bound tenant context (login, the tenant switcher, the back
+    office), where the RLS policy would hide the very rows needed to decide
+    where the user may go. Every query therefore filters on ``tenant``
+    explicitly; see ``apps.accounts.permissions``.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        "tenancy.Tenant",
+        verbose_name=_("tenant"),
+        on_delete=models.CASCADE,
+        related_name="roles",
+    )
+    name = models.CharField(_("name"), max_length=100)
+    slug = models.SlugField(_("slug"), max_length=50)
+    # Codenames from apps.core.permissions. JSON rather than a join table: the
+    # catalogue is small, fully known at deploy time, and always read whole.
+    permissions = models.JSONField(_("permissions"), default=list, blank=True)
+    # System roles ship with every tenant and cannot be deleted or renamed.
+    is_system = models.BooleanField(_("system role"), default=False)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("updated at"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("role")
+        verbose_name_plural = _("roles")
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(fields=["tenant", "slug"], name="uniq_role_tenant_slug"),
+        ]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def has(self, codename: str) -> bool:
+        return codename in (self.permissions or [])
+
+
 class Membership(models.Model):
     """Links a user to a tenant. A user may belong to several tenants."""
 
@@ -80,8 +123,27 @@ class Membership(models.Model):
         on_delete=models.CASCADE,
         related_name="memberships",
     )
+    role = models.ForeignKey(
+        Role,
+        verbose_name=_("role"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="memberships",
+    )
     is_default = models.BooleanField(_("default tenant"), default=False)
+    # Tenant owner: implicitly holds every permission, regardless of role. This
+    # is what makes it impossible to lock every administrator out of a tenant by
+    # editing roles — there is always someone who can put it right.
     is_owner = models.BooleanField(_("owner"), default=False)
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("invited by"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
     joined_at = models.DateTimeField(_("joined at"), default=timezone.now)
 
     class Meta:

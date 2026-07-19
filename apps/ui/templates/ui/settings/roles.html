@@ -1,0 +1,108 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Roles" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% include "ui/page_header.html" with title=_("Settings") subtitle=_("Manage your account and this organisation.") action_label=_("New role") action_icon="plus" action_event="open-modal-role" %}
+  {% include "ui/settings/_nav.html" %}
+
+  <div class="mb-4">
+    <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Roles" %}</h2>
+    <p class="mt-0.5 text-sm text-text-secondary">
+      {% trans "A role is a set of things someone is allowed to do. Owners always have full access." %}
+    </p>
+  </div>
+
+  <div class="space-y-4">
+    {% for role in roles %}
+      <section class="card p-5" x-data="{ editing: false }">
+        <header class="flex flex-wrap items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-medium text-text-primary">{{ role.name }}</h3>
+              {% if role.is_system %}
+                {% include "ui/badge.html" with label=_("Built-in") tone="neutral" %}
+              {% endif %}
+            </div>
+            <p class="mt-0.5 text-xs text-text-secondary">
+              {% blocktrans count counter=role.member_count %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktrans %}
+            </p>
+          </div>
+          {% if role.slug != "owner" %}
+            <button type="button" @click="editing = !editing"
+                    class="rounded-control border border-border px-3 py-1.5 text-sm text-text-primary hover:bg-subtle">
+              <span x-show="!editing">{% trans "Edit" %}</span>
+              <span x-show="editing" x-cloak>{% trans "Cancel" %}</span>
+            </button>
+          {% endif %}
+        </header>
+
+        {# Read-only summary #}
+        <div class="mt-3 flex flex-wrap gap-1.5" x-show="!editing">
+          {% if role.slug == "owner" %}
+            <span class="text-sm text-text-secondary">{% trans "Full access to everything." %}</span>
+          {% else %}
+            {% for group, permissions in groups.items %}
+              {% for permission in permissions %}
+                {% if permission.codename in role.permissions %}
+                  {% include "ui/badge.html" with label=permission.label tone="accent" %}
+                {% endif %}
+              {% endfor %}
+            {% endfor %}
+            {% if not role.permissions %}
+              <span class="text-sm text-text-muted">{% trans "No permissions yet — this role can only view." %}</span>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        {# Editor #}
+        {% if role.slug != "owner" %}
+          <form method="post" x-show="editing" x-cloak class="mt-4 space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="role_id" value="{{ role.id }}">
+            <div>
+              <label for="name-{{ role.id }}" class="block text-sm font-medium text-text-primary">
+                {% trans "Role name" %}
+              </label>
+              <input id="name-{{ role.id }}" name="name" value="{{ role.name }}" class="input mt-1.5"
+                     {% if role.is_system %}readonly{% endif %}>
+              {% if role.is_system %}
+                <p class="mt-1 text-xs text-text-muted">{% trans "Built-in roles cannot be renamed." %}</p>
+              {% endif %}
+            </div>
+
+            {% for group, permissions in groups.items %}
+              <fieldset class="border-t border-border pt-3">
+                <legend class="text-xs font-medium text-text-muted">{{ group }}</legend>
+                <div class="mt-2 space-y-2">
+                  {% for permission in permissions %}
+                    <label class="flex items-start gap-2.5">
+                      <input type="checkbox" name="permissions" value="{{ permission.codename }}"
+                             class="checkbox mt-0.5"
+                             {% if permission.codename in role.permissions %}checked{% endif %}>
+                      <span>
+                        <span class="block text-sm text-text-primary">{{ permission.label }}</span>
+                        <span class="block text-xs text-text-muted">{{ permission.description }}</span>
+                      </span>
+                    </label>
+                  {% endfor %}
+                </div>
+              </fieldset>
+            {% endfor %}
+
+            <div class="flex justify-end gap-2">
+              <button type="button" @click="editing = false"
+                      class="rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle">
+                {% trans "Cancel" %}
+              </button>
+              {% include "ui/button.html" with label=_("Save role") type="submit" variant="primary" %}
+            </div>
+          </form>
+        {% endif %}
+      </section>
+    {% endfor %}
+  </div>
+
+  {% include "ui/modal.html" with name="role" title=_("New role") include_body="ui/settings/_role_form.html" %}
+{% endblock %}

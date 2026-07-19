@@ -4,7 +4,7 @@
 {% block title %}{{ company.name }} · Erpgram{% endblock %}
 
 {% block content %}
-  {% if is_owner %}
+  {% if can_manage %}
     {% include "ui/page_header.html" with title=company.name subtitle=_("Branches in this company.") action_label=_("Add branch") action_icon="plus" action_event="open-modal-branch" %}
   {% else %}
     {% include "ui/page_header.html" with title=company.name subtitle=_("Branches in this company.") %}
@@ -32,7 +32,7 @@
         </dd>
       </div>
     </dl>
-    {% if is_owner %}
+    {% if can_manage %}
       <div class="mt-4 border-t border-border pt-4">
         {% include "ui/button.html" with label=_("Edit company") variant="secondary" size="sm" icon="pencil" event="open-modal-company-edit" %}
       </div>
@@ -46,7 +46,7 @@
 
   {% include "tenancy/_branches_table.html" %}
 
-  {% if is_owner %}
+  {% if can_manage %}
     {% include "ui/modal.html" with name="branch" title=_("Add a branch") include_body="tenancy/_branch_form.html" %}
     {% include "ui/modal.html" with name="company-edit" title=_("Edit company") include_body="tenancy/_company_edit_form.html" %}
   {% endif %}

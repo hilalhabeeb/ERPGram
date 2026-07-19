@@ -9,6 +9,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.utils.translation import gettext_lazy as _
 
+from apps.accounts.models import Role
+
 User = get_user_model()
 
 # Widget -> component class. The shapes themselves live in static/src/input.css
@@ -64,7 +66,44 @@ class LoginForm(StyledForm):
 class InviteForm(StyledForm):
     full_name = forms.CharField(label=_("Full name"), max_length=200)
     email = forms.EmailField(label=_("Email"))
-    is_owner = forms.BooleanField(label=_("Grant owner access"), required=False)
+    role = forms.ModelChoiceField(
+        label=_("Role"),
+        queryset=Role.objects.none(),
+        required=False,
+        empty_label=_("No access yet"),
+        help_text=_("What this person will be allowed to do. You can change it later."),
+    )
+
+    def __init__(self, *args, tenant=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Scoped to the tenant: a role picker is a place another tenant's
+        # configuration would otherwise become visible.
+        self.fields["role"].queryset = (
+            Role.objects.filter(tenant=tenant).order_by("-is_system", "name")
+            if tenant is not None
+            else Role.objects.none()
+        )
+        if tenant is not None and not self.is_bound:
+            self.fields["role"].initial = Role.objects.filter(tenant=tenant, slug="member").first()
+
+
+class RoleForm(StyledForm):
+    """Create/edit a role. Permission checkboxes are rendered by the template."""
+
+    name = forms.CharField(label=_("Role name"), max_length=100)
+
+    def __init__(self, *args, instance: Role | None = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance = instance
+        if instance is not None and instance.is_system:
+            # System role names are referenced in copy and migrations.
+            self.fields["name"].disabled = True
+            self.fields["name"].help_text = _("Built-in roles cannot be renamed.")
+
+    def clean_name(self) -> str:
+        if self.instance is not None and self.instance.is_system:
+            return self.instance.name
+        return self.cleaned_data["name"].strip()
 
 
 class ActivateForm(SetPasswordForm):

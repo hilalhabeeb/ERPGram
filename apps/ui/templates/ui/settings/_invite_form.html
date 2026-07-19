@@ -6,7 +6,7 @@
   {% csrf_token %}
   {% include "partials/_field.html" with field=form.full_name %}
   {% include "partials/_field.html" with field=form.email %}
-  {% include "partials/_field.html" with field=form.is_owner %}
+  {% include "partials/_field.html" with field=form.role %}
   <div class="flex justify-end gap-2 pt-2">
     {% include "ui/button.html" with label=_("Cancel") variant="secondary" attrs='@click="open = false"' %}
     {% include "ui/button.html" with label=_("Send invitation") type="submit" variant="primary" icon="mail" %}

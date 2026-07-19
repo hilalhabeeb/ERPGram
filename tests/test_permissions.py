@@ -52,7 +52,7 @@ def test_settings_nav_shows_all_tabs_to_owners(client):
     resp = client.get(reverse("ui:settings_profile"))
 
     tab_keys = {tab.key for tab in resp.context["tabs"]}
-    assert tab_keys == {"profile", "organization", "users"}
+    assert tab_keys == {"profile", "organization", "users", "roles"}
 
 
 def test_members_do_not_see_the_invite_action(client):

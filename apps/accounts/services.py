@@ -15,8 +15,9 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from django.utils.text import slugify
 
-from apps.accounts.models import LoginAttempt, Membership
+from apps.accounts.models import LoginAttempt, Membership, Role
 from apps.accounts.tokens import activation_token
 from apps.tenancy.models import Tenant
 
@@ -69,6 +70,82 @@ def switch_tenant(request: HttpRequest, tenant_id: str) -> bool:
     return True
 
 
+# --- roles -------------------------------------------------------------------
+
+
+def roles_for(tenant: Tenant):
+    """Every role defined in a tenant, system roles first."""
+    return Role.objects.filter(tenant=tenant).order_by("-is_system", "name")
+
+
+def default_member_role(tenant: Tenant) -> Role | None:
+    """The role new invitees get unless one is chosen."""
+    return Role.objects.filter(tenant=tenant, slug="member").first()
+
+
+@transaction.atomic
+def ensure_system_roles(tenant: Tenant) -> dict[str, Role]:
+    """Create the built-in roles for a tenant if they are missing.
+
+    Mirrors the 0004 data migration so newly created tenants (seed, back office)
+    are never left without roles to assign.
+    """
+    from apps.core.permissions import ALL_CODENAMES
+
+    specs = [
+        ("owner", "Owner", sorted(ALL_CODENAMES)),
+        ("member", "Member", []),
+    ]
+    roles: dict[str, Role] = {}
+    for slug, name, permissions in specs:
+        roles[slug], _created = Role.objects.get_or_create(
+            tenant=tenant,
+            slug=slug,
+            defaults={"name": name, "permissions": permissions, "is_system": True},
+        )
+    return roles
+
+
+@transaction.atomic
+def create_role(*, tenant: Tenant, name: str, permissions: list[str]) -> Role:
+    from apps.core.permissions import clean_codenames
+
+    return Role.objects.create(
+        tenant=tenant,
+        name=name.strip(),
+        slug=_unique_role_slug(tenant, name),
+        permissions=clean_codenames(permissions),
+        is_system=False,
+    )
+
+
+@transaction.atomic
+def update_role(role: Role, *, name: str, permissions: list[str]) -> Role:
+    """Rename a role and set its permissions.
+
+    System roles keep their name (the UI depends on "Owner"/"Member" meaning
+    what they say) but their permissions may still be tuned — except the owner
+    role, which the caller must not weaken.
+    """
+    from apps.core.permissions import clean_codenames
+
+    if not role.is_system:
+        role.name = name.strip()
+    role.permissions = clean_codenames(permissions)
+    role.save(update_fields=["name", "permissions", "updated_at"])
+    return role
+
+
+def _unique_role_slug(tenant: Tenant, name: str) -> str:
+    base = slugify(name)[:40] or "role"
+    slug = base
+    suffix = 2
+    while Role.objects.filter(tenant=tenant, slug=slug).exists():
+        slug = f"{base}-{suffix}"[:50]
+        suffix += 1
+    return slug
+
+
 # --- invitations ------------------------------------------------------------
 
 
@@ -79,7 +156,7 @@ def invite_member(
     email: str,
     full_name: str,
     invited_by,
-    is_owner: bool = False,
+    role: Role | None = None,
 ) -> tuple[Membership, bool]:
     """Create (or reuse) a user and attach a membership to ``tenant``.
 
@@ -95,10 +172,17 @@ def invite_member(
         user.save()
         created_user = True
 
+    # Invitations never grant ownership: is_owner is the anti-lockout flag and is
+    # only ever set by seeding or by an existing owner promoting someone.
+    #
+    # NOTE: Membership is a plain model, not TimeStampedModel — it has no
+    # created_by/updated_by columns. Passing those raised FieldError and broke
+    # every invitation until a test finally exercised this path; `invited_by`
+    # is the field that actually exists.
     membership, _ = Membership.objects.get_or_create(
         user=user,
         tenant=tenant,
-        defaults={"is_owner": is_owner, "created_by": invited_by, "updated_by": invited_by},
+        defaults={"role": role, "invited_by": invited_by},
     )
     return membership, created_user
 

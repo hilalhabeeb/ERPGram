@@ -26,14 +26,16 @@ class SettingsTab:
     url_name: str
 
 
-def settings_tabs(*, is_owner: bool) -> list[SettingsTab]:
-    """Tabs for the settings section; owner-only pages are omitted for members."""
+def settings_tabs(*, can_manage_organization: bool, can_manage_roles: bool) -> list[SettingsTab]:
+    """Tabs for the settings section, omitting pages the user cannot open."""
     from django.utils.translation import gettext as _
 
     tabs = [SettingsTab("profile", _("Profile"), "ui:settings_profile")]
-    if is_owner:
+    if can_manage_organization:
         tabs.append(SettingsTab("organization", _("Organisation"), "ui:settings_organization"))
     tabs.append(SettingsTab("users", _("Users"), "ui:settings_users"))
+    if can_manage_roles:
+        tabs.append(SettingsTab("roles", _("Roles"), "ui:settings_roles"))
     return tabs
 
 
