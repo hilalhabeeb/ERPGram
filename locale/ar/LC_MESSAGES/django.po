@@ -1,0 +1,727 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-19 13:47+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#: apps/accounts/admin.py:29 apps/ui/navigation.py:24 apps/ui/services.py:33
+#: apps/ui/templates/ui/_avatar_menu.html:18
+#: apps/ui/templates/ui/settings/profile.html:4
+#: apps/ui/templates/ui/settings/profile.html:12 apps/ui/views.py:71
+#: apps/ui/views.py:72
+msgid "Profile"
+msgstr "الملف الشخصي"
+
+#: apps/accounts/admin.py:31
+msgid "Permissions"
+msgstr "الصلاحيات"
+
+#: apps/accounts/admin.py:34
+msgid "Dates"
+msgstr "التواريخ"
+
+#: apps/accounts/forms.py:55 apps/accounts/forms.py:66 apps/ui/views.py:150
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: apps/accounts/forms.py:59
+msgid "Password"
+msgstr "كلمة المرور"
+
+#: apps/accounts/forms.py:65 apps/accounts/forms.py:95
+msgid "Full name"
+msgstr "الاسم الكامل"
+
+#: apps/accounts/forms.py:67
+msgid "Grant owner access"
+msgstr "منح صلاحيات المالك"
+
+#: apps/accounts/forms.py:96
+msgid "Phone"
+msgstr "الهاتف"
+
+#: apps/accounts/forms.py:97
+msgid "Avatar"
+msgstr "الصورة الشخصية"
+
+#: apps/accounts/forms.py:98 apps/ui/templates/ui/_avatar_menu.html:22
+msgid "Language"
+msgstr "اللغة"
+
+#: apps/accounts/forms.py:127
+msgid "Organisation name"
+msgstr "اسم المؤسسة"
+
+#: apps/accounts/forms.py:129
+msgid "Timezone"
+msgstr "المنطقة الزمنية"
+
+#: apps/accounts/forms.py:133
+msgid "Default language"
+msgstr "اللغة الافتراضية"
+
+#: apps/accounts/forms.py:134 apps/accounts/models.py:17
+msgid "English"
+msgstr "الإنجليزية"
+
+#: apps/accounts/forms.py:134 apps/accounts/models.py:17
+msgid "العربية"
+msgstr "العربية"
+
+#: apps/accounts/forms.py:151
+msgid "Unknown timezone."
+msgstr "منطقة زمنية غير معروفة."
+
+#: apps/accounts/models.py:24
+msgid "email address"
+msgstr "البريد الإلكتروني"
+
+#: apps/accounts/models.py:25
+msgid "full name"
+msgstr "الاسم الكامل"
+
+#: apps/accounts/models.py:26
+msgid "phone"
+msgstr "الهاتف"
+
+#: apps/accounts/models.py:29
+msgid "avatar"
+msgstr "الصورة الشخصية"
+
+#: apps/accounts/models.py:30
+msgid "locale"
+msgstr "اللغة"
+
+#: apps/accounts/models.py:32 apps/tenancy/models.py:25
+#: apps/tenancy/models.py:44
+msgid "active"
+msgstr "نشط"
+
+#: apps/accounts/models.py:33
+msgid "staff"
+msgstr "موظف"
+
+#: apps/accounts/models.py:35
+msgid "date joined"
+msgstr "تاريخ الانضمام"
+
+#: apps/accounts/models.py:36
+msgid "last login at"
+msgstr "آخر تسجيل دخول"
+
+#: apps/accounts/models.py:44 apps/accounts/models.py:73
+msgid "user"
+msgstr "مستخدم"
+
+#: apps/accounts/models.py:45
+msgid "users"
+msgstr "المستخدمون"
+
+#: apps/accounts/models.py:79 apps/core/models.py:83 apps/tenancy/models.py:30
+msgid "tenant"
+msgstr "مستأجر"
+
+#: apps/accounts/models.py:83
+msgid "default tenant"
+msgstr "المستأجر الافتراضي"
+
+#: apps/accounts/models.py:84
+msgid "owner"
+msgstr "مالك"
+
+#: apps/accounts/models.py:85
+msgid "joined at"
+msgstr "تاريخ الانضمام"
+
+#: apps/accounts/models.py:88
+msgid "membership"
+msgstr "عضوية"
+
+#: apps/accounts/models.py:89
+msgid "memberships"
+msgstr "العضويات"
+
+#: apps/accounts/models.py:102
+msgid "email"
+msgstr "البريد الإلكتروني"
+
+#: apps/accounts/models.py:103
+msgid "ip address"
+msgstr "عنوان IP"
+
+#: apps/accounts/models.py:104
+msgid "successful"
+msgstr "ناجح"
+
+#: apps/accounts/models.py:105 apps/core/models.py:23
+msgid "created at"
+msgstr "تاريخ الإنشاء"
+
+#: apps/accounts/models.py:108
+msgid "login attempt"
+msgstr "محاولة تسجيل دخول"
+
+#: apps/accounts/models.py:109
+msgid "login attempts"
+msgstr "محاولات تسجيل الدخول"
+
+#: apps/accounts/templates/accounts/activate.html:4
+msgid "Activate your account"
+msgstr "تفعيل حسابك"
+
+#: apps/accounts/templates/accounts/activate.html:7
+msgid "Set your password"
+msgstr "تعيين كلمة المرور"
+
+#: apps/accounts/templates/accounts/activate.html:9
+#, python-format
+msgid "Activating %(email)s. Choose a password to finish."
+msgstr "تفعيل %(email)s. اختر كلمة مرور لإكمال العملية."
+
+#: apps/accounts/templates/accounts/activate.html:16
+msgid "Activate account"
+msgstr "تفعيل الحساب"
+
+#: apps/accounts/templates/accounts/activate_invalid.html:4
+#: templates/registration/password_reset_confirm.html:16
+msgid "Link expired"
+msgstr "انتهت صلاحية الرابط"
+
+#: apps/accounts/templates/accounts/activate_invalid.html:7
+msgid "This link is no longer valid"
+msgstr "لم يعد هذا الرابط صالحًا"
+
+#: apps/accounts/templates/accounts/activate_invalid.html:9
+msgid ""
+"The activation link is invalid or has already been used. Ask an owner to re-"
+"send your invitation."
+msgstr ""
+
+#: apps/accounts/templates/accounts/activate_invalid.html:12
+#: templates/registration/password_reset_done.html:12
+#: templates/registration/password_reset_form.html:16
+msgid "Back to sign in"
+msgstr "العودة إلى تسجيل الدخول"
+
+#: apps/accounts/templates/accounts/email/invitation.txt:1
+#, python-format
+msgid "You have been invited to join %(name)s on Erpgram."
+msgstr "تمت دعوتك للانضمام إلى %(name)s على Erpgram."
+
+#: apps/accounts/templates/accounts/email/invitation.txt:3
+msgid "Set your password and activate your account here:"
+msgstr "عيّن كلمة المرور وفعّل حسابك من هنا:"
+
+#: apps/accounts/templates/accounts/email/invitation.txt:6
+msgid "If you weren't expecting this invitation, you can ignore this email."
+msgstr "إذا لم تكن تتوقع هذه الدعوة، يمكنك تجاهل هذه الرسالة."
+
+#: apps/accounts/templates/accounts/login.html:4
+#: apps/accounts/templates/accounts/login.html:7
+#: apps/accounts/templates/accounts/login.html:28
+msgid "Sign in"
+msgstr "تسجيل الدخول"
+
+#: apps/accounts/templates/accounts/login.html:8
+msgid "Welcome back. Please enter your details."
+msgstr "مرحبًا بعودتك. يُرجى إدخال بياناتك."
+
+#: apps/accounts/templates/accounts/login.html:24
+msgid "Forgot password?"
+msgstr "هل نسيت كلمة المرور؟"
+
+#: apps/accounts/templates/accounts/select_tenant.html:4
+msgid "Choose organisation"
+msgstr "اختر مؤسسة"
+
+#: apps/accounts/templates/accounts/select_tenant.html:7
+msgid "Choose an organisation"
+msgstr "اختر مؤسسة"
+
+#: apps/accounts/templates/accounts/select_tenant.html:8
+msgid "You belong to more than one. Pick where to work."
+msgstr "أنت عضو في أكثر من مؤسسة. اختر مكان العمل."
+
+#: apps/accounts/templates/accounts/select_tenant.html:24
+#: apps/ui/templates/ui/settings/_users_row.html:20
+msgid "Owner"
+msgstr "المالك"
+
+#: apps/accounts/templates/accounts/select_tenant.html:37
+#: apps/ui/templates/ui/_avatar_menu.html:43
+msgid "Sign out"
+msgstr "تسجيل الخروج"
+
+#: apps/accounts/views.py:46
+msgid "Too many failed attempts. Please try again in a few minutes."
+msgstr "عدد كبير من المحاولات الفاشلة. يُرجى المحاولة بعد بضع دقائق."
+
+#: apps/accounts/views.py:56
+msgid "Invalid email or password."
+msgstr "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+
+#: apps/accounts/views.py:71
+msgid "Your account is not linked to any organisation yet."
+msgstr "حسابك غير مرتبط بأي مؤسسة بعد."
+
+#: apps/accounts/views.py:92 apps/accounts/views.py:100
+msgid "That organisation is not available."
+msgstr "هذه المؤسسة غير متاحة."
+
+#: apps/accounts/views.py:118
+msgid "Your account is ready. Please sign in."
+msgstr "حسابك جاهز. يُرجى تسجيل الدخول."
+
+#: apps/core/models.py:24
+msgid "updated at"
+msgstr "تاريخ التحديث"
+
+#: apps/core/models.py:27
+msgid "created by"
+msgstr "أنشئ بواسطة"
+
+#: apps/core/models.py:35
+msgid "updated by"
+msgstr "حُدّث بواسطة"
+
+#: apps/tenancy/models.py:23 apps/tenancy/models.py:41
+#: apps/tenancy/models.py:62 apps/tenancy/models.py:90
+msgid "name"
+msgstr "الاسم"
+
+#: apps/tenancy/models.py:24
+msgid "slug"
+msgstr "المعرف"
+
+#: apps/tenancy/models.py:26
+msgid "timezone"
+msgstr "المنطقة الزمنية"
+
+#: apps/tenancy/models.py:27
+msgid "default locale"
+msgstr "اللغة الافتراضية"
+
+#: apps/tenancy/models.py:31
+msgid "tenants"
+msgstr "المستأجرون"
+
+#: apps/tenancy/models.py:42
+msgid "legal name"
+msgstr "الاسم القانوني"
+
+#: apps/tenancy/models.py:43
+msgid "registration no."
+msgstr "رقم السجل"
+
+#: apps/tenancy/models.py:47 apps/tenancy/models.py:60
+msgid "company"
+msgstr "شركة"
+
+#: apps/tenancy/models.py:48
+msgid "companies"
+msgstr "الشركات"
+
+#: apps/tenancy/models.py:63 apps/tenancy/models.py:91
+msgid "code"
+msgstr "الرمز"
+
+#: apps/tenancy/models.py:64
+msgid "address"
+msgstr "العنوان"
+
+#: apps/tenancy/models.py:67 apps/tenancy/models.py:80
+msgid "branch"
+msgstr "فرع"
+
+#: apps/tenancy/models.py:68
+msgid "branches"
+msgstr "الفروع"
+
+#: apps/tenancy/models.py:84
+msgid "parent department"
+msgstr "القسم الرئيسي"
+
+#: apps/tenancy/models.py:94
+msgid "department"
+msgstr "قسم"
+
+#: apps/tenancy/models.py:95
+msgid "departments"
+msgstr "الأقسام"
+
+#: apps/ui/navigation.py:23 apps/ui/templates/ui/dashboard.html:4
+#: apps/ui/templates/ui/dashboard.html:9 apps/ui/views.py:52
+#: templates/shell.html:60
+msgid "Dashboard"
+msgstr "لوحة التحكم"
+
+#: apps/ui/navigation.py:25 apps/ui/services.py:35
+#: apps/ui/templates/ui/settings/organization.html:4
+#: apps/ui/templates/ui/settings/organization.html:12 apps/ui/views.py:102
+#: apps/ui/views.py:103
+msgid "Organisation"
+msgstr "المؤسسة"
+
+#: apps/ui/navigation.py:26 apps/ui/services.py:36
+#: apps/ui/templates/ui/settings/users.html:4
+#: apps/ui/templates/ui/settings/users.html:15 apps/ui/views.py:157
+#: apps/ui/views.py:158
+msgid "Users"
+msgstr "المستخدمون"
+
+#: apps/ui/services.py:46
+msgid "Companies"
+msgstr "الشركات"
+
+#: apps/ui/services.py:47
+msgid "Branches"
+msgstr "الفروع"
+
+#: apps/ui/services.py:48
+msgid "Departments"
+msgstr "الأقسام"
+
+#: apps/ui/templates/ui/_avatar_menu.html:5
+msgid "Account menu"
+msgstr "قائمة الحساب"
+
+#: apps/ui/templates/ui/_pagination.html:9
+msgid "Pagination"
+msgstr "ترقيم الصفحات"
+
+#: apps/ui/templates/ui/_pagination.html:11
+#, python-format
+msgid ""
+"\n"
+"      %(start)s–%(end)s of %(total)s\n"
+"    "
+msgstr ""
+
+#: apps/ui/templates/ui/_pagination.html:21
+msgid "Previous page"
+msgstr "الصفحة السابقة"
+
+#: apps/ui/templates/ui/_pagination.html:31
+msgid "Next page"
+msgstr "الصفحة التالية"
+
+#: apps/ui/templates/ui/_tenant_switcher.html:12
+msgid "Switch organisation"
+msgstr "تبديل المؤسسة"
+
+#: apps/ui/templates/ui/dashboard.html:20
+msgid "Overview"
+msgstr "نظرة عامة"
+
+#: apps/ui/templates/ui/dashboard.html:21
+msgid "Charts and activity will appear here in a later step."
+msgstr "ستظهر الرسوم البيانية والنشاط هنا في خطوة لاحقة."
+
+#: apps/ui/templates/ui/dashboard.html:25
+msgid "No data yet"
+msgstr "لا توجد بيانات بعد"
+
+#: apps/ui/templates/ui/dashboard.html:25
+msgid "Once you add companies and branches, activity shows up here."
+msgstr "بمجرد إضافة شركات وفروع، سيظهر النشاط هنا."
+
+#: apps/ui/templates/ui/data_table.html:25
+msgid "Select all"
+msgstr "تحديد الكل"
+
+#: apps/ui/templates/ui/modal.html:27
+msgid "Close"
+msgstr "إغلاق"
+
+#: apps/ui/templates/ui/search_input.html:12
+#: apps/ui/templates/ui/search_input.html:17 templates/shell.html:73
+msgid "Search"
+msgstr "بحث"
+
+#: apps/ui/templates/ui/settings/_invite_form.html:3
+msgid "We'll email a secure activation link so they can set a password."
+msgstr "سنرسل رابط تفعيل آمن عبر البريد الإلكتروني ليتمكن من تعيين كلمة مرور."
+
+#: apps/ui/templates/ui/settings/_invite_form.html:11
+msgid "Cancel"
+msgstr "إلغاء"
+
+#: apps/ui/templates/ui/settings/_invite_form.html:12
+msgid "Send invitation"
+msgstr "إرسال الدعوة"
+
+#: apps/ui/templates/ui/settings/_nav.html:12
+msgid "Settings sections"
+msgstr "أقسام الإعدادات"
+
+#: apps/ui/templates/ui/settings/_users_row.html:8
+#, python-format
+msgid "Select %(name)s"
+msgstr "تحديد %(name)s"
+
+#: apps/ui/templates/ui/settings/_users_row.html:21
+msgid "Member"
+msgstr "عضو"
+
+#: apps/ui/templates/ui/settings/_users_row.html:24
+msgid "Active"
+msgstr "نشط"
+
+#: apps/ui/templates/ui/settings/_users_row.html:25
+msgid "Invited"
+msgstr "تمت الدعوة"
+
+#: apps/ui/templates/ui/settings/_users_table.html:2
+msgid "No members yet"
+msgstr "لا يوجد أعضاء بعد"
+
+#: apps/ui/templates/ui/settings/_users_table.html:2
+msgid "Invite your teammates to get started."
+msgstr "ادعُ زملاءك للبدء."
+
+#: apps/ui/templates/ui/settings/_users_table.html:2
+#: apps/ui/templates/ui/settings/users.html:8
+msgid "Invite user"
+msgstr "دعوة مستخدم"
+
+#: apps/ui/templates/ui/settings/organization.html:7
+#: apps/ui/templates/ui/settings/profile.html:7
+#: apps/ui/templates/ui/settings/users.html:8
+#: apps/ui/templates/ui/settings/users.html:10 apps/ui/views.py:72
+#: apps/ui/views.py:103 apps/ui/views.py:158
+msgid "Settings"
+msgstr "الإعدادات"
+
+#: apps/ui/templates/ui/settings/organization.html:7
+#: apps/ui/templates/ui/settings/profile.html:7
+#: apps/ui/templates/ui/settings/users.html:8
+#: apps/ui/templates/ui/settings/users.html:10
+msgid "Manage your account and this organisation."
+msgstr "إدارة حسابك وهذه المؤسسة."
+
+#: apps/ui/templates/ui/settings/organization.html:13
+msgid "Details for this organisation. Owners only."
+msgstr "تفاصيل هذه المؤسسة. للمالكين فقط."
+
+#: apps/ui/templates/ui/settings/organization.html:20
+msgid "Save settings"
+msgstr "حفظ الإعدادات"
+
+#: apps/ui/templates/ui/settings/profile.html:13
+msgid "Your personal details and language."
+msgstr "بياناتك الشخصية واللغة."
+
+#: apps/ui/templates/ui/settings/profile.html:24
+msgid "Save changes"
+msgstr "حفظ التغييرات"
+
+#: apps/ui/templates/ui/settings/users.html:16
+msgid "People with access to this organisation."
+msgstr "الأشخاص الذين لديهم صلاحية الوصول إلى هذه المؤسسة."
+
+#: apps/ui/templates/ui/settings/users.html:21
+msgid "Invite a user"
+msgstr "دعوة مستخدم"
+
+#: apps/ui/templates/ui/toast.html:25
+msgid "Dismiss"
+msgstr "تجاهل"
+
+#: apps/ui/views.py:28
+msgid "Owner access is required for this page."
+msgstr "يلزم امتلاك صلاحيات المالك لعرض هذه الصفحة."
+
+#: apps/ui/views.py:44
+msgid "Yearly"
+msgstr "سنوي"
+
+#: apps/ui/views.py:45
+msgid "Monthly"
+msgstr "شهري"
+
+#: apps/ui/views.py:46
+msgid "Weekly"
+msgstr "أسبوعي"
+
+#: apps/ui/views.py:65
+msgid "Your profile has been updated."
+msgstr "تم تحديث ملفك الشخصي."
+
+#: apps/ui/views.py:96
+msgid "Organisation settings saved."
+msgstr "تم حفظ إعدادات المؤسسة."
+
+#: apps/ui/views.py:126
+#, python-format
+msgid "Invitation sent to %(email)s."
+msgstr "تم إرسال الدعوة إلى %(email)s."
+
+#: apps/ui/views.py:131
+#, python-format
+msgid "%(email)s was added to this organisation."
+msgstr "تمت إضافة %(email)s إلى هذه المؤسسة."
+
+#: apps/ui/views.py:149
+msgid "Name"
+msgstr "الاسم"
+
+#: apps/ui/views.py:151
+msgid "Role"
+msgstr "الدور"
+
+#: apps/ui/views.py:152
+msgid "Status"
+msgstr "الحالة"
+
+#: apps/ui/views.py:153
+msgid "Joined"
+msgstr "تاريخ الانضمام"
+
+#: config/urls.py:9 config/urls.py:10
+msgid "Erpgram back office"
+msgstr "إدارة Erpgram"
+
+#: templates/base.html:18
+msgid "Skip to content"
+msgstr "تخطي إلى المحتوى"
+
+#: templates/errors/403.html:5
+msgid "Access denied"
+msgstr "تم رفض الوصول"
+
+#: templates/errors/403.html:6
+msgid "You don't have permission to view this page."
+msgstr "ليس لديك صلاحية لعرض هذه الصفحة."
+
+#: templates/errors/404.html:5
+msgid "Page not found"
+msgstr "الصفحة غير موجودة"
+
+#: templates/errors/404.html:6
+msgid "The page you're looking for doesn't exist or has moved."
+msgstr "الصفحة التي تبحث عنها غير موجودة أو تم نقلها."
+
+#: templates/errors/500.html:5
+msgid "Something went wrong"
+msgstr "حدث خطأ ما"
+
+#: templates/errors/500.html:6
+msgid "An unexpected error occurred. Please try again in a moment."
+msgstr "حدث خطأ غير متوقع. يُرجى المحاولة بعد قليل."
+
+#: templates/errors/base.html:14
+msgid "Back to dashboard"
+msgstr "العودة إلى لوحة التحكم"
+
+#: templates/partials/_field.html:13
+msgid "required"
+msgstr "مطلوب"
+
+#: templates/registration/password_reset_complete.html:4
+#: templates/registration/password_reset_complete.html:7
+msgid "Password changed"
+msgstr "تم تغيير كلمة المرور"
+
+#: templates/registration/password_reset_complete.html:8
+msgid "Your password has been updated. You can sign in now."
+msgstr "تم تحديث كلمة المرور. يمكنك تسجيل الدخول الآن."
+
+#: templates/registration/password_reset_complete.html:10
+msgid "Go to sign in"
+msgstr "الانتقال إلى تسجيل الدخول"
+
+#: templates/registration/password_reset_confirm.html:4
+#: templates/registration/password_reset_confirm.html:8
+msgid "Set a new password"
+msgstr "تعيين كلمة مرور جديدة"
+
+#: templates/registration/password_reset_confirm.html:13
+msgid "Change password"
+msgstr "تغيير كلمة المرور"
+
+#: templates/registration/password_reset_confirm.html:18
+msgid ""
+"This password reset link is invalid, possibly because it has already been "
+"used."
+msgstr ""
+
+#: templates/registration/password_reset_confirm.html:22
+msgid "Request a new link"
+msgstr "طلب رابط جديد"
+
+#: templates/registration/password_reset_done.html:4
+#: templates/registration/password_reset_done.html:7
+msgid "Check your email"
+msgstr "تحقق من بريدك الإلكتروني"
+
+#: templates/registration/password_reset_done.html:9
+msgid ""
+"If an account exists for that address, a password reset link is on its way."
+msgstr ""
+
+#: templates/registration/password_reset_email.txt:1
+msgid "You requested a password reset for your Erpgram account."
+msgstr "لقد طلبت إعادة تعيين كلمة المرور لحسابك على Erpgram."
+
+#: templates/registration/password_reset_email.txt:5
+msgid "If you didn't request this, you can ignore this email."
+msgstr "إذا لم تطلب ذلك، يمكنك تجاهل هذه الرسالة."
+
+#: templates/registration/password_reset_form.html:4
+msgid "Reset password"
+msgstr "إعادة تعيين كلمة المرور"
+
+#: templates/registration/password_reset_form.html:7
+msgid "Reset your password"
+msgstr "إعادة تعيين كلمة المرور"
+
+#: templates/registration/password_reset_form.html:8
+msgid "Enter your email and we'll send a reset link."
+msgstr "أدخل بريدك الإلكتروني وسنرسل رابط إعادة التعيين."
+
+#: templates/registration/password_reset_form.html:13
+msgid "Send reset link"
+msgstr "إرسال رابط إعادة التعيين"
+
+#: templates/registration/password_reset_subject.txt:1
+msgid "Reset your Erpgram password"
+msgstr "إعادة تعيين كلمة مرور Erpgram"
+
+#: templates/shell.html:16
+msgid "Primary"
+msgstr "التنقل الرئيسي"
+
+#: templates/shell.html:18
+msgid "Home"
+msgstr "الرئيسية"
+
+#: templates/shell.html:52
+msgid "Open menu"
+msgstr "فتح القائمة"
+
+#: templates/shell.html:57
+msgid "Breadcrumb"
+msgstr "مسار التنقل"
+
+#: templates/shell.html:76
+msgid "Support"
+msgstr "الدعم"
+
+#: templates/shell.html:78
+msgid "Notifications"
+msgstr "الإشعارات"

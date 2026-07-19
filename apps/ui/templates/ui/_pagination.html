@@ -1,0 +1,37 @@
+{% comment %}
+Pagination footer for data_table. Context:
+  page_obj  (Page)  required
+  table_id  (str)   HTMX target wrapper id
+{% endcomment %}
+{% load i18n ui %}
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="flex items-center justify-between border-t border-border px-4 py-3 text-sm"
+     aria-label="{% trans 'Pagination' %}">
+  <p class="text-text-secondary">
+    {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=page_obj.paginator.count %}
+      {{ start }}–{{ end }} of {{ total }}
+    {% endblocktrans %}
+  </p>
+  <div class="flex items-center gap-1">
+    {% if page_obj.has_previous %}
+      <a hx-get="{% query_string page=page_obj.previous_page_number %}"
+         hx-target="#{{ table_id }}" hx-swap="outerHTML"
+         href="{% query_string page=page_obj.previous_page_number %}"
+         class="grid h-8 w-8 place-items-center rounded-control border border-border text-text-secondary hover:bg-subtle"
+         aria-label="{% trans 'Previous page' %}">
+        {% icon "chevron-left" css_class="w-4 h-4 rtl:hidden" %}{% icon "chevron-right" css_class="w-4 h-4 hidden rtl:inline" %}
+      </a>
+    {% endif %}
+    <span class="px-2 text-text-secondary">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a hx-get="{% query_string page=page_obj.next_page_number %}"
+         hx-target="#{{ table_id }}" hx-swap="outerHTML"
+         href="{% query_string page=page_obj.next_page_number %}"
+         class="grid h-8 w-8 place-items-center rounded-control border border-border text-text-secondary hover:bg-subtle"
+         aria-label="{% trans 'Next page' %}">
+        {% icon "chevron-right" css_class="w-4 h-4 rtl:hidden" %}{% icon "chevron-left" css_class="w-4 h-4 hidden rtl:inline" %}
+      </a>
+    {% endif %}
+  </div>
+</nav>
+{% endif %}

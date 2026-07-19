@@ -1,0 +1,726 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-19 13:47+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/accounts/admin.py:29 apps/ui/navigation.py:24 apps/ui/services.py:33
+#: apps/ui/templates/ui/_avatar_menu.html:18
+#: apps/ui/templates/ui/settings/profile.html:4
+#: apps/ui/templates/ui/settings/profile.html:12 apps/ui/views.py:71
+#: apps/ui/views.py:72
+msgid "Profile"
+msgstr ""
+
+#: apps/accounts/admin.py:31
+msgid "Permissions"
+msgstr ""
+
+#: apps/accounts/admin.py:34
+msgid "Dates"
+msgstr ""
+
+#: apps/accounts/forms.py:55 apps/accounts/forms.py:66 apps/ui/views.py:150
+msgid "Email"
+msgstr ""
+
+#: apps/accounts/forms.py:59
+msgid "Password"
+msgstr ""
+
+#: apps/accounts/forms.py:65 apps/accounts/forms.py:95
+msgid "Full name"
+msgstr ""
+
+#: apps/accounts/forms.py:67
+msgid "Grant owner access"
+msgstr ""
+
+#: apps/accounts/forms.py:96
+msgid "Phone"
+msgstr ""
+
+#: apps/accounts/forms.py:97
+msgid "Avatar"
+msgstr ""
+
+#: apps/accounts/forms.py:98 apps/ui/templates/ui/_avatar_menu.html:22
+msgid "Language"
+msgstr ""
+
+#: apps/accounts/forms.py:127
+msgid "Organisation name"
+msgstr ""
+
+#: apps/accounts/forms.py:129
+msgid "Timezone"
+msgstr ""
+
+#: apps/accounts/forms.py:133
+msgid "Default language"
+msgstr ""
+
+#: apps/accounts/forms.py:134 apps/accounts/models.py:17
+msgid "English"
+msgstr ""
+
+#: apps/accounts/forms.py:134 apps/accounts/models.py:17
+msgid "العربية"
+msgstr ""
+
+#: apps/accounts/forms.py:151
+msgid "Unknown timezone."
+msgstr ""
+
+#: apps/accounts/models.py:24
+msgid "email address"
+msgstr ""
+
+#: apps/accounts/models.py:25
+msgid "full name"
+msgstr ""
+
+#: apps/accounts/models.py:26
+msgid "phone"
+msgstr ""
+
+#: apps/accounts/models.py:29
+msgid "avatar"
+msgstr ""
+
+#: apps/accounts/models.py:30
+msgid "locale"
+msgstr ""
+
+#: apps/accounts/models.py:32 apps/tenancy/models.py:25
+#: apps/tenancy/models.py:44
+msgid "active"
+msgstr ""
+
+#: apps/accounts/models.py:33
+msgid "staff"
+msgstr ""
+
+#: apps/accounts/models.py:35
+msgid "date joined"
+msgstr ""
+
+#: apps/accounts/models.py:36
+msgid "last login at"
+msgstr ""
+
+#: apps/accounts/models.py:44 apps/accounts/models.py:73
+msgid "user"
+msgstr ""
+
+#: apps/accounts/models.py:45
+msgid "users"
+msgstr ""
+
+#: apps/accounts/models.py:79 apps/core/models.py:83 apps/tenancy/models.py:30
+msgid "tenant"
+msgstr ""
+
+#: apps/accounts/models.py:83
+msgid "default tenant"
+msgstr ""
+
+#: apps/accounts/models.py:84
+msgid "owner"
+msgstr ""
+
+#: apps/accounts/models.py:85
+msgid "joined at"
+msgstr ""
+
+#: apps/accounts/models.py:88
+msgid "membership"
+msgstr ""
+
+#: apps/accounts/models.py:89
+msgid "memberships"
+msgstr ""
+
+#: apps/accounts/models.py:102
+msgid "email"
+msgstr ""
+
+#: apps/accounts/models.py:103
+msgid "ip address"
+msgstr ""
+
+#: apps/accounts/models.py:104
+msgid "successful"
+msgstr ""
+
+#: apps/accounts/models.py:105 apps/core/models.py:23
+msgid "created at"
+msgstr ""
+
+#: apps/accounts/models.py:108
+msgid "login attempt"
+msgstr ""
+
+#: apps/accounts/models.py:109
+msgid "login attempts"
+msgstr ""
+
+#: apps/accounts/templates/accounts/activate.html:4
+msgid "Activate your account"
+msgstr ""
+
+#: apps/accounts/templates/accounts/activate.html:7
+msgid "Set your password"
+msgstr ""
+
+#: apps/accounts/templates/accounts/activate.html:9
+#, python-format
+msgid "Activating %(email)s. Choose a password to finish."
+msgstr ""
+
+#: apps/accounts/templates/accounts/activate.html:16
+msgid "Activate account"
+msgstr ""
+
+#: apps/accounts/templates/accounts/activate_invalid.html:4
+#: templates/registration/password_reset_confirm.html:16
+msgid "Link expired"
+msgstr ""
+
+#: apps/accounts/templates/accounts/activate_invalid.html:7
+msgid "This link is no longer valid"
+msgstr ""
+
+#: apps/accounts/templates/accounts/activate_invalid.html:9
+msgid ""
+"The activation link is invalid or has already been used. Ask an owner to re-"
+"send your invitation."
+msgstr ""
+
+#: apps/accounts/templates/accounts/activate_invalid.html:12
+#: templates/registration/password_reset_done.html:12
+#: templates/registration/password_reset_form.html:16
+msgid "Back to sign in"
+msgstr ""
+
+#: apps/accounts/templates/accounts/email/invitation.txt:1
+#, python-format
+msgid "You have been invited to join %(name)s on Erpgram."
+msgstr ""
+
+#: apps/accounts/templates/accounts/email/invitation.txt:3
+msgid "Set your password and activate your account here:"
+msgstr ""
+
+#: apps/accounts/templates/accounts/email/invitation.txt:6
+msgid "If you weren't expecting this invitation, you can ignore this email."
+msgstr ""
+
+#: apps/accounts/templates/accounts/login.html:4
+#: apps/accounts/templates/accounts/login.html:7
+#: apps/accounts/templates/accounts/login.html:28
+msgid "Sign in"
+msgstr ""
+
+#: apps/accounts/templates/accounts/login.html:8
+msgid "Welcome back. Please enter your details."
+msgstr ""
+
+#: apps/accounts/templates/accounts/login.html:24
+msgid "Forgot password?"
+msgstr ""
+
+#: apps/accounts/templates/accounts/select_tenant.html:4
+msgid "Choose organisation"
+msgstr ""
+
+#: apps/accounts/templates/accounts/select_tenant.html:7
+msgid "Choose an organisation"
+msgstr ""
+
+#: apps/accounts/templates/accounts/select_tenant.html:8
+msgid "You belong to more than one. Pick where to work."
+msgstr ""
+
+#: apps/accounts/templates/accounts/select_tenant.html:24
+#: apps/ui/templates/ui/settings/_users_row.html:20
+msgid "Owner"
+msgstr ""
+
+#: apps/accounts/templates/accounts/select_tenant.html:37
+#: apps/ui/templates/ui/_avatar_menu.html:43
+msgid "Sign out"
+msgstr ""
+
+#: apps/accounts/views.py:46
+msgid "Too many failed attempts. Please try again in a few minutes."
+msgstr ""
+
+#: apps/accounts/views.py:56
+msgid "Invalid email or password."
+msgstr ""
+
+#: apps/accounts/views.py:71
+msgid "Your account is not linked to any organisation yet."
+msgstr ""
+
+#: apps/accounts/views.py:92 apps/accounts/views.py:100
+msgid "That organisation is not available."
+msgstr ""
+
+#: apps/accounts/views.py:118
+msgid "Your account is ready. Please sign in."
+msgstr ""
+
+#: apps/core/models.py:24
+msgid "updated at"
+msgstr ""
+
+#: apps/core/models.py:27
+msgid "created by"
+msgstr ""
+
+#: apps/core/models.py:35
+msgid "updated by"
+msgstr ""
+
+#: apps/tenancy/models.py:23 apps/tenancy/models.py:41
+#: apps/tenancy/models.py:62 apps/tenancy/models.py:90
+msgid "name"
+msgstr ""
+
+#: apps/tenancy/models.py:24
+msgid "slug"
+msgstr ""
+
+#: apps/tenancy/models.py:26
+msgid "timezone"
+msgstr ""
+
+#: apps/tenancy/models.py:27
+msgid "default locale"
+msgstr ""
+
+#: apps/tenancy/models.py:31
+msgid "tenants"
+msgstr ""
+
+#: apps/tenancy/models.py:42
+msgid "legal name"
+msgstr ""
+
+#: apps/tenancy/models.py:43
+msgid "registration no."
+msgstr ""
+
+#: apps/tenancy/models.py:47 apps/tenancy/models.py:60
+msgid "company"
+msgstr ""
+
+#: apps/tenancy/models.py:48
+msgid "companies"
+msgstr ""
+
+#: apps/tenancy/models.py:63 apps/tenancy/models.py:91
+msgid "code"
+msgstr ""
+
+#: apps/tenancy/models.py:64
+msgid "address"
+msgstr ""
+
+#: apps/tenancy/models.py:67 apps/tenancy/models.py:80
+msgid "branch"
+msgstr ""
+
+#: apps/tenancy/models.py:68
+msgid "branches"
+msgstr ""
+
+#: apps/tenancy/models.py:84
+msgid "parent department"
+msgstr ""
+
+#: apps/tenancy/models.py:94
+msgid "department"
+msgstr ""
+
+#: apps/tenancy/models.py:95
+msgid "departments"
+msgstr ""
+
+#: apps/ui/navigation.py:23 apps/ui/templates/ui/dashboard.html:4
+#: apps/ui/templates/ui/dashboard.html:9 apps/ui/views.py:52
+#: templates/shell.html:60
+msgid "Dashboard"
+msgstr ""
+
+#: apps/ui/navigation.py:25 apps/ui/services.py:35
+#: apps/ui/templates/ui/settings/organization.html:4
+#: apps/ui/templates/ui/settings/organization.html:12 apps/ui/views.py:102
+#: apps/ui/views.py:103
+msgid "Organisation"
+msgstr ""
+
+#: apps/ui/navigation.py:26 apps/ui/services.py:36
+#: apps/ui/templates/ui/settings/users.html:4
+#: apps/ui/templates/ui/settings/users.html:15 apps/ui/views.py:157
+#: apps/ui/views.py:158
+msgid "Users"
+msgstr ""
+
+#: apps/ui/services.py:46
+msgid "Companies"
+msgstr ""
+
+#: apps/ui/services.py:47
+msgid "Branches"
+msgstr ""
+
+#: apps/ui/services.py:48
+msgid "Departments"
+msgstr ""
+
+#: apps/ui/templates/ui/_avatar_menu.html:5
+msgid "Account menu"
+msgstr ""
+
+#: apps/ui/templates/ui/_pagination.html:9
+msgid "Pagination"
+msgstr ""
+
+#: apps/ui/templates/ui/_pagination.html:11
+#, python-format
+msgid ""
+"\n"
+"      %(start)s–%(end)s of %(total)s\n"
+"    "
+msgstr ""
+
+#: apps/ui/templates/ui/_pagination.html:21
+msgid "Previous page"
+msgstr ""
+
+#: apps/ui/templates/ui/_pagination.html:31
+msgid "Next page"
+msgstr ""
+
+#: apps/ui/templates/ui/_tenant_switcher.html:12
+msgid "Switch organisation"
+msgstr ""
+
+#: apps/ui/templates/ui/dashboard.html:20
+msgid "Overview"
+msgstr ""
+
+#: apps/ui/templates/ui/dashboard.html:21
+msgid "Charts and activity will appear here in a later step."
+msgstr ""
+
+#: apps/ui/templates/ui/dashboard.html:25
+msgid "No data yet"
+msgstr ""
+
+#: apps/ui/templates/ui/dashboard.html:25
+msgid "Once you add companies and branches, activity shows up here."
+msgstr ""
+
+#: apps/ui/templates/ui/data_table.html:25
+msgid "Select all"
+msgstr ""
+
+#: apps/ui/templates/ui/modal.html:27
+msgid "Close"
+msgstr ""
+
+#: apps/ui/templates/ui/search_input.html:12
+#: apps/ui/templates/ui/search_input.html:17 templates/shell.html:73
+msgid "Search"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_invite_form.html:3
+msgid "We'll email a secure activation link so they can set a password."
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_invite_form.html:11
+msgid "Cancel"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_invite_form.html:12
+msgid "Send invitation"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_nav.html:12
+msgid "Settings sections"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_users_row.html:8
+#, python-format
+msgid "Select %(name)s"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_users_row.html:21
+msgid "Member"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_users_row.html:24
+msgid "Active"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_users_row.html:25
+msgid "Invited"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_users_table.html:2
+msgid "No members yet"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_users_table.html:2
+msgid "Invite your teammates to get started."
+msgstr ""
+
+#: apps/ui/templates/ui/settings/_users_table.html:2
+#: apps/ui/templates/ui/settings/users.html:8
+msgid "Invite user"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/organization.html:7
+#: apps/ui/templates/ui/settings/profile.html:7
+#: apps/ui/templates/ui/settings/users.html:8
+#: apps/ui/templates/ui/settings/users.html:10 apps/ui/views.py:72
+#: apps/ui/views.py:103 apps/ui/views.py:158
+msgid "Settings"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/organization.html:7
+#: apps/ui/templates/ui/settings/profile.html:7
+#: apps/ui/templates/ui/settings/users.html:8
+#: apps/ui/templates/ui/settings/users.html:10
+msgid "Manage your account and this organisation."
+msgstr ""
+
+#: apps/ui/templates/ui/settings/organization.html:13
+msgid "Details for this organisation. Owners only."
+msgstr ""
+
+#: apps/ui/templates/ui/settings/organization.html:20
+msgid "Save settings"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/profile.html:13
+msgid "Your personal details and language."
+msgstr ""
+
+#: apps/ui/templates/ui/settings/profile.html:24
+msgid "Save changes"
+msgstr ""
+
+#: apps/ui/templates/ui/settings/users.html:16
+msgid "People with access to this organisation."
+msgstr ""
+
+#: apps/ui/templates/ui/settings/users.html:21
+msgid "Invite a user"
+msgstr ""
+
+#: apps/ui/templates/ui/toast.html:25
+msgid "Dismiss"
+msgstr ""
+
+#: apps/ui/views.py:28
+msgid "Owner access is required for this page."
+msgstr ""
+
+#: apps/ui/views.py:44
+msgid "Yearly"
+msgstr ""
+
+#: apps/ui/views.py:45
+msgid "Monthly"
+msgstr ""
+
+#: apps/ui/views.py:46
+msgid "Weekly"
+msgstr ""
+
+#: apps/ui/views.py:65
+msgid "Your profile has been updated."
+msgstr ""
+
+#: apps/ui/views.py:96
+msgid "Organisation settings saved."
+msgstr ""
+
+#: apps/ui/views.py:126
+#, python-format
+msgid "Invitation sent to %(email)s."
+msgstr ""
+
+#: apps/ui/views.py:131
+#, python-format
+msgid "%(email)s was added to this organisation."
+msgstr ""
+
+#: apps/ui/views.py:149
+msgid "Name"
+msgstr ""
+
+#: apps/ui/views.py:151
+msgid "Role"
+msgstr ""
+
+#: apps/ui/views.py:152
+msgid "Status"
+msgstr ""
+
+#: apps/ui/views.py:153
+msgid "Joined"
+msgstr ""
+
+#: config/urls.py:9 config/urls.py:10
+msgid "Erpgram back office"
+msgstr ""
+
+#: templates/base.html:18
+msgid "Skip to content"
+msgstr ""
+
+#: templates/errors/403.html:5
+msgid "Access denied"
+msgstr ""
+
+#: templates/errors/403.html:6
+msgid "You don't have permission to view this page."
+msgstr ""
+
+#: templates/errors/404.html:5
+msgid "Page not found"
+msgstr ""
+
+#: templates/errors/404.html:6
+msgid "The page you're looking for doesn't exist or has moved."
+msgstr ""
+
+#: templates/errors/500.html:5
+msgid "Something went wrong"
+msgstr ""
+
+#: templates/errors/500.html:6
+msgid "An unexpected error occurred. Please try again in a moment."
+msgstr ""
+
+#: templates/errors/base.html:14
+msgid "Back to dashboard"
+msgstr ""
+
+#: templates/partials/_field.html:13
+msgid "required"
+msgstr ""
+
+#: templates/registration/password_reset_complete.html:4
+#: templates/registration/password_reset_complete.html:7
+msgid "Password changed"
+msgstr ""
+
+#: templates/registration/password_reset_complete.html:8
+msgid "Your password has been updated. You can sign in now."
+msgstr ""
+
+#: templates/registration/password_reset_complete.html:10
+msgid "Go to sign in"
+msgstr ""
+
+#: templates/registration/password_reset_confirm.html:4
+#: templates/registration/password_reset_confirm.html:8
+msgid "Set a new password"
+msgstr ""
+
+#: templates/registration/password_reset_confirm.html:13
+msgid "Change password"
+msgstr ""
+
+#: templates/registration/password_reset_confirm.html:18
+msgid ""
+"This password reset link is invalid, possibly because it has already been "
+"used."
+msgstr ""
+
+#: templates/registration/password_reset_confirm.html:22
+msgid "Request a new link"
+msgstr ""
+
+#: templates/registration/password_reset_done.html:4
+#: templates/registration/password_reset_done.html:7
+msgid "Check your email"
+msgstr ""
+
+#: templates/registration/password_reset_done.html:9
+msgid ""
+"If an account exists for that address, a password reset link is on its way."
+msgstr ""
+
+#: templates/registration/password_reset_email.txt:1
+msgid "You requested a password reset for your Erpgram account."
+msgstr ""
+
+#: templates/registration/password_reset_email.txt:5
+msgid "If you didn't request this, you can ignore this email."
+msgstr ""
+
+#: templates/registration/password_reset_form.html:4
+msgid "Reset password"
+msgstr ""
+
+#: templates/registration/password_reset_form.html:7
+msgid "Reset your password"
+msgstr ""
+
+#: templates/registration/password_reset_form.html:8
+msgid "Enter your email and we'll send a reset link."
+msgstr ""
+
+#: templates/registration/password_reset_form.html:13
+msgid "Send reset link"
+msgstr ""
+
+#: templates/registration/password_reset_subject.txt:1
+msgid "Reset your Erpgram password"
+msgstr ""
+
+#: templates/shell.html:16
+msgid "Primary"
+msgstr ""
+
+#: templates/shell.html:18
+msgid "Home"
+msgstr ""
+
+#: templates/shell.html:52
+msgid "Open menu"
+msgstr ""
+
+#: templates/shell.html:57
+msgid "Breadcrumb"
+msgstr ""
+
+#: templates/shell.html:76
+msgid "Support"
+msgstr ""
+
+#: templates/shell.html:78
+msgid "Notifications"
+msgstr ""

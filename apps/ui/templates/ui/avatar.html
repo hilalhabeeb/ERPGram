@@ -1,0 +1,18 @@
+{% comment %}
+Avatar. Context:
+  user  (User)  required
+  size  (str)   sm | md | lg   (default md)
+Shows the uploaded avatar image, or the user's initials on a soft-blue disc.
+{% endcomment %}
+{% spaceless %}
+<span class="inline-grid place-items-center overflow-hidden rounded-pill bg-accent-primarySoft
+             text-accent-primary font-medium
+             {% if size == 'sm' %}h-8 w-8 text-xs{% elif size == 'lg' %}h-12 w-12 text-base{% else %}h-9 w-9 text-sm{% endif %}"
+      aria-hidden="true">
+  {% if user.avatar %}
+    <img src="{{ user.avatar.url }}" alt="" class="h-full w-full object-cover">
+  {% else %}
+    {{ user.initials }}
+  {% endif %}
+</span>
+{% endspaceless %}

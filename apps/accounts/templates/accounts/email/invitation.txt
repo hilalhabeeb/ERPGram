@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktrans with name=tenant.name %}You have been invited to join {{ name }} on Erpgram.{% endblocktrans %}
+
+{% blocktrans %}Set your password and activate your account here:{% endblocktrans %}
+{{ activation_url }}
+
+{% blocktrans %}If you weren't expecting this invitation, you can ignore this email.{% endblocktrans %}
+{% endautoescape %}

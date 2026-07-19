@@ -1,0 +1,30 @@
+{% extends "auth_base.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Sign in" %} · Erpgram{% endblock %}
+
+{% block auth_content %}
+  <h1 class="text-heading-md font-medium text-text-primary">{% trans "Sign in" %}</h1>
+  <p class="mt-1 text-sm text-text-secondary">{% trans "Welcome back. Please enter your details." %}</p>
+
+  <form method="post" action="{% url 'accounts:login' %}" class="mt-6 space-y-4">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% if form.non_field_errors %}
+      <div class="rounded-control border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+    {% include "partials/_field.html" with field=form.email %}
+    {% include "partials/_field.html" with field=form.password %}
+
+    <div class="flex items-center justify-between">
+      <span></span>
+      <a href="{% url 'accounts:password_reset' %}" class="text-sm text-accent-primary hover:underline">
+        {% trans "Forgot password?" %}
+      </a>
+    </div>
+
+    {% include "ui/button.html" with label=_("Sign in") type="submit" variant="primary" full=True %}
+  </form>
+{% endblock %}

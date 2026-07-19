@@ -1,0 +1,29 @@
+{% comment %}One member row. Context: obj (Membership), selectable (bool).{% endcomment %}
+{% load i18n ui %}
+<tr class="hover:bg-subtle">
+  {% if selectable %}
+    <td class="w-10 ps-4 py-3">
+      <input type="checkbox" data-row-check value="{{ obj.id }}"
+             aria-label="{% blocktrans with name=obj.user.display_name %}Select {{ name }}{% endblocktrans %}"
+             class="checkbox">
+    </td>
+  {% endif %}
+  <td class="px-4 py-3">
+    <div class="flex items-center gap-3">
+      {% include "ui/avatar.html" with user=obj.user size="sm" %}
+      <span class="font-medium text-text-primary">{{ obj.user.display_name }}</span>
+    </div>
+  </td>
+  <td class="px-4 py-3 text-text-secondary">{{ obj.user.email }}</td>
+  <td class="px-4 py-3">
+    {% if obj.is_owner %}{% include "ui/badge.html" with label=_("Owner") tone="accent" %}
+    {% else %}{% include "ui/badge.html" with label=_("Member") tone="neutral" %}{% endif %}
+  </td>
+  <td class="px-4 py-3">
+    {% if obj.user.is_active %}{% include "ui/badge.html" with label=_("Active") tone="success" %}
+    {% else %}{% include "ui/badge.html" with label=_("Invited") tone="warning" %}{% endif %}
+  </td>
+  <td class="px-4 py-3 text-text-secondary">
+    <time datetime="{{ obj.joined_at|date:'c' }}">{{ obj.joined_at|date:"j M Y" }}</time>
+  </td>
+</tr>

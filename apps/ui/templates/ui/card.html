@@ -1,0 +1,20 @@
+{% comment %}
+Card wrapper. Because Django includes have no slots, `card.html` is meant to be
+used with {% include %} for simple cases OR opened/closed with the paired
+partials below. For rich bodies, prefer writing the markup with the `.card`
+class directly. Context:
+  title    (str)  optional header title
+  subtitle (str)  optional header subtitle
+  body     (str)  optional pre-rendered/safe body HTML
+{% endcomment %}
+<section class="card p-5">
+  {% if title %}
+    <header class="mb-4 flex items-center justify-between gap-3">
+      <div>
+        <h2 class="text-heading-sm font-medium text-text-primary">{{ title }}</h2>
+        {% if subtitle %}<p class="text-xs text-text-secondary">{{ subtitle }}</p>{% endif %}
+      </div>
+    </header>
+  {% endif %}
+  {% if body %}<div>{{ body|safe }}</div>{% endif %}
+</section>

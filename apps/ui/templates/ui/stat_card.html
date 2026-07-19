@@ -1,0 +1,20 @@
+{% comment %}
+Stat card. Context:
+  label  (str)  required
+  value  (str|int) required
+  icon   (str)  optional lucide icon name
+  hint   (str)  optional small caption under the value
+{% endcomment %}
+{% load ui %}
+<section class="card flex items-start justify-between gap-4 p-5">
+  <div>
+    <p class="text-sm text-text-secondary">{{ label }}</p>
+    <p class="mt-2 text-heading-lg font-medium text-text-primary">{{ value }}</p>
+    {% if hint %}<p class="mt-1 text-xs text-text-muted">{{ hint }}</p>{% endif %}
+  </div>
+  {% if icon %}
+    <span class="grid h-10 w-10 place-items-center rounded-control bg-accent-primarySoft text-accent-primary">
+      {% icon icon css_class="w-5 h-5" %}
+    </span>
+  {% endif %}
+</section>

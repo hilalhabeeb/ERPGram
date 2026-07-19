@@ -1,0 +1,44 @@
+[project]
+name = "erpgram"
+version = "0.1.0"
+description = "Multi-tenant ERP platform — step 1 scaffold"
+requires-python = ">=3.12"
+dependencies = [
+    "django==5.1.*",
+    "psycopg[binary]>=3.2",
+    "django-environ>=0.11",
+    "django-htmx>=1.19",
+    "whitenoise>=6.7",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-django>=4.9",
+    "factory-boy>=3.3",
+    "ruff>=0.6",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "DJ", "C4"]
+# DJ012 (field/manager/Meta ordering) is purely stylistic and misfires on the
+# tenant-scoped base model's dual-manager pattern.
+ignore = ["E501", "DJ012"]
+
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*" = ["E501", "I"]
+"config/settings/*" = ["F405", "F403"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.local"
+python_files = ["test_*.py", "*_test.py"]
+testpaths = ["tests"]
+addopts = "-q --reuse-db"

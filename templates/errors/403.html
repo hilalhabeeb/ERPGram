@@ -1,0 +1,6 @@
+{% extends "errors/base.html" %}
+{% load i18n %}
+{% block title %}403 · Erpgram{% endblock %}
+{% block code %}403{% endblock %}
+{% block heading %}{% trans "Access denied" %}{% endblock %}
+{% block message %}{% trans "You don't have permission to view this page." %}{% endblock %}

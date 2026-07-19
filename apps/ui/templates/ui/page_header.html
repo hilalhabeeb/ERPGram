@@ -1,0 +1,24 @@
+{% comment %}
+Page header: title on the start side, a primary action on the end side.
+Context:
+  title         (str)  required
+  subtitle      (str)  optional
+  action_label  (str)  optional — renders a primary button/link
+  action_icon   (str)  optional lucide icon for the action (default "plus")
+  action_url    (str)  optional — action is a link to this URL
+  action_event  (str)  optional — action dispatches this CustomEvent (e.g. modal)
+{% endcomment %}
+{% load ui %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-heading-lg font-medium text-text-primary">{{ title }}</h1>
+    {% if subtitle %}<p class="mt-1 text-sm text-text-secondary">{{ subtitle }}</p>{% endif %}
+  </div>
+  {% if action_label %}
+    {% if action_url %}
+      {% include "ui/button.html" with label=action_label icon=action_icon|default:"plus" url=action_url variant="primary" %}
+    {% else %}
+      {% include "ui/button.html" with label=action_label icon=action_icon|default:"plus" event=action_event variant="primary" %}
+    {% endif %}
+  {% endif %}
+</div>

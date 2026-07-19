@@ -1,0 +1,47 @@
+{% load i18n ui %}
+<div x-data="{ open: false }" class="relative">
+  <button type="button" @click="open = !open" :aria-expanded="open"
+          class="flex items-center rounded-pill focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary"
+          aria-label="{% trans 'Account menu' %}">
+    {% include "ui/avatar.html" with user=request.user size="md" %}
+  </button>
+  <div x-show="open" x-cloak @click.outside="open = false" x-transition
+       class="absolute end-0 mt-2 w-64 rounded-card border border-border bg-card p-1 shadow-card">
+    <div class="px-3 py-3">
+      <p class="truncate text-sm font-medium text-text-primary">{{ request.user.display_name }}</p>
+      <p class="truncate text-xs text-text-secondary">{{ request.user.email }}</p>
+    </div>
+    <div class="my-1 border-t border-border"></div>
+
+    <a href="{% url 'ui:settings_profile' %}"
+       class="flex items-center gap-2 rounded-control px-3 py-2 text-sm text-text-primary hover:bg-subtle">
+      {% icon "user" css_class="w-4 h-4 text-text-secondary" %}{% trans "Profile" %}
+    </a>
+
+    <div class="my-1 border-t border-border"></div>
+    <p class="px-3 py-1 text-xs text-text-muted">{% trans "Language" %}</p>
+    {% get_current_language as CURRENT_LANG %}
+    {% for code, name in LANGUAGES %}
+      <form method="post" action="{% url 'set_language' %}">
+        {% csrf_token %}
+        <input type="hidden" name="language" value="{{ code }}">
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit"
+                class="flex w-full items-center justify-between gap-2 rounded-control px-3 py-2 text-start text-sm hover:bg-subtle
+                       {% if code == CURRENT_LANG %}text-accent-primary{% else %}text-text-primary{% endif %}">
+          <span class="flex items-center gap-2">{% icon "globe" css_class="w-4 h-4 text-text-secondary" %}{{ name }}</span>
+          {% if code == CURRENT_LANG %}{% icon "check" css_class="w-4 h-4" %}{% endif %}
+        </button>
+      </form>
+    {% endfor %}
+
+    <div class="my-1 border-t border-border"></div>
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="flex w-full items-center gap-2 rounded-control px-3 py-2 text-start text-sm text-text-primary hover:bg-subtle">
+        {% icon "log-out" css_class="w-4 h-4 text-text-secondary" %}{% trans "Sign out" %}
+      </button>
+    </form>
+  </div>
+</div>

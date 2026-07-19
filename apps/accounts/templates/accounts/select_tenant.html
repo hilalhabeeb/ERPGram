@@ -1,0 +1,39 @@
+{% extends "auth_base.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Choose organisation" %} · Erpgram{% endblock %}
+
+{% block auth_content %}
+  <h1 class="text-heading-md font-medium text-text-primary">{% trans "Choose an organisation" %}</h1>
+  <p class="mt-1 text-sm text-text-secondary">{% trans "You belong to more than one. Pick where to work." %}</p>
+
+  <form method="post" action="{% url 'accounts:select_tenant' %}" class="mt-6 space-y-2">
+    {% csrf_token %}
+    {% for membership in memberships %}
+      <button type="submit" name="tenant_id" value="{{ membership.tenant_id }}"
+              class="flex w-full items-center justify-between gap-3 rounded-control border border-border
+                     bg-card px-4 py-3 text-start hover:border-accent-primary hover:bg-accent-primarySoft/40
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary">
+        <span class="flex items-center gap-3">
+          <span class="grid h-9 w-9 place-items-center rounded-control bg-accent-primarySoft text-accent-primary">
+            {% icon "building" css_class="w-5 h-5" %}
+          </span>
+          <span>
+            <span class="block text-sm font-medium text-text-primary">{{ membership.tenant.name }}</span>
+            {% if membership.is_owner %}
+              <span class="block text-xs text-text-secondary">{% trans "Owner" %}</span>
+            {% endif %}
+          </span>
+        </span>
+        {% icon "chevron-right" css_class="w-4 h-4 text-text-muted rtl:hidden" %}
+        {% icon "chevron-left" css_class="w-4 h-4 text-text-muted hidden rtl:inline" %}
+      </button>
+    {% endfor %}
+  </form>
+{% endblock %}
+
+{% block auth_footer %}
+  <p class="mt-4 text-center text-sm">
+    <a href="{% url 'accounts:logout' %}" class="text-text-secondary hover:text-text-primary">{% trans "Sign out" %}</a>
+  </p>
+{% endblock %}

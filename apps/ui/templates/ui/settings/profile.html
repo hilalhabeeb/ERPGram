@@ -1,0 +1,29 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Profile" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% include "ui/page_header.html" with title=_("Settings") subtitle=_("Manage your account and this organisation.") %}
+  {% include "ui/settings/_nav.html" %}
+
+  <div class="max-w-2xl">
+    <section class="card p-6">
+      <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Profile" %}</h2>
+      <p class="mt-0.5 text-sm text-text-secondary">{% trans "Your personal details and language." %}</p>
+      <form method="post" enctype="multipart/form-data" class="mt-5 space-y-4">
+        {% csrf_token %}
+        <div class="flex items-start gap-4">
+          {% include "ui/avatar.html" with user=request.user size="lg" %}
+          <div class="flex-1">{% include "partials/_field.html" with field=form.avatar %}</div>
+        </div>
+        {% include "partials/_field.html" with field=form.full_name %}
+        {% include "partials/_field.html" with field=form.phone %}
+        {% include "partials/_field.html" with field=form.locale %}
+        <div class="flex justify-end pt-2">
+          {% include "ui/button.html" with label=_("Save changes") type="submit" variant="primary" %}
+        </div>
+      </form>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% comment %}
+Render one form field: label, widget, help text, errors.
+Context:
+  field (BoundField) required
+
+Widget classes come from the form (see apps/accounts/forms.py); this partial
+owns the surrounding layout, the error state and the a11y wiring.
+{% endcomment %}
+{% load i18n %}
+<div class="space-y-1.5 {% if field.errors %}has-error{% endif %}">
+  {% if field.label and field.field.widget.input_type != "checkbox" %}
+    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-text-primary">
+      {{ field.label }}{% if field.field.required %}<span class="text-text-muted" aria-hidden="true"> *</span><span class="sr-only"> ({% trans "required" %})</span>{% endif %}
+    </label>
+  {% endif %}
+
+  {% if field.field.widget.input_type == "checkbox" %}
+    <label for="{{ field.id_for_label }}" class="flex items-center gap-2.5 text-sm text-text-primary">
+      {{ field }} <span>{{ field.label }}</span>
+    </label>
+  {% else %}
+    {{ field }}
+  {% endif %}
+
+  {% if field.help_text %}
+    <p id="{{ field.auto_id }}_help" class="text-xs text-text-muted">{{ field.help_text }}</p>
+  {% endif %}
+  {% for error in field.errors %}
+    <p class="flex items-start gap-1 text-xs text-red-600">{{ error }}</p>
+  {% endfor %}
+</div>

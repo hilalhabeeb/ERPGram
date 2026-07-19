@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Self-hosted fonts ---------------------------------------------------- */
+/* Inter (Latin) — weights 400 / 500 / 600 */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/fonts/inter-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/static/fonts/inter-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/static/fonts/inter-600.woff2") format("woff2");
+}
+
+/* IBM Plex Sans Arabic — weights 400 / 500 */
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/fonts/plex-arabic-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/static/fonts/plex-arabic-500.woff2") format("woff2");
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-page text-text-primary font-sans text-base antialiased;
+  }
+  /* Two weights carry the whole UI: 400 body, 500 labels/headings. Never 700. */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium text-text-primary;
+  }
+  :where(a) {
+    @apply text-accent-primary;
+  }
+  /* Visible focus ring on everything keyboard-reachable. Form controls are
+     excluded — they carry their own inset ring so it never reads as doubled. */
+  :where(a, button, summary, [tabindex]):focus-visible {
+    @apply outline-none ring-2 ring-accent-primary ring-offset-1 ring-offset-page rounded-control;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-card rounded-card border border-border shadow-card;
+  }
+
+  /* --- Form controls ------------------------------------------------------
+     One shared shape for every control so inputs, selects and textareas line
+     up on the same grid. Focus = accent border + soft halo (no offset ring). */
+  .input,
+  .select,
+  .textarea {
+    @apply block w-full rounded-control border border-border bg-card px-3 py-2 text-sm
+           text-text-primary transition-colors placeholder:text-text-muted;
+  }
+  .input:hover,
+  .select:hover,
+  .textarea:hover {
+    @apply border-border-strong;
+  }
+  .input:focus,
+  .select:focus,
+  .textarea:focus,
+  .input:focus-visible,
+  .select:focus-visible,
+  .textarea:focus-visible {
+    @apply border-accent-primary outline-none ring-2 ring-accent-primary/20;
+  }
+  /* Set by the field partial when a field has errors. */
+  .has-error .input,
+  .has-error .select,
+  .has-error .textarea {
+    @apply border-red-400;
+  }
+  .textarea {
+    @apply min-h-24 resize-y;
+  }
+
+  /* Native select chevron replaced with a Lucide-matching one. */
+  .select {
+    @apply appearance-none bg-no-repeat pe-9;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A8A29E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    background-size: 1rem 1rem;
+  }
+  [dir="rtl"] .select {
+    background-position: left 0.75rem center;
+  }
+
+  /* Checkbox: square, hairline, accent when checked. */
+  .checkbox {
+    @apply h-4 w-4 shrink-0 cursor-pointer appearance-none rounded-[5px] border border-border-strong
+           bg-card bg-center bg-no-repeat transition-colors;
+  }
+  .checkbox:hover {
+    @apply border-accent-primary;
+  }
+  .checkbox:checked,
+  .checkbox:indeterminate {
+    @apply border-accent-primary bg-accent-primary;
+  }
+  .checkbox:checked {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 8.5 3 3 6-6.5'/%3E%3C/svg%3E");
+    background-size: 0.75rem 0.75rem;
+  }
+  .checkbox:indeterminate {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' stroke='white' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+    background-size: 0.75rem 0.75rem;
+  }
+  .checkbox:focus-visible {
+    @apply border-accent-primary outline-none ring-2 ring-accent-primary/25;
+  }
+
+  /* File input: style the native button rather than shipping a JS uploader. */
+  .file-input {
+    @apply block w-full cursor-pointer text-sm text-text-secondary
+           file:me-3 file:cursor-pointer file:rounded-control file:border file:border-border
+           file:bg-card file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-text-primary
+           hover:file:bg-subtle;
+  }
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

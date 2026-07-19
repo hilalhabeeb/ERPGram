@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static i18n ui %}
+
+{% block body %}
+<div class="flex min-h-full flex-col items-center justify-center px-4 py-12">
+  <main id="main-content" class="w-full max-w-[400px]">
+    <div class="mb-7 flex flex-col items-center gap-3">
+      <span class="grid h-11 w-11 place-items-center rounded-control bg-accent-primary text-white">
+        {% icon "layout-dashboard" css_class="w-6 h-6" %}
+      </span>
+      <span class="text-heading-md font-medium text-text-primary">Erpgram</span>
+    </div>
+
+    <div class="card p-7">
+      {% block auth_content %}{% endblock %}
+    </div>
+
+    {% block auth_footer %}{% endblock %}
+
+    {# Language switch matters before sign-in in an Arabic-first market. #}
+    <form method="post" action="{% url 'set_language' %}" class="mt-6 flex items-center justify-center gap-2 text-xs">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}">
+      {% for code, name in LANGUAGES %}
+        {% if code != LANGUAGE_CODE %}
+          <button type="submit" name="language" value="{{ code }}"
+                  class="rounded-control px-2 py-1 text-text-secondary hover:bg-subtle hover:text-text-primary">
+            {{ name }}
+          </button>
+        {% else %}
+          <span class="px-2 py-1 text-text-muted">{{ name }}</span>
+        {% endif %}
+      {% endfor %}
+    </form>
+  </main>
+</div>
+{% endblock %}

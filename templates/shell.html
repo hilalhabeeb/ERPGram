@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static i18n ui %}
+
+{% block body %}
+<div x-data="{ mobileNav: false }" class="min-h-full">
+
+  {# ---- Mobile drawer backdrop ---- #}
+  <div x-show="mobileNav" x-cloak @click="mobileNav = false"
+       class="fixed inset-0 z-30 bg-text-primary/20 md:hidden" x-transition.opacity></div>
+
+  {# ================= Icon rail ================= #}
+  <aside x-cloak
+         :class="mobileNav ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full'"
+         class="fixed inset-y-0 start-0 z-40 flex w-16 flex-col items-center border-e border-border
+                bg-card py-4 transition-transform md:translate-x-0 rtl:md:translate-x-0"
+         aria-label="{% trans 'Primary' %}">
+    <a href="{% url 'ui:dashboard' %}" class="mb-6 grid h-9 w-9 place-items-center rounded-control
+              bg-accent-primary text-white" aria-label="{% trans 'Home' %}">
+      {% icon "layout-dashboard" css_class="w-5 h-5" %}
+    </a>
+
+    <nav class="flex flex-1 flex-col items-center gap-2">
+      {% for item in nav_items %}
+        {% url item.url_name as item_url %}
+        <a href="{{ item_url }}"
+           class="group relative grid h-10 w-10 place-items-center rounded-control transition-colors
+                  {% if request.resolver_match.view_name == item.url_name %}
+                    bg-accent-primarySoft text-accent-primary
+                  {% else %}
+                    text-text-secondary hover:bg-subtle hover:text-text-primary
+                  {% endif %}"
+           aria-label="{{ item.label }}"
+           {% if request.resolver_match.view_name == item.url_name %}aria-current="page"{% endif %}>
+          {% icon item.icon css_class="w-5 h-5" %}
+          <span class="pointer-events-none absolute start-full ms-3 hidden whitespace-nowrap rounded-control
+                       bg-text-primary px-2 py-1 text-xs text-white group-hover:block">
+            {{ item.label }}
+          </span>
+        </a>
+      {% endfor %}
+    </nav>
+
+    {% include "ui/avatar.html" with user=request.user size="md" %}
+  </aside>
+
+  {# ================= Main column ================= #}
+  <div class="md:ps-16">
+    {# -------- Topbar -------- #}
+    <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-card px-4 md:px-6">
+      <button type="button" @click="mobileNav = true"
+              class="grid h-9 w-9 place-items-center rounded-control text-text-secondary hover:bg-subtle md:hidden"
+              aria-label="{% trans 'Open menu' %}">
+        {% icon "menu" css_class="w-5 h-5" %}
+      </button>
+
+      {# Root is always "Dashboard"; views pass only the trail below it. #}
+      <nav aria-label="{% trans 'Breadcrumb' %}" class="flex min-w-0 items-center gap-2 text-sm">
+        <a href="{% url 'ui:dashboard' %}"
+           class="{% if breadcrumb %}hidden text-text-secondary hover:text-text-primary sm:inline{% else %}text-text-primary{% endif %}"
+           {% if not breadcrumb %}aria-current="page"{% endif %}>{% trans "Dashboard" %}</a>
+        {% for crumb in breadcrumb %}
+          <span class="{% if forloop.first %}hidden sm:inline{% endif %}" aria-hidden="true">
+            {% icon "chevron-right" css_class="w-4 h-4 text-text-muted rtl:hidden" %}
+            {% icon "chevron-left" css_class="w-4 h-4 text-text-muted hidden rtl:inline" %}
+          </span>
+          <span class="truncate {% if forloop.last %}text-text-primary{% else %}hidden text-text-secondary sm:inline{% endif %}"
+                {% if forloop.last %}aria-current="page"{% endif %}>{{ crumb }}</span>
+        {% endfor %}
+      </nav>
+
+      <div class="ms-auto flex items-center gap-2">
+        <div class="hidden sm:block">
+          {% include "ui/search_input.html" with placeholder=_("Search") name="q" url="" %}
+        </div>
+        <button type="button" class="grid h-9 w-9 place-items-center rounded-pill text-text-secondary hover:bg-subtle"
+                aria-label="{% trans 'Support' %}">{% icon "headset" css_class="w-5 h-5" %}</button>
+        <button type="button" class="grid h-9 w-9 place-items-center rounded-pill text-text-secondary hover:bg-subtle"
+                aria-label="{% trans 'Notifications' %}">{% icon "bell" css_class="w-5 h-5" %}</button>
+
+        {% include "ui/_tenant_switcher.html" %}
+        {% include "ui/_avatar_menu.html" %}
+      </div>
+    </header>
+
+    {# -------- Page content -------- #}
+    <main id="main-content" class="p-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

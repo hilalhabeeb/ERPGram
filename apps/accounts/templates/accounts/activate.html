@@ -1,0 +1,18 @@
+{% extends "auth_base.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Activate your account" %} · Erpgram{% endblock %}
+
+{% block auth_content %}
+  <h1 class="text-heading-md font-medium text-text-primary">{% trans "Set your password" %}</h1>
+  <p class="mt-1 text-sm text-text-secondary">
+    {% blocktrans with email=invitee.email %}Activating {{ email }}. Choose a password to finish.{% endblocktrans %}
+  </p>
+
+  <form method="post" class="mt-6 space-y-4">
+    {% csrf_token %}
+    {% include "partials/_field.html" with field=form.new_password1 %}
+    {% include "partials/_field.html" with field=form.new_password2 %}
+    {% include "ui/button.html" with label=_("Activate account") type="submit" variant="primary" full=True %}
+  </form>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% comment %}
+Settings sub-navigation. Renders as a tab row linking the settings pages.
+
+Context:
+  active     (str)  one of "profile" | "organization" | "users"
+  is_owner   (bool) show owner-only tabs
+
+Owner-only pages are hidden rather than shown-and-403'd — the view still
+enforces access, this only keeps the nav honest about what you can reach.
+{% endcomment %}
+{% load i18n %}
+<nav class="mb-5 border-b border-border" aria-label="{% trans 'Settings sections' %}">
+  <ul class="-mb-px flex gap-1 overflow-x-auto">
+    {% for tab in tabs %}
+      <li>
+        <a href="{% url tab.url_name %}"
+           class="inline-block whitespace-nowrap border-b-2 px-3 py-2.5 text-sm transition-colors
+                  {% if tab.key == active %}
+                    border-accent-primary font-medium text-accent-primary
+                  {% else %}
+                    border-transparent text-text-secondary hover:border-border-strong hover:text-text-primary
+                  {% endif %}"
+           {% if tab.key == active %}aria-current="page"{% endif %}>
+          {{ tab.label }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>

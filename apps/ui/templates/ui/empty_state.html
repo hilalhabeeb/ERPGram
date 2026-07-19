@@ -1,0 +1,24 @@
+{% comment %}
+Empty state. Context:
+  icon          (str)  lucide icon name (default "inbox")
+  title         (str)  required, one-line explanation
+  description   (str)  optional secondary line
+  action_label  (str)  optional primary action
+  action_url    (str)  optional link target for the action
+  action_event  (str)  optional CustomEvent to dispatch instead of a link
+{% endcomment %}
+{% load ui %}
+<div class="flex flex-col items-center justify-center gap-3 px-6 py-12 text-center">
+  <span class="grid h-12 w-12 place-items-center rounded-pill bg-subtle text-text-muted">
+    {% icon icon|default:"inbox" css_class="w-6 h-6" %}
+  </span>
+  <div>
+    <p class="text-sm font-medium text-text-primary">{{ title }}</p>
+    {% if description %}<p class="mt-1 text-sm text-text-secondary">{{ description }}</p>{% endif %}
+  </div>
+  {% if action_label %}
+    <div class="mt-2">
+      {% include "ui/button.html" with label=action_label url=action_url event=action_event variant="primary" size="sm" %}
+    </div>
+  {% endif %}
+</div>

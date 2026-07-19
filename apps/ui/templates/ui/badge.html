@@ -1,0 +1,15 @@
+{% comment %}
+Badge / pill label. Context:
+  label  (str)  required
+  tone   (str)  neutral | accent | success | warning | danger  (default neutral)
+{% endcomment %}
+{% spaceless %}
+<span class="inline-flex items-center rounded-pill px-2.5 py-0.5 text-xs font-medium
+  {% if tone == 'accent' %}bg-accent-primarySoft text-accent-primary
+  {% elif tone == 'success' %}bg-green-50 text-green-700
+  {% elif tone == 'warning' %}bg-amber-50 text-amber-700
+  {% elif tone == 'danger' %}bg-red-50 text-red-700
+  {% else %}bg-subtle text-text-secondary border border-border{% endif %}">
+  {{ label }}
+</span>
+{% endspaceless %}

@@ -1,0 +1,29 @@
+{% load static i18n %}
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}"
+      class="h-full {% if LANGUAGE_BIDI %}font-arabic{% else %}font-sans{% endif %}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Erpgram{% endblock %}</title>
+  <link rel="preload" href="{% static 'fonts/inter-400.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body class="h-full min-h-full bg-page text-text-primary text-base"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <a href="#main-content"
+     class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-control
+            focus:bg-card focus:px-4 focus:py-2 focus:shadow-card focus:ring-2 focus:ring-accent-primary">
+    {% trans "Skip to content" %}
+  </a>
+
+  {% block body %}{% endblock %}
+
+  {% include "ui/toast.html" %}
+
+  <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+  <script src="{% static 'vendor/alpine.min.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

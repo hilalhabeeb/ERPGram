@@ -1,0 +1,31 @@
+{% comment %}
+Button / link button.
+Context:
+  label    (str)  required — visible text
+  variant  (str)  primary | secondary | ghost | danger  (default primary)
+  size     (str)  sm | md                               (default md)
+  type     (str)  button | submit                       (default button)
+  url      (str)  if set, renders an <a> instead of <button>
+  icon     (str)  optional leading lucide icon name
+  event    (str)  optional CustomEvent name dispatched on click (e.g. modal open)
+  full     (bool) full width
+  attrs    (str)  optional extra raw attributes (hx-*, x-on, etc.)
+{% endcomment %}
+{% load ui %}
+{% spaceless %}
+<{% if url %}a href="{{ url }}"{% else %}button type="{{ type|default:'button' }}"{% endif %}
+  class="inline-flex items-center justify-center gap-2 rounded-control font-medium transition-colors
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary
+         focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none
+         {% if size == 'sm' %}h-8 px-3 text-xs{% else %}h-10 px-4 text-sm{% endif %}
+         {% if full %}w-full{% endif %}
+         {% if variant == 'secondary' %}bg-card text-text-primary border border-border hover:bg-subtle
+         {% elif variant == 'ghost' %}bg-transparent text-text-secondary hover:bg-subtle
+         {% elif variant == 'danger' %}bg-transparent text-red-600 border border-border hover:bg-red-50
+         {% else %}bg-accent-primary text-white hover:bg-accent-primary/90{% endif %}"
+  {% if event %}onclick="window.dispatchEvent(new CustomEvent('{{ event }}'))"{% endif %}
+  {{ attrs|safe }}>
+  {% if icon %}{% icon icon css_class="w-4 h-4" %}{% endif %}
+  <span>{{ label }}</span>
+</{% if url %}a{% else %}button{% endif %}>
+{% endspaceless %}

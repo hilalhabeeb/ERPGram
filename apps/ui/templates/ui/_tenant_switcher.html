@@ -1,0 +1,27 @@
+{% load i18n ui %}
+{% if tenant_memberships|length > 1 %}
+<div x-data="{ open: false }" class="relative">
+  <button type="button" @click="open = !open" :aria-expanded="open"
+          class="flex h-9 items-center gap-2 rounded-control border border-border bg-card px-3 text-sm text-text-primary hover:bg-subtle">
+    {% icon "building" css_class="w-4 h-4 text-text-secondary" %}
+    <span class="max-w-[140px] truncate">{{ current_tenant.name }}</span>
+    {% icon "chevron-down" css_class="w-4 h-4 text-text-muted" %}
+  </button>
+  <div x-show="open" x-cloak @click.outside="open = false" x-transition
+       class="absolute end-0 mt-2 w-64 rounded-card border border-border bg-card p-1 shadow-card">
+    <p class="px-3 py-2 text-xs text-text-muted">{% trans "Switch organisation" %}</p>
+    {% for membership in tenant_memberships %}
+      <form method="post" action="{% url 'accounts:switch_tenant' %}">
+        {% csrf_token %}
+        <input type="hidden" name="tenant_id" value="{{ membership.tenant_id }}">
+        <button type="submit"
+                class="flex w-full items-center justify-between gap-2 rounded-control px-3 py-2 text-start text-sm hover:bg-subtle
+                       {% if membership.tenant_id == current_tenant.id %}text-accent-primary{% else %}text-text-primary{% endif %}">
+          <span class="truncate">{{ membership.tenant.name }}</span>
+          {% if membership.tenant_id == current_tenant.id %}{% icon "check" css_class="w-4 h-4" %}{% endif %}
+        </button>
+      </form>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

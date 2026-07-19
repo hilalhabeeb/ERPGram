@@ -1,0 +1,14 @@
+{% load i18n ui %}
+<p class="mb-4 text-sm text-text-secondary">
+  {% trans "We'll email a secure activation link so they can set a password." %}
+</p>
+<form method="post" action="{% url 'ui:settings_users' %}" class="space-y-4">
+  {% csrf_token %}
+  {% include "partials/_field.html" with field=form.full_name %}
+  {% include "partials/_field.html" with field=form.email %}
+  {% include "partials/_field.html" with field=form.is_owner %}
+  <div class="flex justify-end gap-2 pt-2">
+    {% include "ui/button.html" with label=_("Cancel") variant="secondary" attrs='@click="open = false"' %}
+    {% include "ui/button.html" with label=_("Send invitation") type="submit" variant="primary" icon="mail" %}
+  </div>
+</form>

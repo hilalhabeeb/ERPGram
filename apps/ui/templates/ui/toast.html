@@ -1,0 +1,42 @@
+{% comment %}
+Toast host. Renders Django messages on load and also listens for a browser
+"toast" event — emit one from a view via:
+    response["HX-Trigger"] = json.dumps({"toast": {"message": "...", "level": "success"}})
+django-htmx dispatches that as a DOM CustomEvent named "toast".
+{% endcomment %}
+{% load i18n %}
+<div x-data="toastHub()" @toast.window="push($event.detail)"
+     class="pointer-events-none fixed bottom-4 end-4 z-[60] flex w-full max-w-xs flex-col gap-2"
+     role="status" aria-live="polite">
+  {% for message in messages %}
+    <div x-init="push({message: '{{ message|escapejs }}', level: '{{ message.tags|escapejs }}'})"></div>
+  {% endfor %}
+  <template x-for="t in items" :key="t.id">
+    <div class="pointer-events-auto card flex items-start gap-3 border-s-4 px-4 py-3 text-sm"
+         :class="{
+           'border-s-green-500': t.level.includes('success'),
+           'border-s-red-500': t.level.includes('error') || t.level.includes('danger'),
+           'border-s-amber-500': t.level.includes('warning'),
+           'border-s-accent-primary': !t.level || t.level.includes('info') || t.level.includes('debug')
+         }"
+         x-transition>
+      <p class="flex-1 text-text-primary" x-text="t.message"></p>
+      <button type="button" @click="remove(t.id)"
+              class="text-text-muted hover:text-text-primary" aria-label="{% trans 'Dismiss' %}">&times;</button>
+    </div>
+  </template>
+</div>
+<script>
+  function toastHub() {
+    return {
+      items: [], seq: 0,
+      push(d) {
+        if (!d || !d.message) return;
+        const id = ++this.seq;
+        this.items.push({ id, message: d.message, level: d.level || 'info' });
+        setTimeout(() => this.remove(id), 4000);
+      },
+      remove(id) { this.items = this.items.filter(t => t.id !== id); },
+    };
+  }
+</script>

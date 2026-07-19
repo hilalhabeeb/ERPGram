@@ -1,0 +1,65 @@
+{% comment %}
+Server-side sortable, paginated, selectable data table.
+Context:
+  table_id      (str)   required — wrapper id and HTMX swap target
+  columns       (list)  list of {key, label, sortable(bool)}
+  page_obj      (Page)  required — the current page of rows
+  row_template  (str)   required — partial rendering one <tr>; gets `obj`, `selectable`
+  sort_key      (str)   active sort column key
+  direction     (str)   "asc" | "desc"
+  selectable    (bool)  show row checkboxes + header select-all
+  empty_icon / empty_title / empty_description / empty_action_label / empty_action_event
+
+Sorting & pagination links use HTMX to swap this wrapper (outerHTML) and fall
+back to normal navigation when JS is off.
+{% endcomment %}
+{% load i18n ui %}
+<div id="{{ table_id }}" class="card overflow-hidden">
+  <div class="overflow-x-auto" x-data="{ toggleAll(e){ this.$root.querySelectorAll('[data-row-check]').forEach(c => c.checked = e.target.checked) } }">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-border bg-subtle text-start text-xs text-text-secondary">
+          {% if selectable %}
+            <th class="w-10 ps-4 py-3">
+              <input type="checkbox" @change="toggleAll($event)"
+                     aria-label="{% trans 'Select all' %}" class="checkbox">
+            </th>
+          {% endif %}
+          {% for col in columns %}
+            <th class="px-4 py-3 text-start font-medium">
+              {% if col.sortable %}
+                {% if sort_key == col.key and direction == 'asc' %}
+                  {% query_string sort=col.key dir='desc' as sort_href %}
+                {% else %}
+                  {% query_string sort=col.key dir='asc' as sort_href %}
+                {% endif %}
+                <a href="{{ sort_href }}" hx-get="{{ sort_href }}" hx-target="#{{ table_id }}" hx-swap="outerHTML"
+                   class="inline-flex items-center gap-1 hover:text-text-primary">
+                  {{ col.label }}
+                  {% if sort_key == col.key %}
+                    {% if direction == 'asc' %}{% icon "chevron-down" css_class="w-3.5 h-3.5 rotate-180" %}
+                    {% else %}{% icon "chevron-down" css_class="w-3.5 h-3.5" %}{% endif %}
+                  {% endif %}
+                </a>
+              {% else %}
+                {{ col.label }}
+              {% endif %}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-border">
+        {% for obj in page_obj %}
+          {% include row_template with obj=obj selectable=selectable %}
+        {% empty %}
+          <tr>
+            <td colspan="99">
+              {% include "ui/empty_state.html" with icon=empty_icon title=empty_title description=empty_description action_label=empty_action_label action_event=empty_action_event %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "ui/_pagination.html" with page_obj=page_obj table_id=table_id %}
+</div>

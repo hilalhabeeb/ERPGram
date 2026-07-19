@@ -1,0 +1,29 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Dashboard" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% comment %}
+  No primary action yet: the companies module lands in a later step, and a
+  button wired to "#" is worse than no button.
+  {% endcomment %}
+  {% include "ui/page_header.html" with title=_("Dashboard") subtitle=current_tenant.name %}
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for stat in stats %}
+      {% include "ui/stat_card.html" with label=stat.label value=stat.value icon=stat.icon %}
+    {% endfor %}
+  </div>
+
+  <section class="card mt-4 p-5">
+    <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Overview" %}</h2>
+        <p class="text-xs text-text-secondary">{% trans "Charts and activity will appear here in a later step." %}</p>
+      </div>
+      {% include "ui/filter_pills.html" with name="range" active="monthly" options=range_options %}
+    </header>
+    {% include "ui/empty_state.html" with icon="chart" title=_("No data yet") description=_("Once you add companies and branches, activity shows up here.") %}
+  </section>
+{% endblock %}

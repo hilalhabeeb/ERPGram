@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# Django
+*.log
+db.sqlite3
+/staticfiles/
+/media/
+
+# Environment / secrets
+.env
+
+# Tailwind build output (generated)
+/static/css/app.css
+
+# Compiled translation catalogs (generated from .po)
+*.mo
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Tailwind standalone binary (downloaded per-OS)
+/bin/tailwindcss*
+
+# OS
+.DS_Store
+Thumbs.db

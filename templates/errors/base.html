@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n ui %}
+
+{% block body %}
+<div class="flex min-h-full flex-col items-center justify-center px-4 py-12 text-center">
+  <main id="main-content" class="w-full max-w-md">
+    <span class="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-pill bg-subtle text-text-muted">
+      {% block icon %}{% icon "alert-triangle" css_class="w-6 h-6" %}{% endblock %}
+    </span>
+    <p class="text-heading-lg font-medium text-text-primary">{% block code %}{% endblock %}</p>
+    <h1 class="mt-1 text-heading-md font-medium text-text-primary">{% block heading %}{% endblock %}</h1>
+    <p class="mt-2 text-sm text-text-secondary">{% block message %}{% endblock %}</p>
+    <p class="mt-6">
+      <a href="/" class="text-sm text-accent-primary hover:underline">{% trans "Back to dashboard" %}</a>
+    </p>
+  </main>
+</div>
+{% endblock %}

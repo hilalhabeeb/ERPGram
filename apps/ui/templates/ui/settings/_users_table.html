@@ -1,0 +1,2 @@
+{% load i18n %}
+{% include "ui/data_table.html" with table_id="users-table" columns=columns page_obj=page_obj row_template="ui/settings/_users_row.html" sort_key=sort_key direction=direction selectable=True empty_icon="users" empty_title=_("No members yet") empty_description=_("Invite your teammates to get started.") empty_action_label=_("Invite user") empty_action_event="open-modal-invite" %}
