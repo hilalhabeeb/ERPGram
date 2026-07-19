@@ -1,0 +1,24 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Companies" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% if is_owner %}
+    {% include "ui/page_header.html" with title=_("Companies") subtitle=_("Legal entities in this organisation.") action_label=_("Add company") action_icon="plus" action_event="open-modal-company" %}
+  {% else %}
+    {% include "ui/page_header.html" with title=_("Companies") subtitle=_("Legal entities in this organisation.") %}
+  {% endif %}
+
+  {% url 'tenancy:company_list' as company_list_url %}
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    {% include "ui/search_input.html" with placeholder=_("Search companies") name="q" value=search url=company_list_url target="#companies-table" %}
+    {% include "tenancy/_archive_toggle.html" %}
+  </div>
+
+  {% include "tenancy/_companies_table.html" %}
+
+  {% if is_owner %}
+    {% include "ui/modal.html" with name="company" title=_("Add a company") include_body="tenancy/_company_form.html" %}
+  {% endif %}
+{% endblock %}

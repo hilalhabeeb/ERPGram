@@ -8,17 +8,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-19 13:47+0300\n"
+"POT-Creation-Date: 2026-07-19 15:03+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps/accounts/admin.py:29 apps/ui/navigation.py:24 apps/ui/services.py:33
+#: apps/accounts/admin.py:29 apps/ui/navigation.py:27 apps/ui/services.py:33
 #: apps/ui/templates/ui/_avatar_menu.html:18
 #: apps/ui/templates/ui/settings/profile.html:4
 #: apps/ui/templates/ui/settings/profile.html:12 apps/ui/views.py:71
@@ -107,7 +107,8 @@ msgid "locale"
 msgstr ""
 
 #: apps/accounts/models.py:32 apps/tenancy/models.py:25
-#: apps/tenancy/models.py:44
+#: apps/tenancy/models.py:44 apps/tenancy/models.py:65
+#: apps/tenancy/models.py:93
 msgid "active"
 msgstr ""
 
@@ -298,8 +299,58 @@ msgstr ""
 msgid "updated by"
 msgstr ""
 
+#: apps/tenancy/forms.py:23
+msgid "Company name"
+msgstr ""
+
+#: apps/tenancy/forms.py:24
+#: apps/tenancy/templates/tenancy/company_detail.html:17
+msgid "Legal name"
+msgstr ""
+
+#: apps/tenancy/forms.py:25
+#: apps/tenancy/templates/tenancy/company_detail.html:21
+#: apps/tenancy/views.py:77
+msgid "Registration no."
+msgstr ""
+
+#: apps/tenancy/forms.py:29
+msgid "Branch name"
+msgstr ""
+
+#: apps/tenancy/forms.py:30 apps/tenancy/forms.py:36
+#: apps/tenancy/templates/tenancy/branch_detail.html:16
+#: apps/tenancy/views.py:156
+msgid "Code"
+msgstr ""
+
+#: apps/tenancy/forms.py:31
+#: apps/tenancy/templates/tenancy/branch_detail.html:20
+msgid "Address"
+msgstr ""
+
+#: apps/tenancy/forms.py:35
+msgid "Department name"
+msgstr ""
+
+#: apps/tenancy/forms.py:38
+msgid "Parent department"
+msgstr ""
+
+#: apps/tenancy/forms.py:41
+msgid "None (top level)"
+msgstr ""
+
+#: apps/tenancy/forms.py:68
+msgid "A department cannot be moved under itself or one of its own children."
+msgstr ""
+
+#: apps/tenancy/forms.py:86
+msgid "Company"
+msgstr ""
+
 #: apps/tenancy/models.py:23 apps/tenancy/models.py:41
-#: apps/tenancy/models.py:62 apps/tenancy/models.py:90
+#: apps/tenancy/models.py:62 apps/tenancy/models.py:91
 msgid "name"
 msgstr ""
 
@@ -335,7 +386,7 @@ msgstr ""
 msgid "companies"
 msgstr ""
 
-#: apps/tenancy/models.py:63 apps/tenancy/models.py:91
+#: apps/tenancy/models.py:63 apps/tenancy/models.py:92
 msgid "code"
 msgstr ""
 
@@ -343,56 +394,278 @@ msgstr ""
 msgid "address"
 msgstr ""
 
-#: apps/tenancy/models.py:67 apps/tenancy/models.py:80
+#: apps/tenancy/models.py:68 apps/tenancy/models.py:81
 msgid "branch"
 msgstr ""
 
-#: apps/tenancy/models.py:68
+#: apps/tenancy/models.py:69
 msgid "branches"
 msgstr ""
 
-#: apps/tenancy/models.py:84
+#: apps/tenancy/models.py:85
 msgid "parent department"
 msgstr ""
 
-#: apps/tenancy/models.py:94
+#: apps/tenancy/models.py:96
 msgid "department"
 msgstr ""
 
-#: apps/tenancy/models.py:95
+#: apps/tenancy/models.py:97
 msgid "departments"
 msgstr ""
 
-#: apps/ui/navigation.py:23 apps/ui/templates/ui/dashboard.html:4
-#: apps/ui/templates/ui/dashboard.html:9 apps/ui/views.py:52
+#: apps/tenancy/templates/tenancy/_archive_toggle.html:9
+#: apps/tenancy/templates/tenancy/_branch_row.html:13
+#: apps/tenancy/templates/tenancy/_company_row.html:16
+#: apps/tenancy/templates/tenancy/company_detail.html:28
+#: apps/ui/templates/ui/settings/_users_row.html:24
+msgid "Active"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_archive_toggle.html:12
+msgid "All"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branch_edit_form.html:12
+#: apps/tenancy/templates/tenancy/_branch_form.html:12
+#: apps/tenancy/templates/tenancy/_company_edit_form.html:12
+#: apps/tenancy/templates/tenancy/_company_form.html:12
+#: apps/tenancy/templates/tenancy/_department_form.html:12
+#: apps/ui/templates/ui/settings/_invite_form.html:11
+msgid "Cancel"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branch_edit_form.html:14
+#: apps/tenancy/templates/tenancy/_company_edit_form.html:14
+#: apps/ui/templates/ui/settings/profile.html:24
+msgid "Save changes"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branch_form.html:14
+msgid "Create branch"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:15
+#: apps/tenancy/templates/tenancy/_company_row.html:18
+#: apps/tenancy/templates/tenancy/branch_detail.html:51
+#: apps/tenancy/templates/tenancy/company_detail.html:30
+msgid "Archived"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:25
+#, python-format
+msgid "Archive %(name)s and its departments?"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:26
+#: apps/tenancy/templates/tenancy/_company_row.html:29
+#: apps/tenancy/templates/tenancy/branch_detail.html:61
+#, python-format
+msgid "Archive %(name)s"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:28
+#: apps/tenancy/templates/tenancy/_company_row.html:31
+#: apps/tenancy/templates/tenancy/branch_detail.html:63
+#, python-format
+msgid "Restore %(name)s"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:30
+#: apps/tenancy/templates/tenancy/_company_row.html:33
+#: apps/tenancy/templates/tenancy/branch_detail.html:65
+msgid "Archive"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:30
+#: apps/tenancy/templates/tenancy/_company_row.html:33
+#: apps/tenancy/templates/tenancy/branch_detail.html:65
+msgid "Restore"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branches_table.html:2
+msgid "No branches yet"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_branches_table.html:2
+msgid "Add a branch to start organising this company."
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_companies_table.html:2
+msgid "No companies yet"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_companies_table.html:2
+msgid "Add the first company to start building your organisation structure."
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_company_form.html:14
+msgid "Create company"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_company_row.html:28
+#, python-format
+msgid "Archive %(name)s and all its branches and departments?"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/_department_form.html:14
+msgid "Create department"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:8
+msgid "Add department"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:26
+#: apps/tenancy/templates/tenancy/branch_detail.html:79
+msgid "Edit branch"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:32
+#: apps/tenancy/views.py:157 apps/ui/services.py:48
+msgid "Departments"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:60
+#, python-format
+msgid "Archive %(name)s and any departments under it?"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:73
+msgid "No departments yet"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:73
+msgid ""
+"Departments can nest, so you can mirror how this branch is really organised."
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:78
+msgid "Add a department"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_detail.html:8
+#: apps/tenancy/templates/tenancy/company_detail.html:10
+msgid "Branches in this company."
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_detail.html:8
+msgid "Add branch"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_detail.html:25
+#: apps/tenancy/views.py:79 apps/tenancy/views.py:158 apps/ui/views.py:152
+msgid "Status"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_detail.html:37
+#: apps/tenancy/templates/tenancy/company_detail.html:51
+msgid "Edit company"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_detail.html:43
+#: apps/tenancy/views.py:78 apps/ui/services.py:47
+msgid "Branches"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_detail.html:50
+msgid "Add a branch"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_list.html:4
+#: apps/tenancy/templates/tenancy/company_list.html:8
+#: apps/tenancy/templates/tenancy/company_list.html:10 apps/tenancy/views.py:73
+#: apps/tenancy/views.py:74 apps/tenancy/views.py:152 apps/tenancy/views.py:231
+#: apps/ui/navigation.py:26 apps/ui/services.py:46
+msgid "Companies"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_list.html:8
+#: apps/tenancy/templates/tenancy/company_list.html:10
+msgid "Legal entities in this organisation."
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_list.html:8
+msgid "Add company"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_list.html:15
+msgid "Search companies"
+msgstr ""
+
+#: apps/tenancy/templates/tenancy/company_list.html:22
+msgid "Add a company"
+msgstr ""
+
+#: apps/tenancy/views.py:32
+msgid "Owner access is required to change the organisation structure."
+msgstr ""
+
+#: apps/tenancy/views.py:76 apps/tenancy/views.py:155 apps/ui/views.py:149
+msgid "Name"
+msgstr ""
+
+#: apps/tenancy/views.py:103
+#, python-format
+msgid "%(name)s has been created."
+msgstr ""
+
+#: apps/tenancy/views.py:105 apps/tenancy/views.py:118
+#: apps/tenancy/views.py:192 apps/tenancy/views.py:206
+msgid "Please correct the errors and try again."
+msgstr ""
+
+#: apps/tenancy/views.py:116 apps/tenancy/views.py:204
+#: apps/tenancy/views.py:272
+msgid "Changes saved."
+msgstr ""
+
+#: apps/tenancy/views.py:130
+#, python-format
+msgid "%(name)s and everything under it were archived."
+msgstr ""
+
+#: apps/tenancy/views.py:134 apps/tenancy/views.py:220
+#: apps/tenancy/views.py:290
+#, python-format
+msgid "%(name)s was restored."
+msgstr ""
+
+#: apps/tenancy/views.py:190
+msgid "Branch created."
+msgstr ""
+
+#: apps/tenancy/views.py:217 apps/tenancy/views.py:287
+#, python-format
+msgid "%(name)s was archived."
+msgstr ""
+
+#: apps/tenancy/views.py:256
+msgid "Department created."
+msgstr ""
+
+#: apps/tenancy/views.py:258 apps/tenancy/views.py:274
+msgid "Please correct the errors."
+msgstr ""
+
+#: apps/ui/navigation.py:25 apps/ui/templates/ui/dashboard.html:4
+#: apps/ui/templates/ui/dashboard.html:12 apps/ui/views.py:52
 #: templates/shell.html:60
 msgid "Dashboard"
 msgstr ""
 
-#: apps/ui/navigation.py:25 apps/ui/services.py:35
+#: apps/ui/navigation.py:30 apps/ui/services.py:35
 #: apps/ui/templates/ui/settings/organization.html:4
 #: apps/ui/templates/ui/settings/organization.html:12 apps/ui/views.py:102
 #: apps/ui/views.py:103
 msgid "Organisation"
 msgstr ""
 
-#: apps/ui/navigation.py:26 apps/ui/services.py:36
+#: apps/ui/navigation.py:36 apps/ui/services.py:36
 #: apps/ui/templates/ui/settings/users.html:4
 #: apps/ui/templates/ui/settings/users.html:15 apps/ui/views.py:157
 #: apps/ui/views.py:158
 msgid "Users"
-msgstr ""
-
-#: apps/ui/services.py:46
-msgid "Companies"
-msgstr ""
-
-#: apps/ui/services.py:47
-msgid "Branches"
-msgstr ""
-
-#: apps/ui/services.py:48
-msgid "Departments"
 msgstr ""
 
 #: apps/ui/templates/ui/_avatar_menu.html:5
@@ -423,19 +696,19 @@ msgstr ""
 msgid "Switch organisation"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:20
+#: apps/ui/templates/ui/dashboard.html:23
 msgid "Overview"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:21
+#: apps/ui/templates/ui/dashboard.html:24
 msgid "Charts and activity will appear here in a later step."
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:25
+#: apps/ui/templates/ui/dashboard.html:28
 msgid "No data yet"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:25
+#: apps/ui/templates/ui/dashboard.html:28
 msgid "Once you add companies and branches, activity shows up here."
 msgstr ""
 
@@ -456,10 +729,6 @@ msgstr ""
 msgid "We'll email a secure activation link so they can set a password."
 msgstr ""
 
-#: apps/ui/templates/ui/settings/_invite_form.html:11
-msgid "Cancel"
-msgstr ""
-
 #: apps/ui/templates/ui/settings/_invite_form.html:12
 msgid "Send invitation"
 msgstr ""
@@ -475,10 +744,6 @@ msgstr ""
 
 #: apps/ui/templates/ui/settings/_users_row.html:21
 msgid "Member"
-msgstr ""
-
-#: apps/ui/templates/ui/settings/_users_row.html:24
-msgid "Active"
 msgstr ""
 
 #: apps/ui/templates/ui/settings/_users_row.html:25
@@ -525,15 +790,11 @@ msgstr ""
 msgid "Your personal details and language."
 msgstr ""
 
-#: apps/ui/templates/ui/settings/profile.html:24
-msgid "Save changes"
-msgstr ""
-
 #: apps/ui/templates/ui/settings/users.html:16
 msgid "People with access to this organisation."
 msgstr ""
 
-#: apps/ui/templates/ui/settings/users.html:21
+#: apps/ui/templates/ui/settings/users.html:22
 msgid "Invite a user"
 msgstr ""
 
@@ -575,16 +836,8 @@ msgstr ""
 msgid "%(email)s was added to this organisation."
 msgstr ""
 
-#: apps/ui/views.py:149
-msgid "Name"
-msgstr ""
-
 #: apps/ui/views.py:151
 msgid "Role"
-msgstr ""
-
-#: apps/ui/views.py:152
-msgid "Status"
 msgstr ""
 
 #: apps/ui/views.py:153

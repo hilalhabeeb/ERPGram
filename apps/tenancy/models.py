@@ -62,6 +62,7 @@ class Branch(TenantScopedModel):
     name = models.CharField(_("name"), max_length=200)
     code = models.CharField(_("code"), max_length=40, blank=True)
     address = models.TextField(_("address"), blank=True)
+    is_active = models.BooleanField(_("active"), default=True)
 
     class Meta:
         verbose_name = _("branch")
@@ -89,6 +90,7 @@ class Department(TenantScopedModel):
     )
     name = models.CharField(_("name"), max_length=200)
     code = models.CharField(_("code"), max_length=40, blank=True)
+    is_active = models.BooleanField(_("active"), default=True)
 
     class Meta:
         verbose_name = _("department")

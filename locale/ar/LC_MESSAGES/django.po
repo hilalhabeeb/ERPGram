@@ -8,18 +8,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-19 13:47+0300\n"
+"POT-Creation-Date: 2026-07-19 15:03+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: apps/accounts/admin.py:29 apps/ui/navigation.py:24 apps/ui/services.py:33
+#: apps/accounts/admin.py:29 apps/ui/navigation.py:27 apps/ui/services.py:33
 #: apps/ui/templates/ui/_avatar_menu.html:18
 #: apps/ui/templates/ui/settings/profile.html:4
 #: apps/ui/templates/ui/settings/profile.html:12 apps/ui/views.py:71
@@ -108,7 +108,8 @@ msgid "locale"
 msgstr "اللغة"
 
 #: apps/accounts/models.py:32 apps/tenancy/models.py:25
-#: apps/tenancy/models.py:44
+#: apps/tenancy/models.py:44 apps/tenancy/models.py:65
+#: apps/tenancy/models.py:93
 msgid "active"
 msgstr "نشط"
 
@@ -210,7 +211,7 @@ msgstr "لم يعد هذا الرابط صالحًا"
 msgid ""
 "The activation link is invalid or has already been used. Ask an owner to re-"
 "send your invitation."
-msgstr ""
+msgstr "رابط التفعيل غير صالح أو تم استخدامه بالفعل. اطلب من أحد المالكين إعادة إرسال الدعوة."
 
 #: apps/accounts/templates/accounts/activate_invalid.html:12
 #: templates/registration/password_reset_done.html:12
@@ -299,8 +300,58 @@ msgstr "أنشئ بواسطة"
 msgid "updated by"
 msgstr "حُدّث بواسطة"
 
+#: apps/tenancy/forms.py:23
+msgid "Company name"
+msgstr "اسم الشركة"
+
+#: apps/tenancy/forms.py:24
+#: apps/tenancy/templates/tenancy/company_detail.html:17
+msgid "Legal name"
+msgstr "الاسم القانوني"
+
+#: apps/tenancy/forms.py:25
+#: apps/tenancy/templates/tenancy/company_detail.html:21
+#: apps/tenancy/views.py:77
+msgid "Registration no."
+msgstr "رقم السجل"
+
+#: apps/tenancy/forms.py:29
+msgid "Branch name"
+msgstr "اسم الفرع"
+
+#: apps/tenancy/forms.py:30 apps/tenancy/forms.py:36
+#: apps/tenancy/templates/tenancy/branch_detail.html:16
+#: apps/tenancy/views.py:156
+msgid "Code"
+msgstr "الرمز"
+
+#: apps/tenancy/forms.py:31
+#: apps/tenancy/templates/tenancy/branch_detail.html:20
+msgid "Address"
+msgstr "العنوان"
+
+#: apps/tenancy/forms.py:35
+msgid "Department name"
+msgstr "اسم القسم"
+
+#: apps/tenancy/forms.py:38
+msgid "Parent department"
+msgstr "القسم الرئيسي"
+
+#: apps/tenancy/forms.py:41
+msgid "None (top level)"
+msgstr "بدون (المستوى الأعلى)"
+
+#: apps/tenancy/forms.py:68
+msgid "A department cannot be moved under itself or one of its own children."
+msgstr "لا يمكن نقل القسم ليكون تابعًا لنفسه أو لأحد أقسامه الفرعية."
+
+#: apps/tenancy/forms.py:86
+msgid "Company"
+msgstr "الشركة"
+
 #: apps/tenancy/models.py:23 apps/tenancy/models.py:41
-#: apps/tenancy/models.py:62 apps/tenancy/models.py:90
+#: apps/tenancy/models.py:62 apps/tenancy/models.py:91
 msgid "name"
 msgstr "الاسم"
 
@@ -336,7 +387,7 @@ msgstr "شركة"
 msgid "companies"
 msgstr "الشركات"
 
-#: apps/tenancy/models.py:63 apps/tenancy/models.py:91
+#: apps/tenancy/models.py:63 apps/tenancy/models.py:92
 msgid "code"
 msgstr "الرمز"
 
@@ -344,57 +395,277 @@ msgstr "الرمز"
 msgid "address"
 msgstr "العنوان"
 
-#: apps/tenancy/models.py:67 apps/tenancy/models.py:80
+#: apps/tenancy/models.py:68 apps/tenancy/models.py:81
 msgid "branch"
 msgstr "فرع"
 
-#: apps/tenancy/models.py:68
+#: apps/tenancy/models.py:69
 msgid "branches"
 msgstr "الفروع"
 
-#: apps/tenancy/models.py:84
+#: apps/tenancy/models.py:85
 msgid "parent department"
 msgstr "القسم الرئيسي"
 
-#: apps/tenancy/models.py:94
+#: apps/tenancy/models.py:96
 msgid "department"
 msgstr "قسم"
 
-#: apps/tenancy/models.py:95
+#: apps/tenancy/models.py:97
 msgid "departments"
 msgstr "الأقسام"
 
-#: apps/ui/navigation.py:23 apps/ui/templates/ui/dashboard.html:4
-#: apps/ui/templates/ui/dashboard.html:9 apps/ui/views.py:52
+#: apps/tenancy/templates/tenancy/_archive_toggle.html:9
+#: apps/tenancy/templates/tenancy/_branch_row.html:13
+#: apps/tenancy/templates/tenancy/_company_row.html:16
+#: apps/tenancy/templates/tenancy/company_detail.html:28
+#: apps/ui/templates/ui/settings/_users_row.html:24
+msgid "Active"
+msgstr "نشط"
+
+#: apps/tenancy/templates/tenancy/_archive_toggle.html:12
+msgid "All"
+msgstr "الكل"
+
+#: apps/tenancy/templates/tenancy/_branch_edit_form.html:12
+#: apps/tenancy/templates/tenancy/_branch_form.html:12
+#: apps/tenancy/templates/tenancy/_company_edit_form.html:12
+#: apps/tenancy/templates/tenancy/_company_form.html:12
+#: apps/tenancy/templates/tenancy/_department_form.html:12
+#: apps/ui/templates/ui/settings/_invite_form.html:11
+msgid "Cancel"
+msgstr "إلغاء"
+
+#: apps/tenancy/templates/tenancy/_branch_edit_form.html:14
+#: apps/tenancy/templates/tenancy/_company_edit_form.html:14
+#: apps/ui/templates/ui/settings/profile.html:24
+msgid "Save changes"
+msgstr "حفظ التغييرات"
+
+#: apps/tenancy/templates/tenancy/_branch_form.html:14
+msgid "Create branch"
+msgstr "إنشاء الفرع"
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:15
+#: apps/tenancy/templates/tenancy/_company_row.html:18
+#: apps/tenancy/templates/tenancy/branch_detail.html:51
+#: apps/tenancy/templates/tenancy/company_detail.html:30
+msgid "Archived"
+msgstr "مؤرشف"
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:25
+#, python-format
+msgid "Archive %(name)s and its departments?"
+msgstr "هل تريد أرشفة %(name)s وأقسامه؟"
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:26
+#: apps/tenancy/templates/tenancy/_company_row.html:29
+#: apps/tenancy/templates/tenancy/branch_detail.html:61
+msgid "Archive %(name)s"
+msgstr "أرشفة %(name)s"
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:28
+#: apps/tenancy/templates/tenancy/_company_row.html:31
+#: apps/tenancy/templates/tenancy/branch_detail.html:63
+msgid "Restore %(name)s"
+msgstr "استعادة %(name)s"
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:30
+#: apps/tenancy/templates/tenancy/_company_row.html:33
+#: apps/tenancy/templates/tenancy/branch_detail.html:65
+msgid "Archive"
+msgstr "أرشفة"
+
+#: apps/tenancy/templates/tenancy/_branch_row.html:30
+#: apps/tenancy/templates/tenancy/_company_row.html:33
+#: apps/tenancy/templates/tenancy/branch_detail.html:65
+msgid "Restore"
+msgstr "استعادة"
+
+#: apps/tenancy/templates/tenancy/_branches_table.html:2
+msgid "No branches yet"
+msgstr "لا توجد فروع بعد"
+
+#: apps/tenancy/templates/tenancy/_branches_table.html:2
+msgid "Add a branch to start organising this company."
+msgstr "أضف فرعًا لبدء تنظيم هذه الشركة."
+
+#: apps/tenancy/templates/tenancy/_companies_table.html:2
+msgid "No companies yet"
+msgstr "لا توجد شركات بعد"
+
+#: apps/tenancy/templates/tenancy/_companies_table.html:2
+msgid "Add the first company to start building your organisation structure."
+msgstr "أضف أول شركة لبدء بناء هيكل مؤسستك."
+
+#: apps/tenancy/templates/tenancy/_company_form.html:14
+msgid "Create company"
+msgstr "إنشاء الشركة"
+
+#: apps/tenancy/templates/tenancy/_company_row.html:28
+#, python-format
+msgid "Archive %(name)s and all its branches and departments?"
+msgstr "هل تريد أرشفة %(name)s وجميع فروعها وأقسامها؟"
+
+#: apps/tenancy/templates/tenancy/_department_form.html:14
+msgid "Create department"
+msgstr "إنشاء القسم"
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:8
+msgid "Add department"
+msgstr "إضافة قسم"
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:26
+#: apps/tenancy/templates/tenancy/branch_detail.html:79
+msgid "Edit branch"
+msgstr "تعديل الفرع"
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:32
+#: apps/tenancy/views.py:157 apps/ui/services.py:48
+msgid "Departments"
+msgstr "الأقسام"
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:60
+#, python-format
+msgid "Archive %(name)s and any departments under it?"
+msgstr "هل تريد أرشفة %(name)s وأي أقسام تابعة له؟"
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:73
+msgid "No departments yet"
+msgstr "لا توجد أقسام بعد"
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:73
+msgid ""
+"Departments can nest, so you can mirror how this branch is really organised."
+msgstr "يمكن تداخل الأقسام، بحيث تعكس التنظيم الفعلي لهذا الفرع."
+
+#: apps/tenancy/templates/tenancy/branch_detail.html:78
+msgid "Add a department"
+msgstr "إضافة قسم"
+
+#: apps/tenancy/templates/tenancy/company_detail.html:8
+#: apps/tenancy/templates/tenancy/company_detail.html:10
+msgid "Branches in this company."
+msgstr "الفروع في هذه الشركة."
+
+#: apps/tenancy/templates/tenancy/company_detail.html:8
+msgid "Add branch"
+msgstr "إضافة فرع"
+
+#: apps/tenancy/templates/tenancy/company_detail.html:25
+#: apps/tenancy/views.py:79 apps/tenancy/views.py:158 apps/ui/views.py:152
+msgid "Status"
+msgstr "الحالة"
+
+#: apps/tenancy/templates/tenancy/company_detail.html:37
+#: apps/tenancy/templates/tenancy/company_detail.html:51
+msgid "Edit company"
+msgstr "تعديل الشركة"
+
+#: apps/tenancy/templates/tenancy/company_detail.html:43
+#: apps/tenancy/views.py:78 apps/ui/services.py:47
+msgid "Branches"
+msgstr "الفروع"
+
+#: apps/tenancy/templates/tenancy/company_detail.html:50
+msgid "Add a branch"
+msgstr "إضافة فرع"
+
+#: apps/tenancy/templates/tenancy/company_list.html:4
+#: apps/tenancy/templates/tenancy/company_list.html:8
+#: apps/tenancy/templates/tenancy/company_list.html:10 apps/tenancy/views.py:73
+#: apps/tenancy/views.py:74 apps/tenancy/views.py:152 apps/tenancy/views.py:231
+#: apps/ui/navigation.py:26 apps/ui/services.py:46
+msgid "Companies"
+msgstr "الشركات"
+
+#: apps/tenancy/templates/tenancy/company_list.html:8
+#: apps/tenancy/templates/tenancy/company_list.html:10
+msgid "Legal entities in this organisation."
+msgstr "الكيانات القانونية في هذه المؤسسة."
+
+#: apps/tenancy/templates/tenancy/company_list.html:8
+msgid "Add company"
+msgstr "إضافة شركة"
+
+#: apps/tenancy/templates/tenancy/company_list.html:15
+msgid "Search companies"
+msgstr "البحث في الشركات"
+
+#: apps/tenancy/templates/tenancy/company_list.html:22
+msgid "Add a company"
+msgstr "إضافة شركة"
+
+#: apps/tenancy/views.py:32
+msgid "Owner access is required to change the organisation structure."
+msgstr "يلزم امتلاك صلاحيات المالك لتغيير هيكل المؤسسة."
+
+#: apps/tenancy/views.py:76 apps/tenancy/views.py:155 apps/ui/views.py:149
+msgid "Name"
+msgstr "الاسم"
+
+#: apps/tenancy/views.py:103
+#, python-format
+msgid "%(name)s has been created."
+msgstr "تم إنشاء %(name)s."
+
+#: apps/tenancy/views.py:105 apps/tenancy/views.py:118
+#: apps/tenancy/views.py:192 apps/tenancy/views.py:206
+msgid "Please correct the errors and try again."
+msgstr "يُرجى تصحيح الأخطاء والمحاولة مرة أخرى."
+
+#: apps/tenancy/views.py:116 apps/tenancy/views.py:204
+#: apps/tenancy/views.py:272
+msgid "Changes saved."
+msgstr "تم حفظ التغييرات."
+
+#: apps/tenancy/views.py:130
+#, python-format
+msgid "%(name)s and everything under it were archived."
+msgstr "تمت أرشفة %(name)s وكل ما يتبعها."
+
+#: apps/tenancy/views.py:134 apps/tenancy/views.py:220
+#: apps/tenancy/views.py:290
+#, python-format
+msgid "%(name)s was restored."
+msgstr "تمت استعادة %(name)s."
+
+#: apps/tenancy/views.py:190
+msgid "Branch created."
+msgstr "تم إنشاء الفرع."
+
+#: apps/tenancy/views.py:217 apps/tenancy/views.py:287
+#, python-format
+msgid "%(name)s was archived."
+msgstr "تمت أرشفة %(name)s."
+
+#: apps/tenancy/views.py:256
+msgid "Department created."
+msgstr "تم إنشاء القسم."
+
+#: apps/tenancy/views.py:258 apps/tenancy/views.py:274
+msgid "Please correct the errors."
+msgstr "يُرجى تصحيح الأخطاء."
+
+#: apps/ui/navigation.py:25 apps/ui/templates/ui/dashboard.html:4
+#: apps/ui/templates/ui/dashboard.html:12 apps/ui/views.py:52
 #: templates/shell.html:60
 msgid "Dashboard"
 msgstr "لوحة التحكم"
 
-#: apps/ui/navigation.py:25 apps/ui/services.py:35
+#: apps/ui/navigation.py:30 apps/ui/services.py:35
 #: apps/ui/templates/ui/settings/organization.html:4
 #: apps/ui/templates/ui/settings/organization.html:12 apps/ui/views.py:102
 #: apps/ui/views.py:103
 msgid "Organisation"
 msgstr "المؤسسة"
 
-#: apps/ui/navigation.py:26 apps/ui/services.py:36
+#: apps/ui/navigation.py:36 apps/ui/services.py:36
 #: apps/ui/templates/ui/settings/users.html:4
 #: apps/ui/templates/ui/settings/users.html:15 apps/ui/views.py:157
 #: apps/ui/views.py:158
 msgid "Users"
 msgstr "المستخدمون"
-
-#: apps/ui/services.py:46
-msgid "Companies"
-msgstr "الشركات"
-
-#: apps/ui/services.py:47
-msgid "Branches"
-msgstr "الفروع"
-
-#: apps/ui/services.py:48
-msgid "Departments"
-msgstr "الأقسام"
 
 #: apps/ui/templates/ui/_avatar_menu.html:5
 msgid "Account menu"
@@ -410,7 +681,7 @@ msgid ""
 "\n"
 "      %(start)s–%(end)s of %(total)s\n"
 "    "
-msgstr ""
+msgstr "\n      %(start)s–%(end)s من %(total)s\n    "
 
 #: apps/ui/templates/ui/_pagination.html:21
 msgid "Previous page"
@@ -424,19 +695,19 @@ msgstr "الصفحة التالية"
 msgid "Switch organisation"
 msgstr "تبديل المؤسسة"
 
-#: apps/ui/templates/ui/dashboard.html:20
+#: apps/ui/templates/ui/dashboard.html:23
 msgid "Overview"
 msgstr "نظرة عامة"
 
-#: apps/ui/templates/ui/dashboard.html:21
+#: apps/ui/templates/ui/dashboard.html:24
 msgid "Charts and activity will appear here in a later step."
 msgstr "ستظهر الرسوم البيانية والنشاط هنا في خطوة لاحقة."
 
-#: apps/ui/templates/ui/dashboard.html:25
+#: apps/ui/templates/ui/dashboard.html:28
 msgid "No data yet"
 msgstr "لا توجد بيانات بعد"
 
-#: apps/ui/templates/ui/dashboard.html:25
+#: apps/ui/templates/ui/dashboard.html:28
 msgid "Once you add companies and branches, activity shows up here."
 msgstr "بمجرد إضافة شركات وفروع، سيظهر النشاط هنا."
 
@@ -457,10 +728,6 @@ msgstr "بحث"
 msgid "We'll email a secure activation link so they can set a password."
 msgstr "سنرسل رابط تفعيل آمن عبر البريد الإلكتروني ليتمكن من تعيين كلمة مرور."
 
-#: apps/ui/templates/ui/settings/_invite_form.html:11
-msgid "Cancel"
-msgstr "إلغاء"
-
 #: apps/ui/templates/ui/settings/_invite_form.html:12
 msgid "Send invitation"
 msgstr "إرسال الدعوة"
@@ -477,10 +744,6 @@ msgstr "تحديد %(name)s"
 #: apps/ui/templates/ui/settings/_users_row.html:21
 msgid "Member"
 msgstr "عضو"
-
-#: apps/ui/templates/ui/settings/_users_row.html:24
-msgid "Active"
-msgstr "نشط"
 
 #: apps/ui/templates/ui/settings/_users_row.html:25
 msgid "Invited"
@@ -526,15 +789,11 @@ msgstr "حفظ الإعدادات"
 msgid "Your personal details and language."
 msgstr "بياناتك الشخصية واللغة."
 
-#: apps/ui/templates/ui/settings/profile.html:24
-msgid "Save changes"
-msgstr "حفظ التغييرات"
-
 #: apps/ui/templates/ui/settings/users.html:16
 msgid "People with access to this organisation."
 msgstr "الأشخاص الذين لديهم صلاحية الوصول إلى هذه المؤسسة."
 
-#: apps/ui/templates/ui/settings/users.html:21
+#: apps/ui/templates/ui/settings/users.html:22
 msgid "Invite a user"
 msgstr "دعوة مستخدم"
 
@@ -576,17 +835,9 @@ msgstr "تم إرسال الدعوة إلى %(email)s."
 msgid "%(email)s was added to this organisation."
 msgstr "تمت إضافة %(email)s إلى هذه المؤسسة."
 
-#: apps/ui/views.py:149
-msgid "Name"
-msgstr "الاسم"
-
 #: apps/ui/views.py:151
 msgid "Role"
 msgstr "الدور"
-
-#: apps/ui/views.py:152
-msgid "Status"
-msgstr "الحالة"
 
 #: apps/ui/views.py:153
 msgid "Joined"
@@ -658,7 +909,7 @@ msgstr "تغيير كلمة المرور"
 msgid ""
 "This password reset link is invalid, possibly because it has already been "
 "used."
-msgstr ""
+msgstr "رابط إعادة تعيين كلمة المرور غير صالح، ربما لأنه استُخدم بالفعل."
 
 #: templates/registration/password_reset_confirm.html:22
 msgid "Request a new link"
@@ -672,7 +923,7 @@ msgstr "تحقق من بريدك الإلكتروني"
 #: templates/registration/password_reset_done.html:9
 msgid ""
 "If an account exists for that address, a password reset link is on its way."
-msgstr ""
+msgstr "إذا كان هناك حساب مرتبط بهذا العنوان، فسيصلك رابط إعادة تعيين كلمة المرور."
 
 #: templates/registration/password_reset_email.txt:1
 msgid "You requested a password reset for your Erpgram account."

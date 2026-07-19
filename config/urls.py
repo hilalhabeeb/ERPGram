@@ -21,6 +21,7 @@ urlpatterns = [
 # forced to the default language, so anything outside this block can't be Arabic.
 urlpatterns += i18n_patterns(
     path("", include("apps.accounts.urls")),
+    path("", include("apps.tenancy.urls")),
     path("", include("apps.ui.urls")),
     prefix_default_language=False,
 )

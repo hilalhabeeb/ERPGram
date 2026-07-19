@@ -24,13 +24,13 @@
         {% url item.url_name as item_url %}
         <a href="{{ item_url }}"
            class="group relative grid h-10 w-10 place-items-center rounded-control transition-colors
-                  {% if request.resolver_match.view_name == item.url_name %}
+                  {% if item.key == active_nav %}
                     bg-accent-primarySoft text-accent-primary
                   {% else %}
                     text-text-secondary hover:bg-subtle hover:text-text-primary
                   {% endif %}"
            aria-label="{{ item.label }}"
-           {% if request.resolver_match.view_name == item.url_name %}aria-current="page"{% endif %}>
+           {% if item.key == active_nav %}aria-current="page"{% endif %}>
           {% icon item.icon css_class="w-5 h-5" %}
           <span class="pointer-events-none absolute start-full ms-3 hidden whitespace-nowrap rounded-control
                        bg-text-primary px-2 py-1 text-xs text-white group-hover:block">

@@ -1,0 +1,81 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{{ branch.name }} · Erpgram{% endblock %}
+
+{% block content %}
+  {% if is_owner %}
+    {% include "ui/page_header.html" with title=branch.name subtitle=company.name action_label=_("Add department") action_icon="plus" action_event="open-modal-department" %}
+  {% else %}
+    {% include "ui/page_header.html" with title=branch.name subtitle=company.name %}
+  {% endif %}
+
+  <section class="card mb-4 p-5">
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div>
+        <dt class="text-xs text-text-muted">{% trans "Code" %}</dt>
+        <dd class="mt-0.5 text-sm text-text-primary">{{ branch.code|default:"—" }}</dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-xs text-text-muted">{% trans "Address" %}</dt>
+        <dd class="mt-0.5 whitespace-pre-line text-sm text-text-primary">{{ branch.address|default:"—" }}</dd>
+      </div>
+    </dl>
+    {% if is_owner %}
+      <div class="mt-4 border-t border-border pt-4">
+        {% include "ui/button.html" with label=_("Edit branch") variant="secondary" size="sm" icon="pencil" event="open-modal-branch-edit" %}
+      </div>
+    {% endif %}
+  </section>
+
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Departments" %}</h2>
+    {% include "tenancy/_archive_toggle.html" %}
+  </div>
+
+  {# A tree, not a table: depth carries the nesting. #}
+  <section class="card overflow-hidden">
+    {% if rows %}
+      <ul class="divide-y divide-border">
+        {% for row in rows %}
+          <li class="flex items-center justify-between gap-3 px-4 py-3 hover:bg-subtle {% if not row.department.is_active %}opacity-60{% endif %}">
+            <div class="flex min-w-0 items-center gap-2" style="padding-inline-start: {{ row.depth }}rem">
+              {% if row.depth %}
+                <span class="text-text-muted" aria-hidden="true">{% icon "chevron-right" css_class="w-3.5 h-3.5 rtl:hidden" %}{% icon "chevron-left" css_class="w-3.5 h-3.5 hidden rtl:inline" %}</span>
+              {% endif %}
+              <span class="truncate text-sm font-medium text-text-primary">{{ row.department.name }}</span>
+              {% if row.department.code %}
+                <span class="text-xs text-text-muted">{{ row.department.code }}</span>
+              {% endif %}
+              {% if not row.department.is_active %}
+                {% include "ui/badge.html" with label=_("Archived") tone="neutral" %}
+              {% endif %}
+            </div>
+            {% if is_owner %}
+              <form method="post" action="{% url 'tenancy:department_archive' pk=company.pk branch_pk=branch.pk department_pk=row.department.pk %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="rounded-control px-2 py-1 text-sm text-text-secondary hover:bg-subtle hover:text-text-primary"
+                        {% if row.department.is_active %}
+                          onclick="return confirm('{% blocktrans with name=row.department.name %}Archive {{ name }} and any departments under it?{% endblocktrans %}')"
+                          aria-label="{% blocktrans with name=row.department.name %}Archive {{ name }}{% endblocktrans %}"
+                        {% else %}
+                          aria-label="{% blocktrans with name=row.department.name %}Restore {{ name }}{% endblocktrans %}"
+                        {% endif %}>
+                  {% if row.department.is_active %}{% trans "Archive" %}{% else %}{% trans "Restore" %}{% endif %}
+                </button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      {% include "ui/empty_state.html" with icon="network" title=_("No departments yet") description=_("Departments can nest, so you can mirror how this branch is really organised.") %}
+    {% endif %}
+  </section>
+
+  {% if is_owner %}
+    {% include "ui/modal.html" with name="department" title=_("Add a department") include_body="tenancy/_department_form.html" %}
+    {% include "ui/modal.html" with name="branch-edit" title=_("Edit branch") include_body="tenancy/_branch_edit_form.html" %}
+  {% endif %}
+{% endblock %}

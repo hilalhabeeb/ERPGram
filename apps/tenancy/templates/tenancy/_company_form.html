@@ -1,0 +1,15 @@
+{% comment %}Create-company form body, rendered inside the modal.{% endcomment %}
+{% load i18n %}
+<form method="post" action="{% url 'tenancy:company_create' %}" class="space-y-4">
+  {% csrf_token %}
+  {% include "partials/_field.html" with field=form.name %}
+  {% include "partials/_field.html" with field=form.legal_name %}
+  {% include "partials/_field.html" with field=form.registration_no %}
+  <div class="flex justify-end gap-2 pt-2">
+    <button type="button" @click="open = false"
+            class="rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle">
+      {% trans "Cancel" %}
+    </button>
+    {% include "ui/button.html" with label=_("Create company") type="submit" variant="primary" icon="plus" %}
+  </div>
+</form>

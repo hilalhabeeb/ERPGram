@@ -1,0 +1,2 @@
+{% load i18n %}
+{% include "ui/data_table.html" with table_id="companies-table" columns=columns page_obj=page_obj row_template="tenancy/_company_row.html" sort_key=sort_key direction=direction selectable=False empty_icon="building" empty_title=_("No companies yet") empty_description=_("Add the first company to start building your organisation structure.") %}

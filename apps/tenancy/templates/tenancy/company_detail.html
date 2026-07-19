@@ -1,0 +1,53 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{{ company.name }} · Erpgram{% endblock %}
+
+{% block content %}
+  {% if is_owner %}
+    {% include "ui/page_header.html" with title=company.name subtitle=_("Branches in this company.") action_label=_("Add branch") action_icon="plus" action_event="open-modal-branch" %}
+  {% else %}
+    {% include "ui/page_header.html" with title=company.name subtitle=_("Branches in this company.") %}
+  {% endif %}
+
+  {# Company facts, so the detail page is not just a branch list #}
+  <section class="card mb-4 p-5">
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div>
+        <dt class="text-xs text-text-muted">{% trans "Legal name" %}</dt>
+        <dd class="mt-0.5 text-sm text-text-primary">{{ company.legal_name|default:"—" }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-text-muted">{% trans "Registration no." %}</dt>
+        <dd class="mt-0.5 text-sm text-text-primary">{{ company.registration_no|default:"—" }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-text-muted">{% trans "Status" %}</dt>
+        <dd class="mt-0.5">
+          {% if company.is_active %}
+            {% include "ui/badge.html" with label=_("Active") tone="success" %}
+          {% else %}
+            {% include "ui/badge.html" with label=_("Archived") tone="neutral" %}
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+    {% if is_owner %}
+      <div class="mt-4 border-t border-border pt-4">
+        {% include "ui/button.html" with label=_("Edit company") variant="secondary" size="sm" icon="pencil" event="open-modal-company-edit" %}
+      </div>
+    {% endif %}
+  </section>
+
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Branches" %}</h2>
+    {% include "tenancy/_archive_toggle.html" %}
+  </div>
+
+  {% include "tenancy/_branches_table.html" %}
+
+  {% if is_owner %}
+    {% include "ui/modal.html" with name="branch" title=_("Add a branch") include_body="tenancy/_branch_form.html" %}
+    {% include "ui/modal.html" with name="company-edit" title=_("Edit company") include_body="tenancy/_company_edit_form.html" %}
+  {% endif %}
+{% endblock %}

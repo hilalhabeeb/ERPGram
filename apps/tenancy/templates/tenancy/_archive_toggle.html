@@ -1,0 +1,13 @@
+{% comment %}
+Show active / show archived switch. Context:
+  include_archived (bool)
+{% endcomment %}
+{% load i18n %}
+<div class="inline-flex rounded-pill border border-border bg-card p-0.5 text-sm">
+  <a href="?"
+     class="rounded-pill px-3 py-1 {% if not include_archived %}bg-accent-primarySoft font-medium text-accent-primary{% else %}text-text-secondary hover:text-text-primary{% endif %}"
+     {% if not include_archived %}aria-current="page"{% endif %}>{% trans "Active" %}</a>
+  <a href="?archived=1"
+     class="rounded-pill px-3 py-1 {% if include_archived %}bg-accent-primarySoft font-medium text-accent-primary{% else %}text-text-secondary hover:text-text-primary{% endif %}"
+     {% if include_archived %}aria-current="page"{% endif %}>{% trans "All" %}</a>
+</div>
