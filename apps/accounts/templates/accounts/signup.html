@@ -1,0 +1,41 @@
+{% extends "auth_base.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Create your organisation" %} · Erpgram{% endblock %}
+
+{% block auth_content %}
+  <h1 class="text-heading-md font-medium text-text-primary">{% trans "Create your organisation" %}</h1>
+  <p class="mt-1 text-sm text-text-secondary">
+    {% trans "Pick your industry and you'll get the modules that fit it." %}
+  </p>
+
+  <form method="post" action="{% url 'accounts:signup' %}" class="mt-6 space-y-4">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="rounded-control border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {% include "partials/_field.html" with field=form.organisation %}
+    {% include "partials/_field.html" with field=form.domain %}
+
+    <div class="border-t border-border pt-4">
+      <p class="mb-3 text-xs font-medium text-text-muted">{% trans "Your owner account" %}</p>
+      <div class="space-y-4">
+        {% include "partials/_field.html" with field=form.full_name %}
+        {% include "partials/_field.html" with field=form.email %}
+        {% include "partials/_field.html" with field=form.password %}
+      </div>
+    </div>
+
+    {% include "ui/button.html" with label=_("Create organisation") type="submit" variant="primary" full=True %}
+  </form>
+{% endblock %}
+
+{% block auth_footer %}
+  <p class="mt-4 text-center text-sm text-text-secondary">
+    {% trans "Already have an account?" %}
+    <a href="{% url 'accounts:login' %}" class="text-accent-primary hover:underline">{% trans "Sign in" %}</a>
+  </p>
+{% endblock %}

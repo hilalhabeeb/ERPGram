@@ -1,0 +1,102 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{{ page_title }} · Erpgram{% endblock %}
+
+{% block content %}
+  {% include "ui/page_header.html" with title=page_title subtitle=_("Everything a sponsor asks about when choosing a worker.") %}
+
+  <form method="post" enctype="multipart/form-data" class="max-w-4xl space-y-4">
+    {% csrf_token %}
+
+    <section class="card p-6">
+      <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Personal details" %}</h2>
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {% include "partials/_field.html" with field=form.full_name %}
+        {% include "partials/_field.html" with field=form.photo %}
+        {% include "partials/_field.html" with field=form.gender %}
+        {% include "partials/_field.html" with field=form.date_of_birth %}
+        {% include "partials/_field.html" with field=form.nationality %}
+        {% include "partials/_field.html" with field=form.religion %}
+        {% include "partials/_field.html" with field=form.marital_status %}
+        {% include "partials/_field.html" with field=form.children %}
+      </div>
+    </section>
+
+    <section class="card p-6">
+      <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Work profile" %}</h2>
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {% include "partials/_field.html" with field=form.occupation %}
+        {% include "partials/_field.html" with field=form.experience_years %}
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <fieldset>
+          <legend class="mb-2 text-sm font-medium text-text-primary">{{ form.skills.label }}</legend>
+          <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {% for choice in form.skills %}
+              <label class="flex items-center gap-2 text-sm text-text-primary">
+                {{ choice.tag }} <span>{{ choice.choice_label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="mb-2 text-sm font-medium text-text-primary">{{ form.languages.label }}</legend>
+          <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {% for choice in form.languages %}
+              <label class="flex items-center gap-2 text-sm text-text-primary">
+                {{ choice.tag }} <span>{{ choice.choice_label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="mt-4">
+        {% include "partials/_field.html" with field=form.experience_notes %}
+      </div>
+    </section>
+
+    <section class="card p-6">
+      <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Availability and travel" %}</h2>
+      <p class="mt-0.5 text-sm text-text-secondary">
+        {% trans "A worker already in country can be transferred to the sponsor's visa directly; one overseas needs travel, medical and visa processing first." %}
+      </p>
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {% include "partials/_field.html" with field=form.availability %}
+        {% include "partials/_field.html" with field=form.location %}
+        {% include "partials/_field.html" with field=form.agent %}
+        {% include "partials/_field.html" with field=form.accommodation %}
+        {% include "partials/_field.html" with field=form.available_from %}
+        {% include "partials/_field.html" with field=form.monthly_salary %}
+      </div>
+    </section>
+
+    <section class="card p-6">
+      <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Passport" %}</h2>
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {% include "partials/_field.html" with field=form.passport_no %}
+        {% include "partials/_field.html" with field=form.passport_expiry %}
+      </div>
+      <div class="mt-4">
+        {% include "partials/_field.html" with field=form.notes %}
+      </div>
+    </section>
+
+    <div class="flex justify-end gap-2">
+      {% if worker %}
+        <a href="{% url 'manpower:worker_detail' pk=worker.pk %}"
+           class="rounded-control border border-border px-4 py-2 text-sm text-text-primary hover:bg-subtle">
+          {% trans "Cancel" %}
+        </a>
+      {% else %}
+        <a href="{% url 'manpower:worker_list' %}"
+           class="rounded-control border border-border px-4 py-2 text-sm text-text-primary hover:bg-subtle">
+          {% trans "Cancel" %}
+        </a>
+      {% endif %}
+      {% include "ui/button.html" with label=_("Save worker") type="submit" variant="primary" %}
+    </div>
+  </form>
+{% endblock %}

@@ -72,6 +72,48 @@ Emails (invitations, password resets) print to the `web` container logs in dev
 | Extract translations     | `make messages`      | `./tasks.ps1 messages`        |
 | Compile translations     | `make compilemessages` | `./tasks.ps1 compilemessages` |
 
+## Industries (domains)
+
+A tenant picks its **industry** when it signs up at `/signup/`, and that decides
+which modules exist for it. This is a different axis from permissions:
+
+| | question it answers |
+| --- | --- |
+| **domain** | does this feature exist for this customer? |
+| **permission** | may *this user* use a feature their tenant has? |
+
+Nav entries, permissions and apps each declare the domains they belong to (see
+[`apps/core/domains.py`](apps/core/domains.py)), so adding an industry means
+adding a `Domain` plus an app that tags its own entries — not editing the shell.
+A tenant outside a supported industry still gets the shared core (organisation
+structure, users, roles).
+
+Requesting a module your tenant does not have returns **404, not 403**: the
+feature does not exist for you, so confirming the URL is real would mislead.
+
+### Manpower — GCC domestic-worker supply
+
+The first industry module. It models agencies that supply housemaids, drivers,
+cooks and carers to household **sponsors**, where the worker ends up on the
+sponsor's visa. Two fields drive most screens:
+
+- `Worker.availability` — can this worker be offered right now?
+- `Worker.location` — already **in country** (a quick visa transfer) or still
+  **overseas** (travel, medical and visa processing first)
+
+Masters: worker, sponsor, occupation, skill, agent (overseas partner),
+accommodation, document type and worker document. Country and language are
+shared reference data rather than tenant-scoped — they are objective facts, so
+there is one row per country rather than one per agency.
+
+```bash
+make seed-manpower     # or: ./tasks.ps1 seed-manpower
+```
+
+seeds a demo agency (Gulf Domestic Services) with 28 workers across Indonesia,
+the Philippines, Sri Lanka, Ethiopia, Kenya, India and Nepal, plus agents,
+accommodation and sponsors. Sign in as `owner@gulfdomestic.test`.
+
 ## Continuous integration
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to

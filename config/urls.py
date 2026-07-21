@@ -22,6 +22,7 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path("", include("apps.accounts.urls")),
     path("", include("apps.tenancy.urls")),
+    path("", include("apps.manpower.urls")),
     path("", include("apps.ui.urls")),
     prefix_default_language=False,
 )

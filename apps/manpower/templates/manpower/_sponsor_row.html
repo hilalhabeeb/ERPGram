@@ -1,0 +1,28 @@
+{% comment %}One sponsor row. Context: obj (Sponsor), can_manage.{% endcomment %}
+{% load i18n ui %}
+<tr class="hover:bg-subtle {% if not obj.is_active %}opacity-60{% endif %}">
+  <td class="px-4 py-3">
+    <span class="font-medium text-text-primary">{{ obj.name }}</span>
+    {% if obj.name_ar %}<p class="text-xs text-text-muted">{{ obj.name_ar }}</p>{% endif %}
+  </td>
+  <td class="px-4 py-3 text-text-secondary">{{ obj.national_id|default:"—" }}</td>
+  <td class="px-4 py-3 text-text-secondary" dir="ltr">{{ obj.phone|default:"—" }}</td>
+  <td class="px-4 py-3 text-text-secondary">{{ obj.area|default:"—" }}</td>
+  <td class="px-4 py-3">
+    {% if obj.is_active %}
+      {% include "ui/badge.html" with label=_("Active") tone="success" %}
+    {% else %}
+      {% include "ui/badge.html" with label=_("Archived") tone="neutral" %}
+    {% endif %}
+  </td>
+  <td class="px-4 py-3">
+    {% if can_manage %}
+      <form method="post" action="{% url 'manpower:sponsor_archive' pk=obj.pk %}" class="flex justify-end">
+        {% csrf_token %}
+        <button type="submit" class="rounded-control px-2 py-1 text-sm text-text-secondary hover:bg-subtle hover:text-text-primary">
+          {% if obj.is_active %}{% trans "Archive" %}{% else %}{% trans "Restore" %}{% endif %}
+        </button>
+      </form>
+    {% endif %}
+  </td>
+</tr>

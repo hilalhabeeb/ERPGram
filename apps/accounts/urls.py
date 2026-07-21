@@ -5,13 +5,14 @@ from __future__ import annotations
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
-from apps.accounts import views
+from apps.accounts import signup, views
 from apps.accounts.forms import StyledPasswordResetForm, StyledSetPasswordForm
 
 app_name = "accounts"
 
 urlpatterns = [
     path("login/", views.login_view, name="login"),
+    path("signup/", signup.signup, name="signup"),
     path("logout/", views.logout_view, name="logout"),
     path("select-tenant/", views.select_tenant_view, name="select_tenant"),
     path("switch-tenant/", views.switch_tenant_view, name="switch_tenant"),

@@ -24,7 +24,8 @@ def shell(request: HttpRequest) -> dict:
     return {
         # Templates gate actions with `{% if "code" in user_permissions %}`.
         "user_permissions": permissions,
-        "nav_items": nav_for(permissions),
+        "tenant_domain": getattr(tenant, "domain", None),
+        "nav_items": nav_for(permissions, getattr(tenant, "domain", None)),
         "active_nav": active_nav_key(
             getattr(match, "view_name", None), getattr(match, "namespace", None)
         ),

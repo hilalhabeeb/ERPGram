@@ -21,16 +21,21 @@ from django.db import migrations
 
 POLICY_NAME = "tenant_isolation"
 
-# ``current_setting('app.tenant_id', true)`` uses missing_ok=true so that when
-# the GUC is unset the expression is NULL and the row comparison yields NULL —
-# i.e. no rows are visible. Fail-closed by default.
+# ``current_setting('app.tenant_id', true)`` uses missing_ok=true so an unbound
+# request yields NULL and the comparison hides every row — fail-closed.
+#
+# The NULLIF matters: once the GUC has been SET LOCAL anywhere on a connection,
+# Postgres reports it as the empty string rather than NULL for the rest of that
+# session, and ''::uuid raises "invalid input syntax for type uuid". Without the
+# guard, any unbound query on a reused (pooled) connection errors instead of
+# returning nothing — a 500 rather than an empty list.
 _ENABLE_SQL = """
 ALTER TABLE "{table}" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "{table}" FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS {policy} ON "{table}";
 CREATE POLICY {policy} ON "{table}"
-    USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+    USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
+    WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 """
 
 _DISABLE_SQL = """

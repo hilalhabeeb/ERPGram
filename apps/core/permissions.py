@@ -20,6 +20,8 @@ from dataclasses import dataclass
 
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.domains import MANPOWER, applies_to
+
 
 @dataclass(frozen=True)
 class Permission:
@@ -27,6 +29,9 @@ class Permission:
     label: str
     description: str
     group: str
+    # Domains this permission belongs to; None means every domain. A tenant
+    # never sees permissions for an industry it is not in.
+    domains: tuple[str, ...] | None = None
 
 
 # --- the catalogue -----------------------------------------------------------
@@ -35,6 +40,11 @@ MANAGE_STRUCTURE = "tenancy.manage_structure"
 MANAGE_ORGANIZATION = "tenancy.manage_organization"
 MANAGE_MEMBERS = "accounts.manage_members"
 MANAGE_ROLES = "accounts.manage_roles"
+
+# manpower domain
+MANAGE_WORKERS = "manpower.manage_workers"
+MANAGE_SPONSORS = "manpower.manage_sponsors"
+MANAGE_MANPOWER_SETUP = "manpower.manage_setup"
 
 PERMISSIONS: tuple[Permission, ...] = (
     Permission(
@@ -61,24 +71,57 @@ PERMISSIONS: tuple[Permission, ...] = (
         description=_("Create roles and choose what each role is allowed to do."),
         group=_("People"),
     ),
+    # --- manpower domain ---
+    Permission(
+        codename=MANAGE_WORKERS,
+        label=_("Manage workers"),
+        description=_("Add and update worker profiles, documents and availability."),
+        group=_("Manpower"),
+        domains=(MANPOWER,),
+    ),
+    Permission(
+        codename=MANAGE_SPONSORS,
+        label=_("Manage sponsors"),
+        description=_("Add and update the households and companies that hire workers."),
+        group=_("Manpower"),
+        domains=(MANPOWER,),
+    ),
+    Permission(
+        codename=MANAGE_MANPOWER_SETUP,
+        label=_("Manage manpower setup"),
+        description=_("Edit occupations, skills, agents, accommodation and document types."),
+        group=_("Manpower"),
+        domains=(MANPOWER,),
+    ),
 )
 
 ALL_CODENAMES: frozenset[str] = frozenset(p.codename for p in PERMISSIONS)
 
 
-def grouped_permissions() -> dict[str, list[Permission]]:
+def permissions_for_domain(tenant_domain: str | None) -> tuple[Permission, ...]:
+    """The catalogue as it applies to one tenant's industry."""
+    return tuple(p for p in PERMISSIONS if applies_to(p.domains, tenant_domain))
+
+
+def codenames_for_domain(tenant_domain: str | None) -> frozenset[str]:
+    return frozenset(p.codename for p in permissions_for_domain(tenant_domain))
+
+
+def grouped_permissions(tenant_domain: str | None = None) -> dict[str, list[Permission]]:
     """Permissions bucketed by group, for rendering the role editor."""
     groups: dict[str, list[Permission]] = {}
-    for permission in PERMISSIONS:
+    for permission in permissions_for_domain(tenant_domain):
         groups.setdefault(str(permission.group), []).append(permission)
     return groups
 
 
-def clean_codenames(codenames) -> list[str]:
+def clean_codenames(codenames, tenant_domain: str | None = None) -> list[str]:
     """Keep only codenames this build knows about, in catalogue order.
 
     Roles are stored as JSON, so a stale or hand-edited value could otherwise
     grant a permission that no longer exists — or persist one that was renamed.
+    Passing a domain also drops permissions belonging to another industry.
     """
     selected = set(codenames or ())
-    return [p.codename for p in PERMISSIONS if p.codename in selected]
+    catalogue = permissions_for_domain(tenant_domain) if tenant_domain else PERMISSIONS
+    return [p.codename for p in catalogue if p.codename in selected]

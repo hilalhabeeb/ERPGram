@@ -1,0 +1,2 @@
+{% load i18n %}
+{% include "ui/data_table.html" with table_id="sponsors-table" columns=columns page_obj=page_obj row_template="manpower/_sponsor_row.html" sort_key=sort_key direction=direction selectable=False empty_icon="user-check" empty_title=_("No sponsors yet") empty_description=_("Add the households and companies you supply workers to.") %}

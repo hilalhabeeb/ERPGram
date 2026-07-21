@@ -13,6 +13,7 @@ import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.domains import GENERAL, domain_choices
 from apps.core.models import TenantScopedModel, TimeStampedModel
 
 
@@ -25,6 +26,15 @@ class Tenant(TimeStampedModel):
     is_active = models.BooleanField(_("active"), default=True)
     timezone = models.CharField(_("timezone"), max_length=64, default="Asia/Bahrain")
     default_locale = models.CharField(_("default locale"), max_length=8, default="en")
+    # Chosen at sign-up; decides which industry modules exist for this tenant.
+    # See apps.core.domains — choices are resolved lazily so adding a domain
+    # does not require a migration.
+    domain = models.CharField(
+        _("industry"),
+        max_length=32,
+        default=GENERAL,
+        choices=domain_choices,
+    )
 
     class Meta:
         verbose_name = _("tenant")

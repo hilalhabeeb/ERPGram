@@ -23,6 +23,7 @@ switch ($Command) {
         "down     Stop and remove containers",
         "migrate  Apply database migrations",
         "seed     Load two demo tenants",
+        "seed-manpower  Load the demo GCC domestic-worker agency",
         "dev      Run Django + Tailwind watch (http://localhost:8010)",
         "test     Run the test suite",
         "lint     Lint with ruff",
@@ -37,6 +38,7 @@ switch ($Command) {
     "down"    { & docker compose down }
     "migrate" { Invoke-Web @("uv", "run", "python", "manage.py", "migrate") }
     "seed"    { Invoke-Web @("uv", "run", "python", "manage.py", "seed") }
+    "seed-manpower" { Invoke-Web @("uv", "run", "python", "manage.py", "seed_manpower") }
     "dev" {
         & docker compose up -d db
         & docker compose run --rm --service-ports web sh -c "tailwindcss -i static/src/input.css -o static/css/app.css --watch & uv run python manage.py runserver 0.0.0.0:8000"

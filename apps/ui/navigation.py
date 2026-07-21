@@ -10,7 +10,8 @@ from dataclasses import dataclass
 
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.permissions import MANAGE_ORGANIZATION
+from apps.core.domains import MANPOWER, applies_to
+from apps.core.permissions import MANAGE_MANPOWER_SETUP, MANAGE_ORGANIZATION
 
 
 @dataclass(frozen=True)
@@ -21,11 +22,37 @@ class NavItem:
     url_name: str
     # Codename from apps.core.permissions; None means every member may open it.
     requires: str | None = None
+    # Domains this entry belongs to; None means every domain.
+    domains: tuple[str, ...] | None = None
 
 
 # icon= is passed by keyword so the icon-audit test (tests/test_icons.py) sees it.
 PRIMARY_NAV: list[NavItem] = [
     NavItem("dashboard", _("Dashboard"), icon="layout-dashboard", url_name="ui:dashboard"),
+    # --- manpower domain ---
+    NavItem(
+        "workers",
+        _("Workers"),
+        icon="users",
+        url_name="manpower:worker_list",
+        domains=(MANPOWER,),
+    ),
+    NavItem(
+        "sponsors",
+        _("Sponsors"),
+        icon="user-check",
+        url_name="manpower:sponsor_list",
+        domains=(MANPOWER,),
+    ),
+    NavItem(
+        "manpower_setup",
+        _("Manpower setup"),
+        icon="sliders",
+        url_name="manpower:setup",
+        requires=MANAGE_MANPOWER_SETUP,
+        domains=(MANPOWER,),
+    ),
+    # --- shared core ---
     NavItem("companies", _("Companies"), icon="building", url_name="tenancy:company_list"),
     NavItem("profile", _("Profile"), icon="user", url_name="ui:settings_profile"),
     NavItem(
@@ -40,10 +67,19 @@ PRIMARY_NAV: list[NavItem] = [
 ]
 
 
-def nav_for(permissions) -> list[NavItem]:
-    """Rail entries this user can actually reach — never advertise a 403."""
+def nav_for(permissions, tenant_domain: str | None = None) -> list[NavItem]:
+    """Rail entries this user can actually reach — never advertise a 403.
+
+    Filtered on both axes: the tenant's industry decides what exists, the user's
+    permissions decide what they may open.
+    """
     held = frozenset(permissions or ())
-    return [item for item in PRIMARY_NAV if item.requires is None or item.requires in held]
+    return [
+        item
+        for item in PRIMARY_NAV
+        if applies_to(item.domains, tenant_domain)
+        and (item.requires is None or item.requires in held)
+    ]
 
 
 def active_nav_key(view_name: str | None, namespace: str | None) -> str | None:

@@ -7,7 +7,7 @@ RUN := docker compose run --rm web
 EXEC := docker compose exec web
 
 .DEFAULT_GOAL := help
-.PHONY: help install up down migrate seed dev test lint fmt ci messages compilemessages tailwind shell logs
+.PHONY: help install up down migrate seed seed-manpower dev test lint fmt ci messages compilemessages tailwind shell logs
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  %-16s %s\n", $$1, $$2}'
@@ -23,6 +23,9 @@ down: ## Stop and remove containers
 
 migrate: ## Apply database migrations
 	$(RUN) uv run python manage.py migrate
+
+seed-manpower: ## Load the demo GCC domestic-worker agency
+	$(RUN) uv run python manage.py seed_manpower
 
 seed: ## Load two demo tenants with owners and members
 	$(RUN) uv run python manage.py seed

@@ -1,0 +1,24 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Sponsors" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% if can_manage %}
+    {% include "ui/page_header.html" with title=_("Sponsors") subtitle=_("The households and companies that hire your workers.") action_label=_("Add sponsor") action_icon="plus" action_event="open-modal-sponsor" %}
+  {% else %}
+    {% include "ui/page_header.html" with title=_("Sponsors") subtitle=_("The households and companies that hire your workers.") %}
+  {% endif %}
+
+  {% url 'manpower:sponsor_list' as sponsor_list_url %}
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    {% include "ui/search_input.html" with placeholder=_("Search sponsors") name="q" value=search url=sponsor_list_url target="#sponsors-table" %}
+    {% include "tenancy/_archive_toggle.html" %}
+  </div>
+
+  {% include "manpower/_sponsors_table.html" %}
+
+  {% if can_manage %}
+    {% include "ui/modal.html" with name="sponsor" title=_("Add a sponsor") include_body="manpower/_sponsor_form.html" %}
+  {% endif %}
+{% endblock %}

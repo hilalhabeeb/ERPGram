@@ -1,0 +1,38 @@
+{% comment %}One worker row. Context: obj (Worker), can_manage.{% endcomment %}
+{% load i18n ui %}
+<tr class="hover:bg-subtle {% if not obj.is_active %}opacity-60{% endif %}">
+  <td class="px-4 py-3 font-mono text-xs text-text-secondary">{{ obj.reference }}</td>
+  <td class="px-4 py-3">
+    <a href="{% url 'manpower:worker_detail' pk=obj.pk %}"
+       class="font-medium text-text-primary hover:text-accent-primary">{{ obj.full_name }}</a>
+    {% if obj.passport_no %}
+      <p class="text-xs text-text-muted">{{ obj.passport_no }}</p>
+    {% endif %}
+  </td>
+  <td class="px-4 py-3 text-text-secondary">{{ obj.occupation.name }}</td>
+  <td class="px-4 py-3 text-text-secondary">{{ obj.nationality.name }}</td>
+  <td class="px-4 py-3 text-text-secondary">
+    {% blocktrans count years=obj.experience_years %}{{ years }} yr{% plural %}{{ years }} yrs{% endblocktrans %}
+  </td>
+  <td class="px-4 py-3">
+    {% if obj.availability == "available" %}
+      {% include "ui/badge.html" with label=obj.get_availability_display tone="success" %}
+    {% elif obj.availability == "placed" %}
+      {% include "ui/badge.html" with label=obj.get_availability_display tone="accent" %}
+    {% elif obj.availability == "reserved" %}
+      {% include "ui/badge.html" with label=obj.get_availability_display tone="warning" %}
+    {% else %}
+      {% include "ui/badge.html" with label=obj.get_availability_display tone="neutral" %}
+    {% endif %}
+  </td>
+  <td class="px-4 py-3">
+    <span class="inline-flex items-center gap-1.5 text-xs text-text-secondary">
+      {% if obj.location == "in_country" %}
+        {% icon "map-pin" css_class="w-3.5 h-3.5" %}
+      {% else %}
+        {% icon "globe" css_class="w-3.5 h-3.5" %}
+      {% endif %}
+      {{ obj.get_location_display }}
+    </span>
+  </td>
+</tr>

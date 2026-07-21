@@ -28,3 +28,12 @@
     {% include "ui/button.html" with label=_("Sign in") type="submit" variant="primary" full=True %}
   </form>
 {% endblock %}
+
+{% block auth_footer %}
+  <p class="mt-4 text-center text-sm text-text-secondary">
+    {% trans "New here?" %}
+    <a href="{% url 'accounts:signup' %}" class="text-accent-primary hover:underline">
+      {% trans "Create your organisation" %}
+    </a>
+  </p>
+{% endblock %}

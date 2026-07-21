@@ -1,0 +1,78 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Workers" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% url 'manpower:worker_create' as create_url %}
+  {% if can_manage %}
+    {% include "ui/page_header.html" with title=_("Workers") subtitle=_("The register of workers you can offer to sponsors.") action_label=_("Add worker") action_icon="plus" action_url=create_url %}
+  {% else %}
+    {% include "ui/page_header.html" with title=_("Workers") subtitle=_("The register of workers you can offer to sponsors.") %}
+  {% endif %}
+
+  <div class="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+    {% for stat in stats %}
+      {% include "ui/stat_card.html" with label=stat.label value=stat.value icon=stat.icon %}
+    {% endfor %}
+  </div>
+
+  {# Filters mirror how the office actually searches: who, doing what, from where, and can we offer them now. #}
+  <form method="get" class="card mb-4 flex flex-wrap items-end gap-3 p-4"
+        hx-get="{% url 'manpower:worker_list' %}" hx-target="#workers-table" hx-swap="outerHTML"
+        hx-trigger="change from:select, search delay:300ms from:input[type=search]" hx-push-url="true">
+    <label class="min-w-[200px] flex-1">
+      <span class="mb-1 block text-xs text-text-muted">{% trans "Search" %}</span>
+      <input type="search" name="q" value="{{ filters.search }}" class="input"
+             placeholder="{% trans 'Name, reference or passport' %}">
+    </label>
+
+    <label>
+      <span class="mb-1 block text-xs text-text-muted">{% trans "Occupation" %}</span>
+      <select name="occupation" class="select">
+        <option value="">{% trans "Any" %}</option>
+        {% for item in occupations %}
+          <option value="{{ item.id }}" {% if filters.occupation == item.id|stringformat:"s" %}selected{% endif %}>{{ item.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span class="mb-1 block text-xs text-text-muted">{% trans "Nationality" %}</span>
+      <select name="nationality" class="select">
+        <option value="">{% trans "Any" %}</option>
+        {% for item in nationalities %}
+          <option value="{{ item.id }}" {% if filters.nationality == item.id|stringformat:"s" %}selected{% endif %}>{{ item.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span class="mb-1 block text-xs text-text-muted">{% trans "Availability" %}</span>
+      <select name="availability" class="select">
+        <option value="">{% trans "Any" %}</option>
+        {% for value, label in availability_choices %}
+          <option value="{{ value }}" {% if filters.availability == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span class="mb-1 block text-xs text-text-muted">{% trans "Location" %}</span>
+      <select name="location" class="select">
+        <option value="">{% trans "Any" %}</option>
+        {% for value, label in location_choices %}
+          <option value="{{ value }}" {% if filters.location == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <a href="{% url 'manpower:worker_list' %}"
+       class="rounded-control border border-border px-3 py-2 text-sm text-text-secondary hover:bg-subtle">
+      {% trans "Clear" %}
+    </a>
+    <noscript><button type="submit" class="rounded-control bg-accent-primary px-3 py-2 text-sm text-white">{% trans "Apply" %}</button></noscript>
+  </form>
+
+  {% include "manpower/_workers_table.html" %}
+{% endblock %}

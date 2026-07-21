@@ -26,6 +26,7 @@ from apps.core.tenant import reset_current_tenant_id, set_current_tenant_id
 PUBLIC_VIEW_NAMES = frozenset(
     {
         "accounts:login",
+        "accounts:signup",
         "accounts:logout",
         "accounts:password_reset",
         "accounts:password_reset_done",

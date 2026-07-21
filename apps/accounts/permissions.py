@@ -20,7 +20,7 @@ from django.http import HttpRequest
 from django.utils.translation import gettext as _
 
 from apps.accounts.models import Membership
-from apps.core.permissions import ALL_CODENAMES
+from apps.core.permissions import codenames_for_domain
 
 # Cached on the request: several template fragments and view branches ask the
 # same question during one render, and this is a database round-trip.
@@ -35,13 +35,18 @@ def permissions_for(user, tenant) -> frozenset[str]:
     membership = Membership.objects.filter(user=user, tenant=tenant).select_related("role").first()
     if membership is None:
         return frozenset()
+
+    # Everything is bounded by the tenant's industry: a manpower permission is
+    # meaningless — and must not be grantable — in a tenant of another domain.
+    catalogue = codenames_for_domain(getattr(tenant, "domain", None))
+
     if membership.is_owner:
-        return frozenset(ALL_CODENAMES)
+        return catalogue
     if membership.role is None:
         return frozenset()
     # Intersect with the catalogue so a stale codename in the stored JSON can
     # never grant something this build does not define.
-    return frozenset(membership.role.permissions or ()) & ALL_CODENAMES
+    return frozenset(membership.role.permissions or ()) & catalogue
 
 
 def request_permissions(request: HttpRequest) -> frozenset[str]:

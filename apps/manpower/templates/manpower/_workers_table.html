@@ -1,0 +1,2 @@
+{% load i18n %}
+{% include "ui/data_table.html" with table_id="workers-table" columns=columns page_obj=page_obj row_template="manpower/_worker_row.html" sort_key=sort_key direction=direction selectable=False empty_icon="users" empty_title=_("No workers match") empty_description=_("Adjust the filters, or add a worker to the register.") %}

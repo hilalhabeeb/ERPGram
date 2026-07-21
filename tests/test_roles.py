@@ -15,6 +15,7 @@ from apps.core.permissions import (
     MANAGE_ROLES,
     MANAGE_STRUCTURE,
     clean_codenames,
+    codenames_for_domain,
 )
 from apps.core.tenant import activate_tenant
 from apps.tenancy import services as tenancy_services
@@ -47,7 +48,7 @@ def test_owner_holds_every_permission_regardless_of_role():
     # Deliberately give the owner the empty Member role.
     MembershipFactory(user=user, tenant=tenant, is_owner=True, role=roles["member"])
 
-    assert permissions_for(user, tenant) == frozenset(ALL_CODENAMES)
+    assert permissions_for(user, tenant) == codenames_for_domain(tenant.domain)
 
 
 def test_membership_without_a_role_holds_nothing():
@@ -247,7 +248,7 @@ def test_an_owners_role_cannot_be_changed_away(client):
 
     membership.refresh_from_db()
     assert membership.role_id == roles["owner"].pk
-    assert permissions_for(other_owner, tenant) == frozenset(ALL_CODENAMES)
+    assert permissions_for(other_owner, tenant) == codenames_for_domain(tenant.domain)
 
 
 def test_invites_never_grant_ownership(client):
