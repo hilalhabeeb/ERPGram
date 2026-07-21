@@ -2,10 +2,17 @@
 
 [![CI](https://github.com/hilalhabeeb/ERPGram/actions/workflows/ci.yml/badge.svg)](https://github.com/hilalhabeeb/ERPGram/actions/workflows/ci.yml)
 
-A multi-tenant ERP platform. **Step 1** is the foundation: project scaffold,
-tenancy model with two-layer isolation, email/password auth, and a polished,
-RTL-ready, internationalised app shell with a reusable component library.
-Business modules (CRM, inventory, HR, …) come in later steps.
+A multi-tenant ERP platform with a shared core — tenancy with two-layer
+isolation, email/password auth, roles and permissions, and an RTL-ready,
+internationalised app shell — plus **industry modules** selected per tenant.
+
+The first module is **manpower**: GCC agencies supplying housemaids, drivers,
+cooks and carers to household sponsors, including placements that double as the
+agency's invoice.
+
+> **Working on this?** [CLAUDE.md](CLAUDE.md) has the commands, the architecture
+> and the rules that have already caused bugs. [BACKLOG.md](BACKLOG.md) has what
+> is planned next.
 
 > Everything runs in Docker: a `db` service (Postgres 16) and a `web` service
 > (Django 5.1 + the Tailwind standalone CLI — no Node.js). This is a deliberate
