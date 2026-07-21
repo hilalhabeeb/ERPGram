@@ -13,10 +13,13 @@ from django.utils.translation import gettext_lazy as _
 from apps.manpower.models import (
     Accommodation,
     Agent,
+    ChargeType,
     Country,
     DocumentType,
     Language,
     Occupation,
+    Placement,
+    PlacementCharge,
     Skill,
     Sponsor,
     Worker,
@@ -37,7 +40,10 @@ class TenantScopedModelForm(forms.ModelForm):
             queryset = model.all_tenants.filter(tenant=tenant)
             if hasattr(model, "is_active"):
                 queryset = queryset.filter(is_active=True)
-            self.fields[field_name].queryset = queryset.order_by("name")
+            # Use each model's own Meta.ordering rather than assuming a `name`
+            # field — Worker sorts by full_name, and hard-coding "name" here
+            # raised FieldError the moment a Worker relation was scoped.
+            self.fields[field_name].queryset = queryset.order_by(*model._meta.ordering or ["pk"])
         _style(self)
 
 
@@ -136,6 +142,99 @@ class SponsorForm(TenantScopedModelForm):
         }
 
 
+class PlacementForm(TenantScopedModelForm):
+    """Open a placement. Route is derived from the worker, never chosen here."""
+
+    tenant_fields = {"sponsor": Sponsor, "worker": Worker}
+
+    class Meta:
+        model = Placement
+        fields = ["sponsor", "worker", "visa_period_months", "agreed_on", "payment_terms", "notes"]
+        widgets = {
+            "agreed_on": forms.DateInput(attrs={"type": "date"}),
+            "notes": forms.Textarea(attrs={"rows": 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only workers who can actually be offered. The one already on this
+        # placement stays selectable so editing does not silently drop it.
+        offerable = Worker.all_tenants.filter(
+            tenant=self.tenant, is_active=True, availability=Worker.Availability.AVAILABLE
+        )
+        if self.instance and self.instance.pk:
+            offerable = offerable | Worker.all_tenants.filter(pk=self.instance.worker_id)
+        self.fields["worker"].queryset = offerable.select_related("occupation").order_by(
+            "full_name"
+        )
+        self.fields["worker"].label_from_instance = lambda worker: (
+            f"{worker.reference} · {worker.full_name} · {worker.occupation.name}"
+        )
+
+
+class PlacementInvoiceForm(TenantScopedModelForm):
+    """The money and contract terms on an existing placement."""
+
+    class Meta:
+        model = Placement
+        fields = [
+            "invoice_date",
+            "tax_rate",
+            "discount",
+            "amount_paid",
+            "payment_terms",
+            "contract_start",
+            "contract_end",
+            "terms",
+        ]
+        widgets = {
+            "invoice_date": forms.DateInput(attrs={"type": "date"}),
+            "contract_start": forms.DateInput(attrs={"type": "date"}),
+            "contract_end": forms.DateInput(attrs={"type": "date"}),
+            "terms": forms.Textarea(attrs={"rows": 4}),
+        }
+
+
+class PlacementPipelineForm(TenantScopedModelForm):
+    """The milestone dates the office fills in as processing moves along."""
+
+    class Meta:
+        model = Placement
+        fields = [
+            "agreed_on",
+            "medical_on",
+            "visa_applied_on",
+            "visa_issued_on",
+            "travel_on",
+            "arrival_on",
+            "delivered_on",
+        ]
+        widgets = {
+            field: forms.DateInput(attrs={"type": "date"})
+            for field in [
+                "agreed_on",
+                "medical_on",
+                "visa_applied_on",
+                "visa_issued_on",
+                "travel_on",
+                "arrival_on",
+                "delivered_on",
+            ]
+        }
+
+
+class ChargeForm(TenantScopedModelForm):
+    class Meta:
+        model = PlacementCharge
+        fields = ["description", "amount", "is_taxable"]
+
+
+class ChargeTypeForm(TenantScopedModelForm):
+    class Meta:
+        model = ChargeType
+        fields = ["name", "default_amount", "is_taxable", "sort_order"]
+
+
 class OccupationForm(TenantScopedModelForm):
     class Meta:
         model = Occupation
@@ -178,4 +277,5 @@ SETUP_FORMS = {
     "agents": (Agent, AgentForm, _("Agents")),
     "accommodation": (Accommodation, AccommodationForm, _("Accommodation")),
     "document-types": (DocumentType, DocumentTypeForm, _("Document types")),
+    "charge-types": (ChargeType, ChargeTypeForm, _("Charge types")),
 }

@@ -20,6 +20,8 @@ actually owns or configures is ``TenantScopedModel`` with an RLS policy.
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -336,6 +338,188 @@ class Worker(TenantScopedModel):
     def is_offerable(self) -> bool:
         """Can this worker be shown to a sponsor as available right now?"""
         return self.is_active and self.availability == self.Availability.AVAILABLE
+
+
+class ChargeType(TenantScopedModel):
+    """A line an agency puts on a placement invoice, with its usual price."""
+
+    name = models.CharField(_("name"), max_length=120)
+    default_amount = models.DecimalField(
+        _("default amount"), max_digits=10, decimal_places=3, default=0
+    )
+    is_taxable = models.BooleanField(_("taxable"), default=True)
+    sort_order = models.PositiveIntegerField(_("order"), default=0)
+    is_active = models.BooleanField(_("active"), default=True)
+
+    class Meta:
+        verbose_name = _("charge type")
+        verbose_name_plural = _("charge types")
+        ordering = ["sort_order", "name"]
+        base_manager_name = "all_tenants"
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Placement(TenantScopedModel):
+    """A worker placed with a sponsor — and the invoice for it.
+
+    This is the agency's final document: it carries the agreement (which worker,
+    which sponsor, how long the visa runs) *and* the money (ticket, visa
+    processing, medical, margin, tax, terms). One record rather than two because
+    that is how the trade works — the signed paper the sponsor takes away is the
+    same paper that says what they owe.
+
+    Worker and occupation are snapshotted onto the row. An invoice must keep
+    saying what was agreed even after someone renames an occupation or corrects
+    a worker's name years later.
+    """
+
+    class Route(models.TextChoices):
+        # The two pipelines: a worker already here only needs the visa moved to
+        # the sponsor; one abroad needs travel, medical and visa processing.
+        TRANSFER = "transfer", _("Visa transfer (in country)")
+        OVERSEAS = "overseas", _("Overseas recruitment")
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        CONFIRMED = "confirmed", _("Confirmed")
+        PROCESSING = "processing", _("Processing")
+        DELIVERED = "delivered", _("Delivered")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    class VisaPeriod(models.IntegerChoices):
+        ONE_YEAR = 12, _("1 year")
+        TWO_YEARS = 24, _("2 years")
+
+    reference = models.CharField(_("reference"), max_length=30)
+    sponsor = models.ForeignKey(
+        Sponsor, verbose_name=_("sponsor"), on_delete=models.PROTECT, related_name="placements"
+    )
+    worker = models.ForeignKey(
+        Worker, verbose_name=_("worker"), on_delete=models.PROTECT, related_name="placements"
+    )
+    worker_name = models.CharField(_("worker name"), max_length=200, blank=True)
+    occupation_name = models.CharField(_("occupation"), max_length=100, blank=True)
+
+    route = models.CharField(_("route"), max_length=20, choices=Route.choices)
+    visa_period_months = models.PositiveSmallIntegerField(
+        _("visa period"), choices=VisaPeriod.choices, default=VisaPeriod.TWO_YEARS
+    )
+    status = models.CharField(
+        _("status"), max_length=20, choices=Status.choices, default=Status.DRAFT
+    )
+
+    agreed_on = models.DateField(_("agreed on"), null=True, blank=True)
+    # Overseas milestones; a transfer skips most of these.
+    medical_on = models.DateField(_("medical completed"), null=True, blank=True)
+    visa_applied_on = models.DateField(_("visa applied"), null=True, blank=True)
+    visa_issued_on = models.DateField(_("visa issued"), null=True, blank=True)
+    travel_on = models.DateField(_("travel date"), null=True, blank=True)
+    arrival_on = models.DateField(_("arrival date"), null=True, blank=True)
+    delivered_on = models.DateField(_("delivered on"), null=True, blank=True)
+
+    contract_start = models.DateField(_("contract start"), null=True, blank=True)
+    contract_end = models.DateField(_("contract end"), null=True, blank=True)
+
+    # --- invoice ---
+    invoice_date = models.DateField(_("invoice date"), null=True, blank=True)
+    tax_rate = models.DecimalField(
+        _("tax rate %"),
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("10.00"),
+        help_text=_("Applied to taxable lines only."),
+    )
+    discount = models.DecimalField(_("discount"), max_digits=10, decimal_places=3, default=0)
+    amount_paid = models.DecimalField(_("amount paid"), max_digits=10, decimal_places=3, default=0)
+    payment_terms = models.CharField(_("payment terms"), max_length=200, blank=True)
+    terms = models.TextField(_("terms and conditions"), blank=True)
+    notes = models.TextField(_("notes"), blank=True)
+
+    class Meta:
+        verbose_name = _("placement")
+        verbose_name_plural = _("placements")
+        ordering = ["-created_at"]
+        base_manager_name = "all_tenants"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "reference"], name="uniq_placement_tenant_reference"
+            ),
+        ]
+        indexes = [models.Index(fields=["tenant", "status"])]
+
+    def __str__(self) -> str:
+        return f"{self.reference} · {self.worker_name}"
+
+    # --- money ---
+    # Derived rather than stored: the charge lines are the source of truth, and
+    # a stored total is one edit away from disagreeing with them.
+
+    @property
+    def subtotal(self) -> Decimal:
+        return sum((line.amount for line in self.charges.all()), Decimal("0"))
+
+    @property
+    def taxable_base(self) -> Decimal:
+        return sum((line.amount for line in self.charges.all() if line.is_taxable), Decimal("0"))
+
+    @property
+    def tax_amount(self) -> Decimal:
+        base = self.taxable_base - self.discount
+        if base <= 0:
+            return Decimal("0.000")
+        return (base * self.tax_rate / Decimal("100")).quantize(Decimal("0.001"))
+
+    @property
+    def total(self) -> Decimal:
+        return (self.subtotal - self.discount + self.tax_amount).quantize(Decimal("0.001"))
+
+    @property
+    def balance_due(self) -> Decimal:
+        return (self.total - self.amount_paid).quantize(Decimal("0.001"))
+
+    @property
+    def is_paid(self) -> bool:
+        return self.balance_due <= 0
+
+    @property
+    def milestones(self) -> list[dict]:
+        """The pipeline for this route, in order, with the date reached."""
+        steps = [(_("Agreed"), self.agreed_on)]
+        if self.route == self.Route.OVERSEAS:
+            steps += [
+                (_("Medical"), self.medical_on),
+                (_("Visa applied"), self.visa_applied_on),
+                (_("Visa issued"), self.visa_issued_on),
+                (_("Travel"), self.travel_on),
+                (_("Arrival"), self.arrival_on),
+            ]
+        else:
+            steps += [(_("Visa transferred"), self.visa_issued_on)]
+        steps.append((_("Delivered"), self.delivered_on))
+        return [{"label": label, "date": date, "done": date is not None} for label, date in steps]
+
+
+class PlacementCharge(TenantScopedModel):
+    """One priced line on a placement invoice."""
+
+    placement = models.ForeignKey(
+        Placement, verbose_name=_("placement"), on_delete=models.CASCADE, related_name="charges"
+    )
+    description = models.CharField(_("description"), max_length=200)
+    amount = models.DecimalField(_("amount"), max_digits=10, decimal_places=3, default=0)
+    is_taxable = models.BooleanField(_("taxable"), default=True)
+    sort_order = models.PositiveIntegerField(_("order"), default=0)
+
+    class Meta:
+        verbose_name = _("charge")
+        verbose_name_plural = _("charges")
+        ordering = ["sort_order", "id"]
+        base_manager_name = "all_tenants"
+
+    def __str__(self) -> str:
+        return f"{self.description}: {self.amount}"
 
 
 class WorkerDocument(TenantScopedModel):

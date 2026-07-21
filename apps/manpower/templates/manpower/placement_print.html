@@ -1,0 +1,152 @@
+{% extends "print_base.html" %}
+{% load i18n ui %}
+{% load l10n %}
+
+{% block title %}{{ placement.reference }}{% endblock %}
+{% block back_url %}{% url 'manpower:placement_detail' pk=placement.pk %}{% endblock %}
+
+{% block document %}
+  {# --- letterhead --- #}
+  <header class="flex items-start justify-between gap-6 border-b border-border pb-5">
+    <div>
+      <h1 class="text-heading-lg font-medium">{{ current_tenant.name }}</h1>
+      <p class="mt-1 text-sm text-text-secondary">{% trans "Domestic worker recruitment" %}</p>
+    </div>
+    <div class="text-end">
+      <p class="text-heading-md font-medium">{% trans "Placement agreement and invoice" %}</p>
+      <p class="mt-1 text-sm text-text-secondary" dir="ltr">{{ placement.reference }}</p>
+      <p class="text-sm text-text-secondary">
+        {{ placement.invoice_date|default:placement.agreed_on|date:"j M Y" }}
+      </p>
+    </div>
+  </header>
+
+  {# --- parties --- #}
+  <section class="mt-6 grid grid-cols-2 gap-6">
+    <div>
+      <h2 class="text-xs uppercase tracking-wide text-text-muted">{% trans "Sponsor" %}</h2>
+      <p class="mt-1 text-sm font-medium">{{ placement.sponsor.name }}</p>
+      {% if placement.sponsor.name_ar %}<p class="text-sm">{{ placement.sponsor.name_ar }}</p>{% endif %}
+      {% if placement.sponsor.national_id %}
+        <p class="text-sm text-text-secondary" dir="ltr">{% trans "ID" %}: {{ placement.sponsor.national_id }}</p>
+      {% endif %}
+      {% if placement.sponsor.phone %}
+        <p class="text-sm text-text-secondary" dir="ltr">{{ placement.sponsor.phone }}</p>
+      {% endif %}
+      {% if placement.sponsor.area %}<p class="text-sm text-text-secondary">{{ placement.sponsor.area }}</p>{% endif %}
+    </div>
+    <div>
+      <h2 class="text-xs uppercase tracking-wide text-text-muted">{% trans "Worker" %}</h2>
+      <p class="mt-1 text-sm font-medium">{{ placement.worker_name }}</p>
+      <p class="text-sm text-text-secondary">{{ placement.occupation_name }} · {{ placement.worker.nationality.name }}</p>
+      {% if placement.worker.passport_no %}
+        <p class="text-sm text-text-secondary" dir="ltr">{% trans "Passport" %}: {{ placement.worker.passport_no }}</p>
+      {% endif %}
+      <p class="text-sm text-text-secondary">{{ placement.get_route_display }}</p>
+    </div>
+  </section>
+
+  {# --- contract terms --- #}
+  <section class="mt-6 rounded-card border border-border">
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-border">
+        <tr>
+          <td class="w-1/3 px-4 py-2.5 text-text-secondary">{% trans "Visa period" %}</td>
+          <td class="px-4 py-2.5">{{ placement.get_visa_period_months_display }}</td>
+        </tr>
+        <tr>
+          <td class="px-4 py-2.5 text-text-secondary">{% trans "Contract" %}</td>
+          <td class="px-4 py-2.5">
+            {{ placement.contract_start|date:"j M Y"|default:"—" }} → {{ placement.contract_end|date:"j M Y"|default:"—" }}
+          </td>
+        </tr>
+        {% if placement.delivered_on %}
+          <tr>
+            <td class="px-4 py-2.5 text-text-secondary">{% trans "Delivered on" %}</td>
+            <td class="px-4 py-2.5">{{ placement.delivered_on|date:"j M Y" }}</td>
+          </tr>
+        {% endif %}
+        {% if placement.payment_terms %}
+          <tr>
+            <td class="px-4 py-2.5 text-text-secondary">{% trans "Payment terms" %}</td>
+            <td class="px-4 py-2.5">{{ placement.payment_terms }}</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </section>
+
+  {# --- charges --- #}
+  <section class="mt-6">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-y border-border bg-subtle text-xs text-text-secondary">
+          <th class="px-4 py-2.5 text-start font-medium">{% trans "Description" %}</th>
+          <th class="px-4 py-2.5 text-end font-medium">{% trans "Amount" %} ({{ current_tenant.currency }})</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-border">
+        {% for charge in charges %}
+          <tr>
+            <td class="px-4 py-2.5">
+              {{ charge.description }}
+              {% if not charge.is_taxable %}
+                <span class="text-xs text-text-muted">{% trans "(not taxable)" %}</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-2.5 text-end" dir="ltr">{% localize off %}{{ charge.amount }}{% endlocalize %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="border-t border-border">
+          <td class="px-4 py-2 text-end text-text-secondary">{% trans "Subtotal" %}</td>
+          <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ placement.subtotal }}{% endlocalize %}</td>
+        </tr>
+        {% if placement.discount %}
+          <tr>
+            <td class="px-4 py-2 text-end text-text-secondary">{% trans "Discount" %}</td>
+            <td class="px-4 py-2 text-end" dir="ltr">−{% localize off %}{{ placement.discount }}{% endlocalize %}</td>
+          </tr>
+        {% endif %}
+        <tr>
+          <td class="px-4 py-2 text-end text-text-secondary">{% trans "Tax" %} ({% localize off %}{{ placement.tax_rate }}{% endlocalize %}%)</td>
+          <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ placement.tax_amount }}{% endlocalize %}</td>
+        </tr>
+        <tr class="border-t-2 border-border-strong text-base font-medium">
+          <td class="px-4 py-3 text-end">{% trans "Total" %}</td>
+          <td class="px-4 py-3 text-end" dir="ltr">{{ current_tenant.currency }} {% localize off %}{{ placement.total }}{% endlocalize %}</td>
+        </tr>
+        {% if placement.amount_paid %}
+          <tr>
+            <td class="px-4 py-2 text-end text-text-secondary">{% trans "Paid" %}</td>
+            <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ placement.amount_paid }}{% endlocalize %}</td>
+          </tr>
+          <tr class="font-medium">
+            <td class="px-4 py-2 text-end">{% trans "Balance due" %}</td>
+            <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ placement.balance_due }}{% endlocalize %}</td>
+          </tr>
+        {% endif %}
+      </tfoot>
+    </table>
+  </section>
+
+  {% if placement.terms %}
+    <section class="avoid-break mt-6 border-t border-border pt-4">
+      <h2 class="text-xs uppercase tracking-wide text-text-muted">{% trans "Terms and conditions" %}</h2>
+      <p class="mt-2 whitespace-pre-line text-xs leading-relaxed text-text-secondary">{{ placement.terms }}</p>
+    </section>
+  {% endif %}
+
+  {# --- signatures --- #}
+  <section class="avoid-break mt-10 grid grid-cols-2 gap-10">
+    <div>
+      <div class="h-12 border-b border-border-strong"></div>
+      <p class="mt-2 text-xs text-text-secondary">{% trans "For" %} {{ current_tenant.name }}</p>
+    </div>
+    <div>
+      <div class="h-12 border-b border-border-strong"></div>
+      <p class="mt-2 text-xs text-text-secondary">{{ placement.sponsor.name }} — {% trans "sponsor" %}</p>
+    </div>
+  </section>
+{% endblock %}

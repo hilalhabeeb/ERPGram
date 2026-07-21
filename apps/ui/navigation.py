@@ -45,6 +45,13 @@ PRIMARY_NAV: list[NavItem] = [
         domains=(MANPOWER,),
     ),
     NavItem(
+        "placements",
+        _("Placements"),
+        icon="briefcase",
+        url_name="manpower:placement_list",
+        domains=(MANPOWER,),
+    ),
+    NavItem(
         "manpower_setup",
         _("Manpower setup"),
         icon="sliders",

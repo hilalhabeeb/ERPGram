@@ -1,0 +1,50 @@
+{% load static i18n %}<!doctype html>
+{% comment %}
+Base for documents meant to leave the building: the placement invoice and the
+worker CV.
+
+Deliberately a print-styled HTML page rather than a generated PDF. It keeps the
+project free of a PDF dependency, every browser can print or save it, and — the
+part that actually matters here — Arabic comes out right, because it is the same
+engine that lays out the rest of the app.
+{% endcomment %}
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · Erpgram</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <style>
+    /* Screen: sit the sheet on the app background so it reads as a document. */
+    body { background: #F3F3F1; }
+    .sheet {
+      width: 210mm; min-height: 297mm; margin: 24px auto; padding: 16mm;
+      background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+    }
+    @page { size: A4; margin: 12mm; }
+    @media print {
+      body { background: #fff; }
+      .sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
+      .no-print { display: none !important; }
+      /* Keep tables from splitting a row across pages. */
+      tr, .avoid-break { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body class="{% if LANGUAGE_BIDI %}font-arabic{% else %}font-sans{% endif %} text-text-primary">
+  <div class="no-print mx-auto flex w-[210mm] max-w-full items-center justify-between gap-3 px-2 pt-6">
+    <a href="{% block back_url %}{% endblock %}"
+       class="rounded-control border border-border bg-card px-3 py-2 text-sm text-text-primary hover:bg-subtle">
+      ← {% trans "Back" %}
+    </a>
+    <button type="button" onclick="window.print()"
+            class="rounded-control bg-accent-primary px-4 py-2 text-sm font-medium text-white">
+      {% trans "Print or save as PDF" %}
+    </button>
+  </div>
+
+  <main class="sheet">
+    {% block document %}{% endblock %}
+  </main>
+</body>
+</html>

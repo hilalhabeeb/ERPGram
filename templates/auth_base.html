@@ -18,20 +18,23 @@
     {% block auth_footer %}{% endblock %}
 
     {# Language switch matters before sign-in in an Arabic-first market. #}
-    <form method="post" action="{% url 'set_language' %}" class="mt-6 flex items-center justify-center gap-2 text-xs">
-      {% csrf_token %}
-      <input type="hidden" name="next" value="{{ request.path }}">
-      {% for code, name in LANGUAGES %}
-        {% if code != LANGUAGE_CODE %}
-          <button type="submit" name="language" value="{{ code }}"
-                  class="rounded-control px-2 py-1 text-text-secondary hover:bg-subtle hover:text-text-primary">
-            {{ name }}
-          </button>
+    <div class="mt-6 flex items-center justify-center gap-2 text-xs">
+      {% for link in language_links %}
+        {% if link.is_current %}
+          <span class="px-2 py-1 text-text-muted">{{ link.name }}</span>
         {% else %}
-          <span class="px-2 py-1 text-text-muted">{{ name }}</span>
+          <form method="post" action="{% url 'set_language' %}">
+            {% csrf_token %}
+            <input type="hidden" name="language" value="{{ link.code }}">
+            <input type="hidden" name="next" value="{{ link.url }}">
+            <button type="submit"
+                    class="rounded-control px-2 py-1 text-text-secondary hover:bg-subtle hover:text-text-primary">
+              {{ link.name }}
+            </button>
+          </form>
         {% endif %}
       {% endfor %}
-    </form>
+    </div>
   </main>
 </div>
 {% endblock %}

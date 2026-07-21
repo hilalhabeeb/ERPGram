@@ -1,0 +1,22 @@
+{% comment %}Open-placement form body, rendered inside the modal.{% endcomment %}
+{% load i18n %}
+<form method="post" action="{% url 'manpower:placement_create' %}" class="space-y-4">
+  {% csrf_token %}
+  {% include "partials/_field.html" with field=form.sponsor %}
+  {% include "partials/_field.html" with field=form.worker %}
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    {% include "partials/_field.html" with field=form.visa_period_months %}
+    {% include "partials/_field.html" with field=form.agreed_on %}
+  </div>
+  {% include "partials/_field.html" with field=form.payment_terms %}
+  <p class="text-xs text-text-muted">
+    {% trans "The route (visa transfer or overseas recruitment) is set from where the worker is, and the agency price list is copied in automatically." %}
+  </p>
+  <div class="flex justify-end gap-2 pt-2">
+    <button type="button" @click="open = false"
+            class="rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle">
+      {% trans "Cancel" %}
+    </button>
+    {% include "ui/button.html" with label=_("Open placement") type="submit" variant="primary" icon="plus" %}
+  </div>
+</form>

@@ -45,6 +45,7 @@ MANAGE_ROLES = "accounts.manage_roles"
 MANAGE_WORKERS = "manpower.manage_workers"
 MANAGE_SPONSORS = "manpower.manage_sponsors"
 MANAGE_MANPOWER_SETUP = "manpower.manage_setup"
+MANAGE_PLACEMENTS = "manpower.manage_placements"
 
 PERMISSIONS: tuple[Permission, ...] = (
     Permission(
@@ -83,6 +84,13 @@ PERMISSIONS: tuple[Permission, ...] = (
         codename=MANAGE_SPONSORS,
         label=_("Manage sponsors"),
         description=_("Add and update the households and companies that hire workers."),
+        group=_("Manpower"),
+        domains=(MANPOWER,),
+    ),
+    Permission(
+        codename=MANAGE_PLACEMENTS,
+        label=_("Manage placements"),
+        description=_("Place workers with sponsors, price the contract and issue invoices."),
         group=_("Manpower"),
         domains=(MANPOWER,),
     ),

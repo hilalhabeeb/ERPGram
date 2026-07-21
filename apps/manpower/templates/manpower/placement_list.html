@@ -1,0 +1,42 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Placements" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% if can_manage %}
+    {% include "ui/page_header.html" with title=_("Placements") subtitle=_("Agreements with sponsors, and the invoice for each.") action_label=_("New placement") action_icon="plus" action_event="open-modal-placement" %}
+  {% else %}
+    {% include "ui/page_header.html" with title=_("Placements") subtitle=_("Agreements with sponsors, and the invoice for each.") %}
+  {% endif %}
+
+  <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    {% for stat in stats %}
+      {% include "ui/stat_card.html" with label=stat.label value=stat.value icon=stat.icon %}
+    {% endfor %}
+  </div>
+
+  <form method="get" class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+    <label class="min-w-[220px] flex-1">
+      <span class="mb-1 block text-xs text-text-muted">{% trans "Search" %}</span>
+      <input type="search" name="q" value="{{ search }}" class="input" placeholder="{% trans 'Reference, worker or sponsor' %}">
+    </label>
+    <label>
+      <span class="mb-1 block text-xs text-text-muted">{% trans "Status" %}</span>
+      <select name="status" class="select">
+        <option value="">{% trans "Any" %}</option>
+        {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit" class="rounded-control bg-accent-primary px-3 py-2 text-sm text-white">{% trans "Apply" %}</button>
+    <a href="{% url 'manpower:placement_list' %}" class="rounded-control border border-border px-3 py-2 text-sm text-text-secondary hover:bg-subtle">{% trans "Clear" %}</a>
+  </form>
+
+  {% include "manpower/_placements_table.html" %}
+
+  {% if can_manage %}
+    {% include "ui/modal.html" with name="placement" title=_("Open a placement") include_body="manpower/_placement_form.html" %}
+  {% endif %}
+{% endblock %}

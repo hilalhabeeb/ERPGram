@@ -11,6 +11,11 @@
     {% include "ui/page_header.html" with title=worker.full_name subtitle=worker.reference %}
   {% endif %}
 
+  <div class="mb-4 flex flex-wrap gap-2">
+    {% url 'manpower:worker_cv' pk=worker.pk as cv_url %}
+    {% include "ui/button.html" with label=_("Biodata sheet") variant="secondary" size="sm" icon="file-text" url=cv_url %}
+  </div>
+
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
     {# Profile #}
     <section class="card p-5 lg:col-span-2">

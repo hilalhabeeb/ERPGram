@@ -4,26 +4,93 @@
 {% block title %}{% trans "Dashboard" %} · Erpgram{% endblock %}
 
 {% block content %}
-  {% comment %}
-  No primary action yet: the companies module lands in a later step, and a
-  button wired to "#" is worse than no button.
-  {% endcomment %}
   {% include "ui/page_header.html" with title=_("Dashboard") subtitle=current_tenant.name %}
 
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
     {% for stat in stats %}
       {% include "ui/stat_card.html" with label=stat.label value=stat.value icon=stat.icon %}
     {% endfor %}
   </div>
 
-  <section class="card mt-4 p-5">
-    <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Overview" %}</h2>
-        <p class="text-xs text-text-secondary">{% trans "Charts and activity will appear here in a later step." %}</p>
-      </div>
-      {% include "ui/filter_pills.html" with name="range" active="monthly" options=range_options %}
-    </header>
-    {% include "ui/empty_state.html" with icon="chart" title=_("No data yet") description=_("Once you add companies and branches, activity shows up here.") %}
-  </section>
+  {% if is_manpower %}
+    {% comment %}
+    An agency's dashboard leads with paperwork about to lapse and the files
+    currently moving — not with a branch count.
+    {% endcomment %}
+    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section class="card overflow-hidden">
+        <header class="flex items-center justify-between border-b border-border px-5 py-4">
+          <div>
+            <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Expiring soon" %}</h2>
+            <p class="text-xs text-text-secondary">{% trans "Documents lapsing in the next 90 days." %}</p>
+          </div>
+          {% icon "alert-triangle" css_class="w-4 h-4 text-text-muted" %}
+        </header>
+        {% if expiring %}
+          <ul class="divide-y divide-border">
+            {% for document in expiring %}
+              <li class="flex items-center justify-between gap-3 px-5 py-3">
+                <div class="min-w-0">
+                  <a href="{% url 'manpower:worker_detail' pk=document.worker_id %}"
+                     class="text-sm font-medium text-text-primary hover:text-accent-primary">
+                    {{ document.worker.full_name }}
+                  </a>
+                  <p class="text-xs text-text-muted">{{ document.document_type.name }}</p>
+                </div>
+                <span class="whitespace-nowrap text-xs text-text-secondary">
+                  {{ document.expires_on|date:"j M Y" }}
+                </span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          {% include "ui/empty_state.html" with icon="check-circle" title=_("Nothing expiring") description=_("No worker documents lapse in the next 90 days.") %}
+        {% endif %}
+      </section>
+
+      <section class="card overflow-hidden">
+        <header class="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Recent placements" %}</h2>
+          <a href="{% url 'manpower:placement_list' %}" class="text-sm text-accent-primary hover:underline">
+            {% trans "View all" %}
+          </a>
+        </header>
+        {% if recent_placements %}
+          <ul class="divide-y divide-border">
+            {% for placement in recent_placements %}
+              <li class="flex items-center justify-between gap-3 px-5 py-3">
+                <div class="min-w-0">
+                  <a href="{% url 'manpower:placement_detail' pk=placement.pk %}"
+                     class="text-sm font-medium text-text-primary hover:text-accent-primary">
+                    {{ placement.worker_name }}
+                  </a>
+                  <p class="text-xs text-text-muted">{{ placement.sponsor.name }}</p>
+                </div>
+                {% if placement.status == "delivered" %}
+                  {% include "ui/badge.html" with label=placement.get_status_display tone="success" %}
+                {% elif placement.status == "cancelled" %}
+                  {% include "ui/badge.html" with label=placement.get_status_display tone="neutral" %}
+                {% else %}
+                  {% include "ui/badge.html" with label=placement.get_status_display tone="accent" %}
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          {% include "ui/empty_state.html" with icon="briefcase" title=_("No placements yet") description=_("Open a placement when a sponsor picks a worker.") %}
+        {% endif %}
+      </section>
+    </div>
+  {% else %}
+    <section class="card mt-4 p-5">
+      <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Overview" %}</h2>
+          <p class="text-xs text-text-secondary">{% trans "Charts and activity will appear here in a later step." %}</p>
+        </div>
+        {% include "ui/filter_pills.html" with name="range" active="monthly" options=range_options %}
+      </header>
+      {% include "ui/empty_state.html" with icon="chart" title=_("No data yet") description=_("Once you add companies and branches, activity shows up here.") %}
+    </section>
+  {% endif %}
 {% endblock %}

@@ -19,6 +19,7 @@ from apps.accounts.services import (
     send_invitation_email,
     update_role,
 )
+from apps.core.domains import MANPOWER
 from apps.core.permissions import (
     MANAGE_MEMBERS,
     MANAGE_ORGANIZATION,
@@ -50,16 +51,30 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         {"value": "monthly", "label": _("Monthly")},
         {"value": "weekly", "label": _("Weekly")},
     ]
-    return render(
-        request,
-        "ui/dashboard.html",
-        {
-            "page_title": _("Dashboard"),
-            "breadcrumb": [],  # root crumb is rendered by the shell
-            "stats": dashboard_stats(),
-            "range_options": range_options,
-        },
-    )
+
+    # The dashboard follows the tenant's industry. A manpower agency has no
+    # interest in a branch count; it wants to know who is placeable and what
+    # paperwork is about to expire.
+    context = {
+        "page_title": _("Dashboard"),
+        "breadcrumb": [],  # root crumb is rendered by the shell
+        "range_options": range_options,
+    }
+
+    if getattr(request.tenant, "domain", None) == MANPOWER:
+        from apps.manpower import services as manpower_services
+
+        context.update(
+            stats=manpower_services.worker_summary(request.tenant)
+            + manpower_services.placement_summary(request.tenant),
+            expiring=manpower_services.expiring_documents(request.tenant),
+            recent_placements=manpower_services.placements_for(request.tenant)[:5],
+            is_manpower=True,
+        )
+    else:
+        context.update(stats=dashboard_stats())
+
+    return render(request, "ui/dashboard.html", context)
 
 
 @require_http_methods(["GET", "POST"])

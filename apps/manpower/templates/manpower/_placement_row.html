@@ -1,0 +1,31 @@
+{% comment %}One placement row. Context: obj (Placement).{% endcomment %}
+{% load i18n ui %}
+{% load l10n %}
+<tr class="hover:bg-subtle">
+  <td class="px-4 py-3 font-mono text-xs">
+    <a href="{% url 'manpower:placement_detail' pk=obj.pk %}" class="text-text-primary hover:text-accent-primary">{{ obj.reference }}</a>
+  </td>
+  <td class="px-4 py-3">
+    <span class="font-medium text-text-primary">{{ obj.worker_name }}</span>
+    <p class="text-xs text-text-muted">{{ obj.occupation_name }}</p>
+  </td>
+  <td class="px-4 py-3 text-text-secondary">{{ obj.sponsor.name }}</td>
+  <td class="px-4 py-3">
+    <span class="inline-flex items-center gap-1.5 text-xs text-text-secondary">
+      {% if obj.route == "transfer" %}{% icon "map-pin" css_class="w-3.5 h-3.5" %}{% else %}{% icon "globe" css_class="w-3.5 h-3.5" %}{% endif %}
+      {{ obj.get_route_display }}
+    </span>
+  </td>
+  <td class="px-4 py-3">
+    {% if obj.status == "delivered" %}{% include "ui/badge.html" with label=obj.get_status_display tone="success" %}
+    {% elif obj.status == "cancelled" %}{% include "ui/badge.html" with label=obj.get_status_display tone="neutral" %}
+    {% elif obj.status == "draft" %}{% include "ui/badge.html" with label=obj.get_status_display tone="neutral" %}
+    {% else %}{% include "ui/badge.html" with label=obj.get_status_display tone="accent" %}{% endif %}
+  </td>
+  <td class="px-4 py-3 text-text-secondary" dir="ltr">
+    {{ current_tenant.currency }} {% localize off %}{{ obj.total }}{% endlocalize %}
+    {% if not obj.is_paid and obj.status != "cancelled" %}
+      <span class="ms-1 text-xs text-amber-600">{% trans "due" %}</span>
+    {% endif %}
+  </td>
+</tr>

@@ -1,0 +1,211 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+{% load l10n %}
+
+{% block title %}{{ placement.reference }} · Erpgram{% endblock %}
+
+{% block content %}
+  {% url 'manpower:placement_print' pk=placement.pk as print_url %}
+  {% include "ui/page_header.html" with title=placement.reference subtitle=placement.worker_name action_label=_("Print document") action_icon="file-text" action_url=print_url %}
+
+  {# Status + pipeline: what stage is this placement at? #}
+  <section class="card mb-4 p-5">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        {% if placement.status == "delivered" %}
+          {% include "ui/badge.html" with label=placement.get_status_display tone="success" %}
+        {% elif placement.status == "cancelled" %}
+          {% include "ui/badge.html" with label=placement.get_status_display tone="neutral" %}
+        {% else %}
+          {% include "ui/badge.html" with label=placement.get_status_display tone="accent" %}
+        {% endif %}
+        <span class="text-sm text-text-secondary">{{ placement.get_route_display }}</span>
+        <span class="text-sm text-text-muted">·</span>
+        <span class="text-sm text-text-secondary">{{ placement.get_visa_period_months_display }}</span>
+      </div>
+
+      {% if can_manage and placement.status != "cancelled" %}
+        <div class="flex flex-wrap gap-2">
+          {% for value, label in placement.Status.choices %}
+            {% if value != placement.status and value != "draft" %}
+              <form method="post" action="{% url 'manpower:placement_status' pk=placement.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="{{ value }}">
+                <button type="submit"
+                        class="rounded-control border border-border px-3 py-1.5 text-sm text-text-primary hover:bg-subtle"
+                        {% if value == "cancelled" %}onclick="return confirm('{% trans "Cancel this placement and free the worker?" %}')"{% endif %}>
+                  {% trans "Mark" %} {{ label|lower }}
+                </button>
+              </form>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    {# Milestones for this route — a transfer skips travel and medical. #}
+    <ol class="mt-5 flex flex-wrap gap-x-6 gap-y-3 border-t border-border pt-4">
+      {% for step in placement.milestones %}
+        <li class="flex items-center gap-2">
+          <span class="grid h-6 w-6 place-items-center rounded-pill
+                       {% if step.done %}bg-accent-primarySoft text-accent-primary{% else %}bg-subtle text-text-muted{% endif %}">
+            {% if step.done %}{% icon "check" css_class="w-3.5 h-3.5" %}{% else %}<span class="text-[10px]">{{ forloop.counter }}</span>{% endif %}
+          </span>
+          <span class="text-sm {% if step.done %}text-text-primary{% else %}text-text-muted{% endif %}">
+            {{ step.label }}
+            {% if step.date %}<span class="block text-xs text-text-muted">{{ step.date|date:"j M Y" }}</span>{% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    {# Parties #}
+    <section class="card p-5">
+      <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Parties" %}</h2>
+      <dl class="mt-3 space-y-3">
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Sponsor" %}</dt>
+          <dd class="mt-0.5 text-sm text-text-primary">{{ placement.sponsor.name }}</dd>
+          <dd class="text-xs text-text-muted" dir="ltr">{{ placement.sponsor.national_id }} · {{ placement.sponsor.phone }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Worker" %}</dt>
+          <dd class="mt-0.5 text-sm text-text-primary">
+            <a href="{% url 'manpower:worker_detail' pk=placement.worker_id %}" class="hover:text-accent-primary">
+              {{ placement.worker_name }}
+            </a>
+          </dd>
+          <dd class="text-xs text-text-muted">{{ placement.occupation_name }} · {{ placement.worker.nationality.name }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Contract" %}</dt>
+          <dd class="mt-0.5 text-sm text-text-primary">
+            {{ placement.contract_start|date:"j M Y"|default:"—" }} → {{ placement.contract_end|date:"j M Y"|default:"—" }}
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    {# Charges = the invoice lines #}
+    <section class="card overflow-hidden lg:col-span-2">
+      <header class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Charges" %}</h2>
+        <span class="text-sm text-text-secondary" dir="ltr">
+          {{ current_tenant.currency }} {% localize off %}{{ placement.total }}{% endlocalize %}
+        </span>
+      </header>
+
+      <table class="w-full text-sm">
+        <tbody class="divide-y divide-border">
+          {% for charge in charges %}
+            <tr>
+              <td class="px-5 py-2.5 text-text-primary">
+                {{ charge.description }}
+                {% if not charge.is_taxable %}
+                  <span class="ms-1 text-xs text-text-muted">{% trans "(no tax)" %}</span>
+                {% endif %}
+              </td>
+              <td class="px-5 py-2.5 text-end text-text-secondary" dir="ltr">{% localize off %}{{ charge.amount }}{% endlocalize %}</td>
+              <td class="w-10 px-2 py-2.5">
+                {% if can_manage %}
+                  <form method="post" action="{% url 'manpower:placement_charge_delete' pk=placement.pk charge_pk=charge.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="rounded-control p-1 text-text-muted hover:bg-subtle hover:text-red-600"
+                            aria-label="{% trans 'Remove charge' %}">{% icon "trash-2" css_class="w-4 h-4" %}</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="px-5 py-4 text-sm text-text-muted">{% trans "No charges yet." %}</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="border-t border-border bg-subtle text-sm">
+          <tr>
+            <td class="px-5 py-2 text-text-secondary">{% trans "Subtotal" %}</td>
+            <td class="px-5 py-2 text-end text-text-primary" dir="ltr">{% localize off %}{{ placement.subtotal }}{% endlocalize %}</td><td></td>
+          </tr>
+          {% if placement.discount %}
+            <tr>
+              <td class="px-5 py-2 text-text-secondary">{% trans "Discount" %}</td>
+              <td class="px-5 py-2 text-end text-text-primary" dir="ltr">−{% localize off %}{{ placement.discount }}{% endlocalize %}</td><td></td>
+            </tr>
+          {% endif %}
+          <tr>
+            <td class="px-5 py-2 text-text-secondary">{% trans "Tax" %} ({% localize off %}{{ placement.tax_rate }}{% endlocalize %}%)</td>
+            <td class="px-5 py-2 text-end text-text-primary" dir="ltr">{% localize off %}{{ placement.tax_amount }}{% endlocalize %}</td><td></td>
+          </tr>
+          <tr class="font-medium">
+            <td class="px-5 py-2.5 text-text-primary">{% trans "Total" %}</td>
+            <td class="px-5 py-2.5 text-end text-text-primary" dir="ltr">{{ current_tenant.currency }} {% localize off %}{{ placement.total }}{% endlocalize %}</td><td></td>
+          </tr>
+          <tr>
+            <td class="px-5 py-2 text-text-secondary">{% trans "Paid" %}</td>
+            <td class="px-5 py-2 text-end text-text-secondary" dir="ltr">{% localize off %}{{ placement.amount_paid }}{% endlocalize %}</td><td></td>
+          </tr>
+          <tr class="{% if placement.is_paid %}text-green-700{% else %}text-amber-700{% endif %}">
+            <td class="px-5 py-2 font-medium">{% trans "Balance due" %}</td>
+            <td class="px-5 py-2 text-end font-medium" dir="ltr">{% localize off %}{{ placement.balance_due }}{% endlocalize %}</td><td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      {% if can_manage %}
+        <form method="post" action="{% url 'manpower:placement_charge_add' pk=placement.pk %}"
+              class="flex flex-wrap items-end gap-3 border-t border-border p-4">
+          {% csrf_token %}
+          <div class="min-w-[180px] flex-1">{% include "partials/_field.html" with field=charge_form.description %}</div>
+          <div class="w-32">{% include "partials/_field.html" with field=charge_form.amount %}</div>
+          <label class="flex items-center gap-2 pb-2 text-sm text-text-primary">
+            {{ charge_form.is_taxable }} {% trans "Taxable" %}
+          </label>
+          {% include "ui/button.html" with label=_("Add charge") type="submit" variant="secondary" size="sm" icon="plus" %}
+        </form>
+      {% endif %}
+    </section>
+  </div>
+
+  {% if can_manage %}
+    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section class="card p-5">
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Invoice and contract" %}</h2>
+        <form method="post" action="{% url 'manpower:placement_update' pk=placement.pk section='invoice' %}" class="mt-4 space-y-4">
+          {% csrf_token %}
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {% include "partials/_field.html" with field=invoice_form.invoice_date %}
+            {% include "partials/_field.html" with field=invoice_form.tax_rate %}
+            {% include "partials/_field.html" with field=invoice_form.discount %}
+            {% include "partials/_field.html" with field=invoice_form.amount_paid %}
+            {% include "partials/_field.html" with field=invoice_form.contract_start %}
+            {% include "partials/_field.html" with field=invoice_form.contract_end %}
+          </div>
+          {% include "partials/_field.html" with field=invoice_form.payment_terms %}
+          {% include "partials/_field.html" with field=invoice_form.terms %}
+          <div class="flex justify-end">
+            {% include "ui/button.html" with label=_("Save invoice") type="submit" variant="primary" size="sm" %}
+          </div>
+        </form>
+      </section>
+
+      <section class="card p-5">
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Processing dates" %}</h2>
+        <p class="mt-0.5 text-sm text-text-secondary">
+          {% trans "Fill these in as the file moves through medical, visa and travel." %}
+        </p>
+        <form method="post" action="{% url 'manpower:placement_update' pk=placement.pk section='pipeline' %}" class="mt-4 space-y-4">
+          {% csrf_token %}
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {% for field in pipeline_form %}
+              {% include "partials/_field.html" with field=field %}
+            {% endfor %}
+          </div>
+          <div class="flex justify-end">
+            {% include "ui/button.html" with label=_("Save dates") type="submit" variant="primary" size="sm" %}
+          </div>
+        </form>
+      </section>
+    </div>
+  {% endif %}
+{% endblock %}

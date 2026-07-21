@@ -1,0 +1,2 @@
+{% load i18n %}
+{% include "ui/data_table.html" with table_id="placements-table" columns=columns page_obj=page_obj row_template="manpower/_placement_row.html" sort_key=sort_key direction=direction selectable=False empty_icon="briefcase" empty_title=_("No placements yet") empty_description=_("Open a placement when a sponsor picks a worker.") %}

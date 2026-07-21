@@ -26,6 +26,8 @@ class Tenant(TimeStampedModel):
     is_active = models.BooleanField(_("active"), default=True)
     timezone = models.CharField(_("timezone"), max_length=64, default="Asia/Bahrain")
     default_locale = models.CharField(_("default locale"), max_length=8, default="en")
+    # Printed on invoices. Gulf currencies are quoted to three decimals.
+    currency = models.CharField(_("currency"), max_length=8, default="BHD")
     # Chosen at sign-up; decides which industry modules exist for this tenant.
     # See apps.core.domains — choices are resolved lazily so adding a domain
     # does not require a migration.

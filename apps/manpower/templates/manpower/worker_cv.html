@@ -1,0 +1,109 @@
+{% extends "print_base.html" %}
+{% load i18n ui %}
+
+{% block title %}{{ worker.full_name }} — {% trans "biodata" %}{% endblock %}
+{% block back_url %}{% url 'manpower:worker_detail' pk=worker.pk %}{% endblock %}
+
+{% block document %}
+  {% comment %}
+  The sheet an agency sends a sponsor to choose from: photo, the facts a
+  household actually asks about, then skills and languages.
+  {% endcomment %}
+  <header class="flex items-start justify-between gap-6 border-b border-border pb-5">
+    <div>
+      <h1 class="text-heading-lg font-medium">{{ current_tenant.name }}</h1>
+      <p class="mt-1 text-sm text-text-secondary">{% trans "Worker biodata" %}</p>
+    </div>
+    <p class="font-mono text-sm text-text-secondary" dir="ltr">{{ worker.reference }}</p>
+  </header>
+
+  <section class="mt-6 flex items-start gap-6">
+    {% if worker.photo %}
+      <img src="{{ worker.photo.url }}" alt="" class="h-40 w-32 rounded-card border border-border object-cover">
+    {% else %}
+      <span class="grid h-40 w-32 place-items-center rounded-card border border-border bg-subtle text-text-muted">
+        {% icon "user" css_class="w-10 h-10" %}
+      </span>
+    {% endif %}
+
+    <div class="min-w-0 flex-1">
+      <h2 class="text-heading-md font-medium">{{ worker.full_name }}</h2>
+      <p class="mt-0.5 text-sm text-text-secondary">
+        {{ worker.occupation.name }} · {{ worker.nationality.name }}
+      </p>
+
+      <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Date of birth" %}</dt>
+          <dd>{{ worker.date_of_birth|date:"j M Y"|default:"—" }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Gender" %}</dt>
+          <dd>{{ worker.get_gender_display }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Marital status" %}</dt>
+          <dd>{{ worker.get_marital_status_display|default:"—" }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Children" %}</dt>
+          <dd>{{ worker.children|default:"—" }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Religion" %}</dt>
+          <dd>{{ worker.religion|default:"—" }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Experience" %}</dt>
+          <dd>{% blocktrans count years=worker.experience_years %}{{ years }} year{% plural %}{{ years }} years{% endblocktrans %}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Passport no." %}</dt>
+          <dd dir="ltr">{{ worker.passport_no|default:"—" }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Passport expiry" %}</dt>
+          <dd>{{ worker.passport_expiry|date:"j M Y"|default:"—" }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-text-muted">{% trans "Location" %}</dt>
+          <dd>{{ worker.get_location_display }}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="avoid-break mt-6 grid grid-cols-2 gap-6 border-t border-border pt-5">
+    <div>
+      <h3 class="text-xs uppercase tracking-wide text-text-muted">{% trans "Skills" %}</h3>
+      <ul class="mt-2 space-y-1 text-sm">
+        {% for skill in skills %}
+          <li class="flex items-center gap-2">{% icon "check" css_class="w-3.5 h-3.5 text-accent-primary" %}{{ skill.name }}</li>
+        {% empty %}
+          <li class="text-text-muted">{% trans "None recorded." %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h3 class="text-xs uppercase tracking-wide text-text-muted">{% trans "Languages" %}</h3>
+      <ul class="mt-2 space-y-1 text-sm">
+        {% for language in languages %}
+          <li class="flex items-center gap-2">{% icon "check" css_class="w-3.5 h-3.5 text-accent-primary" %}{{ language.name }}</li>
+        {% empty %}
+          <li class="text-text-muted">{% trans "No languages recorded." %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+
+  {% if worker.experience_notes %}
+    <section class="avoid-break mt-6 border-t border-border pt-5">
+      <h3 class="text-xs uppercase tracking-wide text-text-muted">{% trans "Work history" %}</h3>
+      <p class="mt-2 whitespace-pre-line text-sm text-text-secondary">{{ worker.experience_notes }}</p>
+    </section>
+  {% endif %}
+
+  <footer class="mt-10 border-t border-border pt-4 text-xs text-text-muted">
+    {% trans "Availability is subject to confirmation at the time of booking." %}
+  </footer>
+{% endblock %}

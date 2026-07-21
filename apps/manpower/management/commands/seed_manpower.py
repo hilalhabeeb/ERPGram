@@ -29,6 +29,7 @@ from apps.manpower.models import (
     DocumentType,
     Language,
     Occupation,
+    Placement,
     Skill,
     Sponsor,
     Worker,
@@ -380,6 +381,7 @@ class Command(BaseCommand):
             houses = self._accommodation(tenant, owner)
             self._sponsors(tenant, owner)
             self._workers(tenant, owner, agents, houses, rng)
+            self._placements(tenant, owner)
 
         self.stdout.write("")
         self.stdout.write(self.style.SUCCESS("Manpower demo ready. Sign in as:"))
@@ -572,3 +574,73 @@ class Command(BaseCommand):
             made += 1
 
         self.stdout.write(f"  workers created: {made}")
+
+    def _placements(self, tenant, owner):
+        """A few placements across the pipeline, so the module has a story.
+
+        One delivered (paid), one mid-processing overseas, one draft transfer —
+        enough to show both routes and the invoice in different states.
+        """
+        services.ensure_charge_types(tenant, user=owner)
+
+        if Placement.all_tenants.filter(tenant=tenant).exists():
+            return
+
+        sponsors = list(Sponsor.objects.filter(tenant=tenant).order_by("name")[:3])
+        workers = list(
+            Worker.objects.filter(
+                tenant=tenant, availability=Worker.Availability.AVAILABLE
+            ).order_by("reference")[:3]
+        )
+        if not sponsors or not workers:
+            return
+
+        today = dt.date(2026, 7, 19)
+        plan = [
+            # (status, agreed offset, paid?)
+            (Placement.Status.DELIVERED, -120, True),
+            (Placement.Status.PROCESSING, -35, False),
+            (Placement.Status.DRAFT, -3, False),
+        ]
+
+        made = 0
+        for index, (status, offset, paid) in enumerate(plan):
+            if index >= len(sponsors) or index >= len(workers):
+                break
+            worker = workers[index]
+            placement = services.create_placement(
+                tenant=tenant,
+                user=owner,
+                sponsor=sponsors[index],
+                worker=worker,
+                visa_period_months=Placement.VisaPeriod.TWO_YEARS,
+                agreed_on=today + dt.timedelta(days=offset),
+                payment_terms="50% on signing, balance on delivery",
+                terms=(
+                    "1. The sponsor is responsible for the worker's residence permit.\n"
+                    "2. A replacement is offered once within three months if the worker "
+                    "is unable to continue.\n"
+                    "3. Fees are non-refundable after the visa has been issued."
+                ),
+                invoice_date=today + dt.timedelta(days=offset),
+            )
+
+            if placement.route == Placement.Route.OVERSEAS:
+                placement.medical_on = placement.agreed_on + dt.timedelta(days=7)
+                placement.visa_applied_on = placement.agreed_on + dt.timedelta(days=14)
+                if status in (Placement.Status.DELIVERED,):
+                    placement.visa_issued_on = placement.agreed_on + dt.timedelta(days=30)
+                    placement.travel_on = placement.agreed_on + dt.timedelta(days=45)
+                    placement.arrival_on = placement.agreed_on + dt.timedelta(days=46)
+            elif status == Placement.Status.DELIVERED:
+                placement.visa_issued_on = placement.agreed_on + dt.timedelta(days=10)
+
+            if paid:
+                placement.amount_paid = placement.total
+            placement.save()
+
+            if status != Placement.Status.DRAFT:
+                services.set_placement_status(placement, user=owner, status=status)
+            made += 1
+
+        self.stdout.write(f"  placements created: {made}")

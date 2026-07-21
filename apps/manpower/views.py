@@ -18,12 +18,21 @@ from apps.accounts.permissions import has_permission, require_permission
 from apps.core.domains import MANPOWER
 from apps.core.permissions import (
     MANAGE_MANPOWER_SETUP,
+    MANAGE_PLACEMENTS,
     MANAGE_SPONSORS,
     MANAGE_WORKERS,
 )
 from apps.manpower import services
-from apps.manpower.forms import SETUP_FORMS, SponsorForm, WorkerForm
-from apps.manpower.models import Country, Occupation, Sponsor, Worker
+from apps.manpower.forms import (
+    SETUP_FORMS,
+    ChargeForm,
+    PlacementForm,
+    PlacementInvoiceForm,
+    PlacementPipelineForm,
+    SponsorForm,
+    WorkerForm,
+)
+from apps.manpower.models import Country, Occupation, Placement, Sponsor, Worker
 from apps.ui.services import paginate
 
 
@@ -234,6 +243,177 @@ def sponsor_archive(request: HttpRequest, pk) -> HttpResponse:
     return redirect("manpower:sponsor_list")
 
 
+# --- placements --------------------------------------------------------------
+
+
+def placement_list(request: HttpRequest) -> HttpResponse:
+    _require_manpower(request)
+    tenant = request.tenant
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "")
+
+    page, sort_key, direction = paginate(
+        request,
+        services.placements_for(tenant, search=search, status=status),
+        allowed_sorts={"reference": "reference", "created": "created_at"},
+        default_sort="created",
+    )
+
+    context = {
+        "page_title": _("Placements"),
+        "breadcrumb": [_("Placements")],
+        "columns": [
+            {"key": "reference", "label": _("Ref"), "sortable": True},
+            {"key": "worker", "label": _("Worker"), "sortable": False},
+            {"key": "sponsor", "label": _("Sponsor"), "sortable": False},
+            {"key": "route", "label": _("Route"), "sortable": False},
+            {"key": "status", "label": _("Status"), "sortable": False},
+            {"key": "total", "label": _("Total"), "sortable": False},
+        ],
+        "page_obj": page,
+        "sort_key": sort_key,
+        "direction": direction,
+        "search": search,
+        "status": status,
+        "status_choices": Placement.Status.choices,
+        "stats": services.placement_summary(tenant),
+        "can_manage": has_permission(request, MANAGE_PLACEMENTS),
+        "form": PlacementForm(tenant=tenant),
+    }
+    if request.htmx and request.htmx.target == "placements-table":
+        return render(request, "manpower/_placements_table.html", context)
+    return render(request, "manpower/placement_list.html", context)
+
+
+def _get_placement(request: HttpRequest, pk) -> Placement:
+    return get_object_or_404(
+        Placement.objects.filter(tenant=request.tenant).select_related("sponsor", "worker"),
+        pk=pk,
+    )
+
+
+def placement_detail(request: HttpRequest, pk) -> HttpResponse:
+    _require_manpower(request)
+    placement = _get_placement(request, pk)
+    return render(
+        request,
+        "manpower/placement_detail.html",
+        {
+            "page_title": placement.reference,
+            "breadcrumb": [_("Placements"), placement.reference],
+            "placement": placement,
+            "charges": placement.charges.all(),
+            "invoice_form": PlacementInvoiceForm(instance=placement, tenant=request.tenant),
+            "pipeline_form": PlacementPipelineForm(instance=placement, tenant=request.tenant),
+            "charge_form": ChargeForm(tenant=request.tenant),
+            "can_manage": has_permission(request, MANAGE_PLACEMENTS),
+        },
+    )
+
+
+@require_POST
+def placement_create(request: HttpRequest) -> HttpResponse:
+    _require_manpower(request)
+    require_permission(request, MANAGE_PLACEMENTS)
+    form = PlacementForm(request.POST, tenant=request.tenant)
+    if form.is_valid():
+        data = dict(form.cleaned_data)
+        placement = services.create_placement(
+            tenant=request.tenant,
+            user=request.user,
+            sponsor=data.pop("sponsor"),
+            worker=data.pop("worker"),
+            **data,
+        )
+        messages.success(request, _("Placement %(ref)s opened.") % {"ref": placement.reference})
+        return redirect("manpower:placement_detail", pk=placement.pk)
+    messages.error(request, _("Please correct the errors and try again."))
+    return redirect("manpower:placement_list")
+
+
+@require_POST
+def placement_update(request: HttpRequest, pk, section: str) -> HttpResponse:
+    """Save one section of the placement (invoice terms or pipeline dates)."""
+    _require_manpower(request)
+    require_permission(request, MANAGE_PLACEMENTS)
+    placement = _get_placement(request, pk)
+
+    form_class = {"invoice": PlacementInvoiceForm, "pipeline": PlacementPipelineForm}.get(section)
+    if form_class is None:
+        raise Http404("unknown placement section")
+
+    form = form_class(request.POST, instance=placement, tenant=request.tenant)
+    if form.is_valid():
+        services.update_placement(placement, user=request.user, **form.cleaned_data)
+        messages.success(request, _("Changes saved."))
+    else:
+        messages.error(request, _("Please correct the errors and try again."))
+    return redirect("manpower:placement_detail", pk=placement.pk)
+
+
+@require_POST
+def placement_status(request: HttpRequest, pk) -> HttpResponse:
+    _require_manpower(request)
+    require_permission(request, MANAGE_PLACEMENTS)
+    placement = _get_placement(request, pk)
+
+    status = request.POST.get("status", "")
+    if status not in Placement.Status.values:
+        raise Http404("unknown status")
+
+    services.set_placement_status(placement, user=request.user, status=status)
+    messages.success(request, _("Placement updated."))
+    return redirect("manpower:placement_detail", pk=placement.pk)
+
+
+@require_POST
+def placement_charge_add(request: HttpRequest, pk) -> HttpResponse:
+    _require_manpower(request)
+    require_permission(request, MANAGE_PLACEMENTS)
+    placement = _get_placement(request, pk)
+
+    form = ChargeForm(request.POST, tenant=request.tenant)
+    if form.is_valid():
+        charge = form.save(commit=False)
+        charge.tenant = request.tenant
+        charge.placement = placement
+        charge.created_by = request.user
+        charge.updated_by = request.user
+        charge.save()
+        messages.success(request, _("Charge added."))
+    else:
+        messages.error(request, _("Please correct the errors and try again."))
+    return redirect("manpower:placement_detail", pk=placement.pk)
+
+
+@require_POST
+def placement_charge_delete(request: HttpRequest, pk, charge_pk) -> HttpResponse:
+    _require_manpower(request)
+    require_permission(request, MANAGE_PLACEMENTS)
+    placement = _get_placement(request, pk)
+    charge = get_object_or_404(placement.charges, pk=charge_pk)
+    charge.delete()
+    messages.success(request, _("Charge removed."))
+    return redirect("manpower:placement_detail", pk=placement.pk)
+
+
+def placement_print(request: HttpRequest, pk) -> HttpResponse:
+    """The final document: agreement + invoice, laid out for print.
+
+    Rendered as a print-styled HTML page rather than a generated PDF so the
+    project stays dependency-free — every browser can save or print it, and the
+    Arabic layout comes out right because it is the same engine that renders the
+    rest of the app.
+    """
+    _require_manpower(request)
+    placement = _get_placement(request, pk)
+    return render(
+        request,
+        "manpower/placement_print.html",
+        {"placement": placement, "charges": placement.charges.all()},
+    )
+
+
 # --- setup -------------------------------------------------------------------
 
 
@@ -293,5 +473,29 @@ def setup(request: HttpRequest, section: str = "occupations") -> HttpResponse:
             "rows": rows,
             "form": form,
             "editing": instance,
+        },
+    )
+
+
+def worker_cv(request: HttpRequest, pk) -> HttpResponse:
+    """The worker's biodata sheet — what an agency sends a sponsor to choose from.
+
+    Print-styled HTML for the same reason as the invoice: no PDF dependency, and
+    RTL renders correctly because it is the browser doing the layout.
+    """
+    _require_manpower(request)
+    worker = get_object_or_404(
+        Worker.objects.filter(tenant=request.tenant).select_related(
+            "nationality", "occupation", "agent"
+        ),
+        pk=pk,
+    )
+    return render(
+        request,
+        "manpower/worker_cv.html",
+        {
+            "worker": worker,
+            "skills": worker.skills.all(),
+            "languages": worker.languages.all(),
         },
     )

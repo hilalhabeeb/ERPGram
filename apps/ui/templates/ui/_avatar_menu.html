@@ -20,17 +20,21 @@
 
     <div class="my-1 border-t border-border"></div>
     <p class="px-3 py-1 text-xs text-text-muted">{% trans "Language" %}</p>
-    {% get_current_language as CURRENT_LANG %}
-    {% for code, name in LANGUAGES %}
+    {% comment %}
+    `next` is the current page already translated into the target language — see
+    apps.ui.context_processors.language_links for why it cannot be left to
+    set_language to work out.
+    {% endcomment %}
+    {% for link in language_links %}
       <form method="post" action="{% url 'set_language' %}">
         {% csrf_token %}
-        <input type="hidden" name="language" value="{{ code }}">
-        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <input type="hidden" name="language" value="{{ link.code }}">
+        <input type="hidden" name="next" value="{{ link.url }}">
         <button type="submit"
                 class="flex w-full items-center justify-between gap-2 rounded-control px-3 py-2 text-start text-sm hover:bg-subtle
-                       {% if code == CURRENT_LANG %}text-accent-primary{% else %}text-text-primary{% endif %}">
-          <span class="flex items-center gap-2">{% icon "globe" css_class="w-4 h-4 text-text-secondary" %}{{ name }}</span>
-          {% if code == CURRENT_LANG %}{% icon "check" css_class="w-4 h-4" %}{% endif %}
+                       {% if link.is_current %}text-accent-primary{% else %}text-text-primary{% endif %}">
+          <span class="flex items-center gap-2">{% icon "globe" css_class="w-4 h-4 text-text-secondary" %}{{ link.name }}</span>
+          {% if link.is_current %}{% icon "check" css_class="w-4 h-4" %}{% endif %}
         </button>
       </form>
     {% endfor %}
