@@ -152,8 +152,10 @@ def test_rail_only_lists_reachable_entries(client):
     resp = client.get(reverse("ui:settings_profile"))
     keys = {item.key for item in resp.context["nav_items"]}
 
-    assert "organization" not in keys
-    assert {"dashboard", "companies", "profile", "users"} <= keys
+    # Owner-only entries stay hidden; Profile is not a rail entry at all — it
+    # lives in the avatar menu, since it is personal rather than navigation.
+    assert not ({"organization", "users", "profile"} & keys)
+    assert {"dashboard", "companies"} <= keys
 
 
 # --- role management ---------------------------------------------------------

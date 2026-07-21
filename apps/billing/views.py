@@ -65,7 +65,12 @@ def invoice_list(request: HttpRequest) -> HttpResponse:
         "columns": [
             {"key": "number", "label": _("Number"), "sortable": True},
             {"key": "sponsor", "label": _("Sponsor"), "sortable": False},
-            {"key": "issued", "label": _("Issued"), "sortable": True},
+            {
+                "key": "issued",
+                "label": _("Issued"),
+                "sortable": True,
+                "css": "hidden lg:table-cell",
+            },
             {"key": "due", "label": _("Due"), "sortable": True},
             {"key": "total", "label": _("Total"), "sortable": False},
             {"key": "state", "label": _("Status"), "sortable": False},

@@ -10,8 +10,8 @@
     {% endif %}
   </td>
   <td class="px-4 py-3 text-text-secondary">{{ obj.occupation.name }}</td>
-  <td class="px-4 py-3 text-text-secondary">{{ obj.nationality.name }}</td>
-  <td class="px-4 py-3 text-text-secondary">
+  <td class="hidden px-4 py-3 text-text-secondary lg:table-cell">{{ obj.nationality.name }}</td>
+  <td class="hidden px-4 py-3 text-text-secondary xl:table-cell">
     {% blocktrans count years=obj.experience_years %}{{ years }} yr{% plural %}{{ years }} yrs{% endblocktrans %}
   </td>
   <td class="px-4 py-3">

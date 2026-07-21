@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-21 13:17+0300\n"
+"POT-Creation-Date: 2026-07-21 15:27+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps/accounts/admin.py:32 apps/ui/navigation.py:85 apps/ui/services.py:33
+#: apps/accounts/admin.py:32 apps/ui/services.py:33
 #: apps/ui/templates/ui/_avatar_menu.html:18
 #: apps/ui/templates/ui/settings/profile.html:4
-#: apps/ui/templates/ui/settings/profile.html:12 apps/ui/views.py:91
-#: apps/ui/views.py:92
+#: apps/ui/templates/ui/settings/profile.html:12 apps/ui/views.py:107
+#: apps/ui/views.py:108
 msgid "Profile"
 msgstr ""
 
@@ -34,7 +34,7 @@ msgstr ""
 msgid "Dates"
 msgstr ""
 
-#: apps/accounts/forms.py:57 apps/accounts/forms.py:68 apps/ui/views.py:170
+#: apps/accounts/forms.py:57 apps/accounts/forms.py:68 apps/ui/views.py:186
 msgid "Email"
 msgstr ""
 
@@ -46,7 +46,7 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
-#: apps/accounts/forms.py:70 apps/ui/views.py:171
+#: apps/accounts/forms.py:70 apps/ui/views.py:187
 msgid "Role"
 msgstr ""
 
@@ -67,7 +67,7 @@ msgstr ""
 msgid "Built-in roles cannot be renamed."
 msgstr ""
 
-#: apps/accounts/forms.py:135 apps/manpower/views.py:205
+#: apps/accounts/forms.py:135 apps/manpower/views.py:215
 msgid "Phone"
 msgstr ""
 
@@ -125,7 +125,7 @@ msgid "locale"
 msgstr ""
 
 #: apps/accounts/models.py:32 apps/billing/models.py:56
-#: apps/billing/models.py:95 apps/manpower/models.py:77
+#: apps/billing/models.py:93 apps/manpower/models.py:77
 #: apps/manpower/models.py:93 apps/manpower/models.py:120
 #: apps/manpower/models.py:140 apps/manpower/models.py:161
 #: apps/manpower/models.py:204 apps/manpower/models.py:317
@@ -160,7 +160,7 @@ msgid "tenant"
 msgstr ""
 
 #: apps/accounts/models.py:85 apps/billing/models.py:43
-#: apps/billing/models.py:85 apps/manpower/models.py:36
+#: apps/billing/models.py:83 apps/manpower/models.py:36
 #: apps/manpower/models.py:56 apps/manpower/models.py:74
 #: apps/manpower/models.py:92 apps/manpower/models.py:108
 #: apps/manpower/models.py:135 apps/manpower/models.py:155
@@ -386,16 +386,16 @@ msgstr ""
 msgid "Your account is ready. Please sign in."
 msgstr ""
 
-#: apps/billing/forms.py:39 apps/manpower/forms.py:178
+#: apps/billing/forms.py:42 apps/manpower/forms.py:180
 msgid "Insert terms template"
 msgstr ""
 
-#: apps/billing/forms.py:106
+#: apps/billing/forms.py:109
 #: apps/billing/templates/billing/invoice_detail.html:80
 msgid "Services"
 msgstr ""
 
-#: apps/billing/forms.py:107
+#: apps/billing/forms.py:110
 msgid "Terms templates"
 msgstr ""
 
@@ -405,7 +405,7 @@ msgstr ""
 msgid "code"
 msgstr ""
 
-#: apps/billing/models.py:44 apps/billing/models.py:289
+#: apps/billing/models.py:44 apps/billing/models.py:283
 #: apps/manpower/models.py:76
 msgid "description"
 msgstr ""
@@ -414,7 +414,7 @@ msgstr ""
 msgid "default rate"
 msgstr ""
 
-#: apps/billing/models.py:49 apps/billing/models.py:298
+#: apps/billing/models.py:49 apps/billing/models.py:292
 msgid "taxable"
 msgstr ""
 
@@ -426,11 +426,11 @@ msgstr ""
 msgid "income account"
 msgstr ""
 
-#: apps/billing/models.py:55 apps/billing/models.py:302
+#: apps/billing/models.py:55 apps/billing/models.py:296
 msgid "order"
 msgstr ""
 
-#: apps/billing/models.py:59 apps/billing/models.py:283
+#: apps/billing/models.py:59 apps/billing/models.py:277
 msgid "service"
 msgstr ""
 
@@ -438,274 +438,274 @@ msgstr ""
 msgid "services"
 msgstr ""
 
-#: apps/billing/models.py:81
+#: apps/billing/models.py:79
 msgid "Agreements and invoices"
 msgstr ""
 
-#: apps/billing/models.py:82
+#: apps/billing/models.py:80
 msgid "Agreements only"
 msgstr ""
 
-#: apps/billing/models.py:83
+#: apps/billing/models.py:81
 msgid "Invoices only"
 msgstr ""
 
-#: apps/billing/models.py:86
+#: apps/billing/models.py:84
 msgid "terms"
 msgstr ""
 
-#: apps/billing/models.py:88
+#: apps/billing/models.py:86
 msgid "applies to"
 msgstr ""
 
-#: apps/billing/models.py:91
+#: apps/billing/models.py:89
 msgid "use by default"
 msgstr ""
 
-#: apps/billing/models.py:93
+#: apps/billing/models.py:91
 msgid "Pre-selected on new documents."
 msgstr ""
 
-#: apps/billing/models.py:98
+#: apps/billing/models.py:96
 msgid "terms template"
 msgstr ""
 
-#: apps/billing/models.py:99
+#: apps/billing/models.py:97
 msgid "terms templates"
 msgstr ""
 
-#: apps/billing/models.py:116
+#: apps/billing/models.py:114
 msgid "Invoice"
 msgstr ""
 
-#: apps/billing/models.py:117
+#: apps/billing/models.py:115
 #: apps/billing/templates/billing/invoice_detail.html:33
 #: apps/billing/templates/billing/invoice_print.html:15
 msgid "Credit note"
 msgstr ""
 
-#: apps/billing/models.py:120
+#: apps/billing/models.py:118
 #: apps/billing/templates/billing/_invoice_row.html:7
 #: apps/billing/templates/billing/_invoice_row.html:39
 #: apps/billing/templates/billing/invoice_detail.html:21
-#: apps/billing/templates/billing/invoice_list.html:41 apps/billing/views.py:95
-#: apps/manpower/models.py:364
+#: apps/billing/templates/billing/invoice_list.html:41
+#: apps/billing/views.py:100 apps/manpower/models.py:363
 #: apps/manpower/templates/manpower/placement_detail.html:117
 msgid "Draft"
 msgstr ""
 
-#: apps/billing/models.py:121
+#: apps/billing/models.py:119
 #: apps/billing/templates/billing/invoice_detail.html:26
 #: apps/billing/templates/billing/invoice_detail.html:28
-#: apps/billing/templates/billing/invoice_list.html:42 apps/billing/views.py:68
+#: apps/billing/templates/billing/invoice_list.html:42 apps/billing/views.py:70
 #: apps/manpower/templates/manpower/worker_detail.html:150
 msgid "Issued"
 msgstr ""
 
-#: apps/billing/models.py:122
+#: apps/billing/models.py:120
 #: apps/billing/templates/billing/_invoice_row.html:37
 #: apps/billing/templates/billing/invoice_detail.html:24
 #: apps/billing/templates/billing/invoice_list.html:43
-#: apps/manpower/models.py:368
+#: apps/manpower/models.py:367
 msgid "Cancelled"
 msgstr ""
 
-#: apps/billing/models.py:125 apps/manpower/models.py:490
+#: apps/billing/models.py:123 apps/manpower/models.py:486
 msgid "number"
 msgstr ""
 
-#: apps/billing/models.py:128
+#: apps/billing/models.py:126
 msgid "Assigned when the invoice is issued."
 msgstr ""
 
-#: apps/billing/models.py:130 apps/manpower/models.py:190
+#: apps/billing/models.py:128 apps/manpower/models.py:190
 msgid "type"
 msgstr ""
 
-#: apps/billing/models.py:132 apps/manpower/models.py:389
+#: apps/billing/models.py:130 apps/manpower/models.py:388
 msgid "status"
 msgstr ""
 
-#: apps/billing/models.py:137 apps/manpower/models.py:207
-#: apps/manpower/models.py:376
+#: apps/billing/models.py:135 apps/manpower/models.py:207
+#: apps/manpower/models.py:375
 #: apps/manpower/templates/manpower/placement_print.html:96
 msgid "sponsor"
 msgstr ""
 
-#: apps/billing/models.py:143 apps/manpower/models.py:411
+#: apps/billing/models.py:141 apps/manpower/models.py:410
 msgid "placement"
 msgstr ""
 
-#: apps/billing/models.py:148
+#: apps/billing/models.py:146
 msgid "Optional — not all billing comes from a placement."
 msgstr ""
 
-#: apps/billing/models.py:153
+#: apps/billing/models.py:151
 #: apps/billing/templates/billing/invoice_detail.html:37
 msgid "corrects"
 msgstr ""
 
-#: apps/billing/models.py:161
+#: apps/billing/models.py:159
 msgid "billed to"
 msgstr ""
 
-#: apps/billing/models.py:162 apps/manpower/models.py:192
+#: apps/billing/models.py:160 apps/manpower/models.py:192
 msgid "national ID / CPR"
 msgstr ""
 
-#: apps/billing/models.py:164
+#: apps/billing/models.py:162
 msgid "issue date"
 msgstr ""
 
-#: apps/billing/models.py:165
+#: apps/billing/models.py:163
 msgid "due date"
 msgstr ""
 
-#: apps/billing/models.py:166 apps/manpower/models.py:406
+#: apps/billing/models.py:164 apps/manpower/models.py:405
 msgid "payment terms"
 msgstr ""
 
-#: apps/billing/models.py:167 apps/manpower/models.py:407
+#: apps/billing/models.py:165 apps/manpower/models.py:406
 msgid "terms and conditions"
 msgstr ""
 
-#: apps/billing/models.py:168 apps/billing/models.py:356
+#: apps/billing/models.py:166 apps/billing/models.py:350
 #: apps/manpower/models.py:119 apps/manpower/models.py:203
-#: apps/manpower/models.py:316 apps/manpower/models.py:408
-#: apps/manpower/models.py:494
+#: apps/manpower/models.py:316 apps/manpower/models.py:407
+#: apps/manpower/models.py:490
 msgid "notes"
 msgstr ""
 
-#: apps/billing/models.py:171
+#: apps/billing/models.py:169
 msgid "discount"
 msgstr ""
 
-#: apps/billing/models.py:179 apps/billing/models.py:279
-#: apps/billing/models.py:343
+#: apps/billing/models.py:177 apps/billing/models.py:273
+#: apps/billing/models.py:337
 msgid "invoice"
 msgstr ""
 
-#: apps/billing/models.py:180
+#: apps/billing/models.py:178
 msgid "invoices"
 msgstr ""
 
-#: apps/billing/models.py:194
+#: apps/billing/models.py:192
 #: apps/billing/templates/billing/invoice_detail.html:4
 #: apps/billing/templates/billing/invoice_detail.html:8
-#: apps/billing/templates/billing/invoice_print.html:4 apps/billing/views.py:94
+#: apps/billing/templates/billing/invoice_print.html:4 apps/billing/views.py:99
 msgid "Draft invoice"
 msgstr ""
 
-#: apps/billing/models.py:291
+#: apps/billing/models.py:285
 msgid "quantity"
 msgstr ""
 
-#: apps/billing/models.py:297
+#: apps/billing/models.py:291
 msgid "rate"
 msgstr ""
 
-#: apps/billing/models.py:300
+#: apps/billing/models.py:294
 msgid "tax rate %"
 msgstr ""
 
-#: apps/billing/models.py:305
+#: apps/billing/models.py:299
 msgid "invoice line"
 msgstr ""
 
-#: apps/billing/models.py:306
+#: apps/billing/models.py:300
 msgid "invoice lines"
 msgstr ""
 
-#: apps/billing/models.py:336
+#: apps/billing/models.py:330
 msgid "Cash"
 msgstr ""
 
-#: apps/billing/models.py:337
+#: apps/billing/models.py:331
 msgid "Bank transfer"
 msgstr ""
 
-#: apps/billing/models.py:338
+#: apps/billing/models.py:332
 msgid "Card"
 msgstr ""
 
-#: apps/billing/models.py:339
+#: apps/billing/models.py:333
 msgid "Cheque"
 msgstr ""
 
-#: apps/billing/models.py:340
+#: apps/billing/models.py:334
 msgid "Other"
 msgstr ""
 
-#: apps/billing/models.py:345
+#: apps/billing/models.py:339
 msgid "received on"
 msgstr ""
 
-#: apps/billing/models.py:347
+#: apps/billing/models.py:341
 msgid "amount"
 msgstr ""
 
-#: apps/billing/models.py:353
+#: apps/billing/models.py:347
 msgid "method"
 msgstr ""
 
-#: apps/billing/models.py:355 apps/manpower/models.py:246
-#: apps/manpower/models.py:374
+#: apps/billing/models.py:349 apps/manpower/models.py:246
+#: apps/manpower/models.py:373
 msgid "reference"
 msgstr ""
 
-#: apps/billing/models.py:359
+#: apps/billing/models.py:353
 msgid "payment"
 msgstr ""
 
-#: apps/billing/models.py:360
+#: apps/billing/models.py:354
 msgid "payments"
 msgstr ""
 
-#: apps/billing/services.py:185
+#: apps/billing/services.py:184
 msgid "This invoice has been issued. Raise a credit note to correct it."
 msgstr ""
 
-#: apps/billing/services.py:193
+#: apps/billing/services.py:191
 msgid "Only a draft can be issued."
 msgstr ""
 
-#: apps/billing/services.py:195
+#: apps/billing/services.py:193
 msgid "Add at least one line before issuing."
 msgstr ""
 
-#: apps/billing/services.py:219
+#: apps/billing/services.py:217
 msgid "This invoice has payments against it. Raise a credit note instead."
 msgstr ""
 
-#: apps/billing/services.py:231
+#: apps/billing/services.py:229
 msgid "Only an issued invoice can be credited."
 msgstr ""
 
-#: apps/billing/services.py:233
+#: apps/billing/services.py:231
 msgid "A credit note cannot be credited."
 msgstr ""
 
-#: apps/billing/services.py:267
+#: apps/billing/services.py:265
 msgid "Only an issued invoice can take a payment."
 msgstr ""
 
-#: apps/billing/services.py:321 apps/billing/services.py:331
+#: apps/billing/services.py:319 apps/billing/services.py:329
 msgid "Not yet due"
 msgstr ""
 
-#: apps/billing/services.py:322 apps/billing/services.py:333
+#: apps/billing/services.py:320 apps/billing/services.py:331
 msgid "1–30 days"
 msgstr ""
 
-#: apps/billing/services.py:323 apps/billing/services.py:335
+#: apps/billing/services.py:321 apps/billing/services.py:333
 msgid "31–60 days"
 msgstr ""
 
-#: apps/billing/services.py:324 apps/billing/services.py:337
+#: apps/billing/services.py:322 apps/billing/services.py:335
 msgid "61–90 days"
 msgstr ""
 
-#: apps/billing/services.py:325 apps/billing/services.py:338
+#: apps/billing/services.py:323 apps/billing/services.py:336
 msgid "Over 90 days"
 msgstr ""
 
@@ -713,11 +713,11 @@ msgstr ""
 msgid "Outstanding"
 msgstr ""
 
-#: apps/billing/services.py:382
+#: apps/billing/services.py:385
 msgid "Overdue"
 msgstr ""
 
-#: apps/billing/services.py:383
+#: apps/billing/services.py:386
 msgid "Draft invoices"
 msgstr ""
 
@@ -863,7 +863,7 @@ msgstr ""
 
 #: apps/billing/templates/billing/invoice_detail.html:138
 #: apps/billing/templates/billing/invoice_print.html:103
-#: apps/billing/views.py:70
+#: apps/billing/views.py:75
 msgid "Total"
 msgstr ""
 
@@ -921,9 +921,9 @@ msgstr ""
 #: apps/billing/templates/billing/invoice_list.html:4
 #: apps/billing/templates/billing/invoice_list.html:8
 #: apps/billing/templates/billing/invoice_list.html:10 apps/billing/views.py:63
-#: apps/billing/views.py:64 apps/billing/views.py:95 apps/billing/views.py:276
+#: apps/billing/views.py:64 apps/billing/views.py:100 apps/billing/views.py:281
 #: apps/manpower/templates/manpower/placement_detail.html:97
-#: apps/ui/navigation.py:61
+#: apps/ui/navigation.py:78
 msgid "Invoices"
 msgstr ""
 
@@ -941,7 +941,7 @@ msgstr ""
 #: apps/manpower/templates/manpower/placement_list.html:21
 #: apps/manpower/templates/manpower/worker_list.html:25
 #: apps/ui/templates/ui/search_input.html:12
-#: apps/ui/templates/ui/search_input.html:17 templates/shell.html:73
+#: apps/ui/templates/ui/search_input.html:17 templates/shell.html:135
 msgid "Search"
 msgstr ""
 
@@ -949,11 +949,11 @@ msgstr ""
 msgid "Number or sponsor"
 msgstr ""
 
-#: apps/billing/templates/billing/invoice_list.html:38 apps/billing/views.py:71
+#: apps/billing/templates/billing/invoice_list.html:38 apps/billing/views.py:76
 #: apps/manpower/templates/manpower/placement_list.html:25
-#: apps/manpower/views.py:207 apps/manpower/views.py:272
+#: apps/manpower/views.py:217 apps/manpower/views.py:287
 #: apps/tenancy/templates/tenancy/company_detail.html:25
-#: apps/tenancy/views.py:74 apps/tenancy/views.py:153 apps/ui/views.py:172
+#: apps/tenancy/views.py:74 apps/tenancy/views.py:153 apps/ui/views.py:188
 msgid "Status"
 msgstr ""
 
@@ -980,8 +980,8 @@ msgstr ""
 
 #: apps/billing/templates/billing/invoice_list.html:49
 #: apps/billing/templates/billing/receivables.html:4
-#: apps/billing/templates/billing/receivables.html:7 apps/billing/views.py:275
-#: apps/billing/views.py:276
+#: apps/billing/templates/billing/receivables.html:7 apps/billing/views.py:280
+#: apps/billing/views.py:281
 msgid "Receivables"
 msgstr ""
 
@@ -1056,8 +1056,8 @@ msgid "Nothing open."
 msgstr ""
 
 #: apps/billing/templates/billing/setup.html:4
-#: apps/billing/templates/billing/setup.html:7 apps/billing/views.py:341
-#: apps/billing/views.py:342 apps/ui/navigation.py:77
+#: apps/billing/templates/billing/setup.html:7 apps/billing/views.py:346
+#: apps/billing/views.py:347 apps/ui/navigation.py:104
 msgid "Billing setup"
 msgstr ""
 
@@ -1176,59 +1176,59 @@ msgstr ""
 #: apps/billing/views.py:67
 #: apps/manpower/templates/manpower/placement_detail.html:66
 #: apps/manpower/templates/manpower/placement_print.html:28
-#: apps/manpower/views.py:203 apps/manpower/views.py:270
+#: apps/manpower/views.py:213 apps/manpower/views.py:280
 msgid "Sponsor"
 msgstr ""
 
-#: apps/billing/views.py:69
+#: apps/billing/views.py:74
 msgid "Due"
 msgstr ""
 
-#: apps/billing/views.py:120
+#: apps/billing/views.py:125
 msgid "Draft invoice created."
 msgstr ""
 
-#: apps/billing/views.py:122 apps/billing/views.py:152
-#: apps/billing/views.py:174 apps/billing/views.py:250
-#: apps/billing/views.py:333 apps/manpower/views.py:234
-#: apps/manpower/views.py:332 apps/manpower/views.py:355
-#: apps/manpower/views.py:441 apps/tenancy/views.py:100
+#: apps/billing/views.py:127 apps/billing/views.py:157
+#: apps/billing/views.py:179 apps/billing/views.py:255
+#: apps/billing/views.py:338 apps/manpower/views.py:244
+#: apps/manpower/views.py:347 apps/manpower/views.py:370
+#: apps/manpower/views.py:456 apps/tenancy/views.py:100
 #: apps/tenancy/views.py:113 apps/tenancy/views.py:187
-#: apps/tenancy/views.py:201 apps/ui/views.py:220
+#: apps/tenancy/views.py:201 apps/ui/views.py:236
 msgid "Please correct the errors and try again."
 msgstr ""
 
-#: apps/billing/views.py:150 apps/billing/views.py:320
-#: apps/billing/views.py:331 apps/manpower/views.py:152
-#: apps/manpower/views.py:244 apps/manpower/views.py:353
-#: apps/manpower/views.py:427 apps/manpower/views.py:439
+#: apps/billing/views.py:155 apps/billing/views.py:325
+#: apps/billing/views.py:336 apps/manpower/views.py:162
+#: apps/manpower/views.py:254 apps/manpower/views.py:368
+#: apps/manpower/views.py:442 apps/manpower/views.py:454
 #: apps/tenancy/views.py:111 apps/tenancy/views.py:199
 #: apps/tenancy/views.py:267
 msgid "Changes saved."
 msgstr ""
 
-#: apps/billing/views.py:172
+#: apps/billing/views.py:177
 msgid "Line added."
 msgstr ""
 
-#: apps/billing/views.py:187
+#: apps/billing/views.py:192
 msgid "Line removed."
 msgstr ""
 
-#: apps/billing/views.py:201
+#: apps/billing/views.py:206
 #, python-format
 msgid "Invoice %(number)s issued."
 msgstr ""
 
-#: apps/billing/views.py:215
+#: apps/billing/views.py:220
 msgid "Invoice cancelled."
 msgstr ""
 
-#: apps/billing/views.py:231
+#: apps/billing/views.py:236
 msgid "Credit note drafted. Review it, then issue it."
 msgstr ""
 
-#: apps/billing/views.py:248
+#: apps/billing/views.py:253
 msgid "Payment recorded."
 msgstr ""
 
@@ -1267,10 +1267,10 @@ msgid "Create, edit and archive companies, branches and departments."
 msgstr ""
 
 #: apps/core/permissions.py:60 apps/core/permissions.py:66
-#: apps/ui/navigation.py:88 apps/ui/services.py:35
+#: apps/ui/navigation.py:121 apps/ui/services.py:35
 #: apps/ui/templates/ui/settings/organization.html:4
-#: apps/ui/templates/ui/settings/organization.html:12 apps/ui/views.py:122
-#: apps/ui/views.py:123
+#: apps/ui/templates/ui/settings/organization.html:12 apps/ui/views.py:138
+#: apps/ui/views.py:139
 msgid "Organisation"
 msgstr ""
 
@@ -1340,7 +1340,7 @@ msgid "Create, price, issue and credit invoices."
 msgstr ""
 
 #: apps/core/permissions.py:106 apps/core/permissions.py:113
-#: apps/core/permissions.py:120
+#: apps/core/permissions.py:120 apps/ui/navigation.py:83
 msgid "Accounting"
 msgstr ""
 
@@ -1368,31 +1368,31 @@ msgstr ""
 msgid "Edit occupations, skills, agents, accommodation and document types."
 msgstr ""
 
-#: apps/manpower/forms.py:181
+#: apps/manpower/forms.py:184
 msgid ""
 "Copies the template text below. Editing it later will not change this "
 "agreement."
 msgstr ""
 
-#: apps/manpower/forms.py:278
+#: apps/manpower/forms.py:279
 msgid "Occupations"
 msgstr ""
 
-#: apps/manpower/forms.py:279
+#: apps/manpower/forms.py:280
 #: apps/manpower/templates/manpower/worker_cv.html:79
 msgid "Skills"
 msgstr ""
 
-#: apps/manpower/forms.py:280
+#: apps/manpower/forms.py:281
 msgid "Agents"
 msgstr ""
 
-#: apps/manpower/forms.py:281
+#: apps/manpower/forms.py:282
 #: apps/manpower/templates/manpower/worker_detail.html:127
 msgid "Accommodation"
 msgstr ""
 
-#: apps/manpower/forms.py:282
+#: apps/manpower/forms.py:283
 msgid "Document types"
 msgstr ""
 
@@ -1425,7 +1425,7 @@ msgid "languages"
 msgstr ""
 
 #: apps/manpower/models.py:80 apps/manpower/models.py:270
-#: apps/manpower/models.py:382
+#: apps/manpower/models.py:381
 msgid "occupation"
 msgstr ""
 
@@ -1483,7 +1483,7 @@ msgstr ""
 msgid "Documents of this type are watched for upcoming expiry."
 msgstr ""
 
-#: apps/manpower/models.py:164 apps/manpower/models.py:486
+#: apps/manpower/models.py:164 apps/manpower/models.py:482
 msgid "document type"
 msgstr ""
 
@@ -1643,8 +1643,8 @@ msgstr ""
 msgid "available from"
 msgstr ""
 
-#: apps/manpower/models.py:320 apps/manpower/models.py:379
-#: apps/manpower/models.py:482
+#: apps/manpower/models.py:320 apps/manpower/models.py:378
+#: apps/manpower/models.py:478
 msgid "worker"
 msgstr ""
 
@@ -1652,140 +1652,140 @@ msgstr ""
 msgid "workers"
 msgstr ""
 
-#: apps/manpower/models.py:360
+#: apps/manpower/models.py:359
 msgid "Visa transfer (in country)"
 msgstr ""
 
-#: apps/manpower/models.py:361
+#: apps/manpower/models.py:360
 msgid "Overseas recruitment"
 msgstr ""
 
-#: apps/manpower/models.py:365
+#: apps/manpower/models.py:364
 msgid "Confirmed"
 msgstr ""
 
-#: apps/manpower/models.py:366
+#: apps/manpower/models.py:365
 msgid "Processing"
 msgstr ""
 
-#: apps/manpower/models.py:367 apps/manpower/models.py:473
-#: apps/manpower/services.py:480
+#: apps/manpower/models.py:366 apps/manpower/models.py:470
+#: apps/manpower/services.py:471
 msgid "Delivered"
 msgstr ""
 
-#: apps/manpower/models.py:371
+#: apps/manpower/models.py:370
 msgid "1 year"
 msgstr ""
 
-#: apps/manpower/models.py:372
+#: apps/manpower/models.py:371
 msgid "2 years"
 msgstr ""
 
-#: apps/manpower/models.py:381
+#: apps/manpower/models.py:380
 msgid "worker name"
 msgstr ""
 
-#: apps/manpower/models.py:384
+#: apps/manpower/models.py:383
 msgid "route"
 msgstr ""
 
-#: apps/manpower/models.py:386
+#: apps/manpower/models.py:385
 msgid "visa period"
 msgstr ""
 
-#: apps/manpower/models.py:392
+#: apps/manpower/models.py:391
 msgid "agreed on"
 msgstr ""
 
-#: apps/manpower/models.py:394
+#: apps/manpower/models.py:393
 msgid "medical completed"
 msgstr ""
 
-#: apps/manpower/models.py:395
+#: apps/manpower/models.py:394
 msgid "visa applied"
 msgstr ""
 
-#: apps/manpower/models.py:396
+#: apps/manpower/models.py:395
 msgid "visa issued"
 msgstr ""
 
-#: apps/manpower/models.py:397
+#: apps/manpower/models.py:396
 msgid "travel date"
 msgstr ""
 
-#: apps/manpower/models.py:398
+#: apps/manpower/models.py:397
 msgid "arrival date"
 msgstr ""
 
-#: apps/manpower/models.py:399
+#: apps/manpower/models.py:398
 msgid "delivered on"
 msgstr ""
 
-#: apps/manpower/models.py:401
+#: apps/manpower/models.py:400
 msgid "contract start"
 msgstr ""
 
-#: apps/manpower/models.py:402
+#: apps/manpower/models.py:401
 msgid "contract end"
 msgstr ""
 
-#: apps/manpower/models.py:412
+#: apps/manpower/models.py:411
 msgid "placements"
 msgstr ""
 
-#: apps/manpower/models.py:462
+#: apps/manpower/models.py:459
 msgid "Agreed"
 msgstr ""
 
-#: apps/manpower/models.py:465
+#: apps/manpower/models.py:462
 msgid "Medical"
 msgstr ""
 
-#: apps/manpower/models.py:466
+#: apps/manpower/models.py:463
 msgid "Visa applied"
 msgstr ""
 
-#: apps/manpower/models.py:467
+#: apps/manpower/models.py:464
 msgid "Visa issued"
 msgstr ""
 
-#: apps/manpower/models.py:468
+#: apps/manpower/models.py:465
 msgid "Travel"
 msgstr ""
 
-#: apps/manpower/models.py:469
+#: apps/manpower/models.py:466
 msgid "Arrival"
 msgstr ""
 
-#: apps/manpower/models.py:472
+#: apps/manpower/models.py:469
 msgid "Visa transferred"
 msgstr ""
 
-#: apps/manpower/models.py:491
+#: apps/manpower/models.py:487
 msgid "issued on"
 msgstr ""
 
-#: apps/manpower/models.py:492
+#: apps/manpower/models.py:488
 msgid "expires on"
 msgstr ""
 
-#: apps/manpower/models.py:493
+#: apps/manpower/models.py:489
 msgid "file"
 msgstr ""
 
-#: apps/manpower/models.py:497
+#: apps/manpower/models.py:493
 msgid "worker document"
 msgstr ""
 
-#: apps/manpower/models.py:498
+#: apps/manpower/models.py:494
 msgid "worker documents"
 msgstr ""
 
-#: apps/manpower/services.py:472
+#: apps/manpower/services.py:463
 msgid "In progress"
 msgstr ""
 
-#: apps/manpower/services.py:486
+#: apps/manpower/services.py:477
 msgid "Awaiting payment"
 msgstr ""
 
@@ -1804,12 +1804,12 @@ msgid "not invoiced"
 msgstr ""
 
 #: apps/manpower/templates/manpower/_placements_table.html:2
-#: apps/ui/templates/ui/dashboard.html:81
+#: apps/ui/templates/ui/dashboard.html:117
 msgid "No placements yet"
 msgstr ""
 
 #: apps/manpower/templates/manpower/_placements_table.html:2
-#: apps/ui/templates/ui/dashboard.html:81
+#: apps/ui/templates/ui/dashboard.html:117
 msgid "Open a placement when a sponsor picks a worker."
 msgstr ""
 
@@ -1868,7 +1868,7 @@ msgstr ""
 
 #: apps/manpower/templates/manpower/placement_detail.html:71
 #: apps/manpower/templates/manpower/placement_print.html:40
-#: apps/manpower/views.py:86 apps/manpower/views.py:269
+#: apps/manpower/views.py:86 apps/manpower/views.py:279
 msgid "Worker"
 msgstr ""
 
@@ -1928,8 +1928,8 @@ msgstr ""
 #: apps/manpower/templates/manpower/placement_list.html:4
 #: apps/manpower/templates/manpower/placement_list.html:8
 #: apps/manpower/templates/manpower/placement_list.html:10
-#: apps/manpower/views.py:265 apps/manpower/views.py:266
-#: apps/manpower/views.py:305 apps/ui/navigation.py:54
+#: apps/manpower/views.py:275 apps/manpower/views.py:276
+#: apps/manpower/views.py:320 apps/ui/navigation.py:70 apps/ui/views.py:79
 msgid "Placements"
 msgstr ""
 
@@ -1980,8 +1980,8 @@ msgid "For"
 msgstr ""
 
 #: apps/manpower/templates/manpower/setup.html:4
-#: apps/manpower/templates/manpower/setup.html:7 apps/manpower/views.py:451
-#: apps/manpower/views.py:452 apps/ui/navigation.py:69
+#: apps/manpower/templates/manpower/setup.html:7 apps/manpower/views.py:466
+#: apps/manpower/views.py:467 apps/ui/navigation.py:95
 msgid "Manpower setup"
 msgstr ""
 
@@ -1992,8 +1992,8 @@ msgstr ""
 #: apps/manpower/templates/manpower/sponsor_list.html:4
 #: apps/manpower/templates/manpower/sponsor_list.html:8
 #: apps/manpower/templates/manpower/sponsor_list.html:10
-#: apps/manpower/views.py:200 apps/manpower/views.py:201
-#: apps/ui/navigation.py:47
+#: apps/manpower/views.py:210 apps/manpower/views.py:211
+#: apps/ui/navigation.py:62
 msgid "Sponsors"
 msgstr ""
 
@@ -2045,7 +2045,7 @@ msgstr ""
 #: apps/manpower/templates/manpower/worker_cv.html:58
 #: apps/manpower/templates/manpower/worker_detail.html:56
 #: apps/manpower/templates/manpower/worker_detail.html:93
-#: apps/manpower/views.py:89
+#: apps/manpower/views.py:96
 msgid "Experience"
 msgstr ""
 
@@ -2070,7 +2070,7 @@ msgstr ""
 #: apps/manpower/templates/manpower/worker_cv.html:70
 #: apps/manpower/templates/manpower/worker_detail.html:52
 #: apps/manpower/templates/manpower/worker_list.html:61
-#: apps/manpower/views.py:91
+#: apps/manpower/views.py:101
 msgid "Location"
 msgstr ""
 
@@ -2097,7 +2097,7 @@ msgid "Availability is subject to confirmation at the time of booking."
 msgstr ""
 
 #: apps/manpower/templates/manpower/worker_detail.html:9
-#: apps/manpower/views.py:159
+#: apps/manpower/views.py:169
 msgid "Edit worker"
 msgstr ""
 
@@ -2175,8 +2175,8 @@ msgstr ""
 #: apps/manpower/templates/manpower/worker_list.html:9
 #: apps/manpower/templates/manpower/worker_list.html:11
 #: apps/manpower/views.py:82 apps/manpower/views.py:83
-#: apps/manpower/views.py:122 apps/manpower/views.py:160
-#: apps/ui/navigation.py:40
+#: apps/manpower/views.py:132 apps/manpower/views.py:170
+#: apps/ui/navigation.py:54 apps/ui/views.py:75
 msgid "Workers"
 msgstr ""
 
@@ -2186,7 +2186,7 @@ msgid "The register of workers you can offer to sponsors."
 msgstr ""
 
 #: apps/manpower/templates/manpower/worker_list.html:9
-#: apps/manpower/views.py:159 apps/manpower/views.py:160
+#: apps/manpower/views.py:169 apps/manpower/views.py:170
 msgid "Add worker"
 msgstr ""
 
@@ -2200,66 +2200,66 @@ msgid "Occupation"
 msgstr ""
 
 #: apps/manpower/templates/manpower/worker_list.html:41
-#: apps/manpower/views.py:88
+#: apps/manpower/views.py:90
 msgid "Nationality"
 msgstr ""
 
 #: apps/manpower/templates/manpower/worker_list.html:51
-#: apps/manpower/views.py:90
+#: apps/manpower/views.py:100
 msgid "Availability"
 msgstr ""
 
-#: apps/manpower/views.py:85 apps/manpower/views.py:268
+#: apps/manpower/views.py:85 apps/manpower/views.py:278
 msgid "Ref"
 msgstr ""
 
-#: apps/manpower/views.py:147 apps/manpower/views.py:232
+#: apps/manpower/views.py:157 apps/manpower/views.py:242
 #, python-format
 msgid "%(name)s has been added."
 msgstr ""
 
-#: apps/manpower/views.py:175 apps/tenancy/views.py:129
+#: apps/manpower/views.py:185 apps/tenancy/views.py:129
 #: apps/tenancy/views.py:215 apps/tenancy/views.py:285
 #, python-format
 msgid "%(name)s was restored."
 msgstr ""
 
-#: apps/manpower/views.py:177 apps/tenancy/views.py:212
+#: apps/manpower/views.py:187 apps/tenancy/views.py:212
 #: apps/tenancy/views.py:282
 #, python-format
 msgid "%(name)s was archived."
 msgstr ""
 
-#: apps/manpower/views.py:204
+#: apps/manpower/views.py:214
 msgid "National ID / CPR"
 msgstr ""
 
-#: apps/manpower/views.py:206
+#: apps/manpower/views.py:216
 msgid "Area"
 msgstr ""
 
-#: apps/manpower/views.py:271
+#: apps/manpower/views.py:283
 msgid "Route"
 msgstr ""
 
-#: apps/manpower/views.py:273
+#: apps/manpower/views.py:288
 msgid "Billing"
 msgstr ""
 
-#: apps/manpower/views.py:330
+#: apps/manpower/views.py:345
 #, python-format
 msgid "Placement %(ref)s opened."
 msgstr ""
 
-#: apps/manpower/views.py:370
+#: apps/manpower/views.py:385
 msgid "Placement updated."
 msgstr ""
 
-#: apps/manpower/views.py:389
+#: apps/manpower/views.py:404
 msgid "Draft invoice created. Check the lines, then issue it."
 msgstr ""
 
-#: apps/manpower/views.py:423
+#: apps/manpower/views.py:438
 msgid "That record is not available."
 msgstr ""
 
@@ -2486,7 +2486,7 @@ msgstr ""
 #: apps/tenancy/templates/tenancy/company_list.html:8
 #: apps/tenancy/templates/tenancy/company_list.html:10 apps/tenancy/views.py:68
 #: apps/tenancy/views.py:69 apps/tenancy/views.py:147 apps/tenancy/views.py:226
-#: apps/ui/navigation.py:84 apps/ui/services.py:48
+#: apps/ui/navigation.py:88 apps/ui/services.py:48
 msgid "Companies"
 msgstr ""
 
@@ -2507,7 +2507,7 @@ msgstr ""
 msgid "Add a company"
 msgstr ""
 
-#: apps/tenancy/views.py:71 apps/tenancy/views.py:150 apps/ui/views.py:169
+#: apps/tenancy/views.py:71 apps/tenancy/views.py:150 apps/ui/views.py:185
 msgid "Name"
 msgstr ""
 
@@ -2533,22 +2533,31 @@ msgstr ""
 msgid "Please correct the errors."
 msgstr ""
 
-#: apps/ui/navigation.py:36 apps/ui/templates/ui/dashboard.html:4
-#: apps/ui/templates/ui/dashboard.html:7 apps/ui/views.py:59
-#: templates/shell.html:60
+#: apps/ui/navigation.py:50 apps/ui/templates/ui/dashboard.html:4
+#: apps/ui/templates/ui/dashboard.html:7 apps/ui/views.py:60
+#: templates/shell.html:122
 msgid "Dashboard"
 msgstr ""
 
-#: apps/ui/navigation.py:94 apps/ui/services.py:36
+#: apps/ui/navigation.py:58 apps/ui/navigation.py:66 apps/ui/navigation.py:74
+msgid "Operations"
+msgstr ""
+
+#: apps/ui/navigation.py:91 apps/ui/navigation.py:100 apps/ui/navigation.py:109
+#: apps/ui/navigation.py:117 apps/ui/navigation.py:125
+msgid "Setup"
+msgstr ""
+
+#: apps/ui/navigation.py:113 apps/ui/services.py:36
 #: apps/ui/templates/ui/settings/users.html:4
-#: apps/ui/templates/ui/settings/users.html:15 apps/ui/views.py:177
-#: apps/ui/views.py:178
+#: apps/ui/templates/ui/settings/users.html:15 apps/ui/views.py:193
+#: apps/ui/views.py:194
 msgid "Users"
 msgstr ""
 
 #: apps/ui/services.py:38 apps/ui/templates/ui/settings/roles.html:4
-#: apps/ui/templates/ui/settings/roles.html:11 apps/ui/views.py:228
-#: apps/ui/views.py:229
+#: apps/ui/templates/ui/settings/roles.html:11 apps/ui/views.py:244
+#: apps/ui/views.py:245
 msgid "Roles"
 msgstr ""
 
@@ -2580,43 +2589,47 @@ msgstr ""
 msgid "Switch organisation"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:25
+#: apps/ui/templates/ui/dashboard.html:31
+msgid "Money"
+msgstr ""
+
+#: apps/ui/templates/ui/dashboard.html:57
 msgid "Expiring soon"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:26
+#: apps/ui/templates/ui/dashboard.html:58
 msgid "Documents lapsing in the next 90 days."
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:48
+#: apps/ui/templates/ui/dashboard.html:82
 msgid "Nothing expiring"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:48
+#: apps/ui/templates/ui/dashboard.html:82
 msgid "No worker documents lapse in the next 90 days."
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:54
+#: apps/ui/templates/ui/dashboard.html:89
 msgid "Recent placements"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:56
+#: apps/ui/templates/ui/dashboard.html:91
 msgid "View all"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:89
+#: apps/ui/templates/ui/dashboard.html:126
 msgid "Overview"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:90
+#: apps/ui/templates/ui/dashboard.html:127
 msgid "Charts and activity will appear here in a later step."
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:94
+#: apps/ui/templates/ui/dashboard.html:131
 msgid "No data yet"
 msgstr ""
 
-#: apps/ui/templates/ui/dashboard.html:94
+#: apps/ui/templates/ui/dashboard.html:131
 msgid "Once you add companies and branches, activity shows up here."
 msgstr ""
 
@@ -2675,8 +2688,8 @@ msgstr ""
 #: apps/ui/templates/ui/settings/profile.html:7
 #: apps/ui/templates/ui/settings/roles.html:7
 #: apps/ui/templates/ui/settings/users.html:8
-#: apps/ui/templates/ui/settings/users.html:10 apps/ui/views.py:92
-#: apps/ui/views.py:123 apps/ui/views.py:178 apps/ui/views.py:229
+#: apps/ui/templates/ui/settings/users.html:10 apps/ui/views.py:108
+#: apps/ui/views.py:139 apps/ui/views.py:194 apps/ui/views.py:245
 msgid "Settings"
 msgstr ""
 
@@ -2746,53 +2759,53 @@ msgstr ""
 msgid "Dismiss"
 msgstr ""
 
-#: apps/ui/views.py:50
+#: apps/ui/views.py:51
 msgid "Yearly"
 msgstr ""
 
-#: apps/ui/views.py:51
+#: apps/ui/views.py:52
 msgid "Monthly"
 msgstr ""
 
-#: apps/ui/views.py:52
+#: apps/ui/views.py:53
 msgid "Weekly"
 msgstr ""
 
-#: apps/ui/views.py:85
+#: apps/ui/views.py:101
 msgid "Your profile has been updated."
 msgstr ""
 
-#: apps/ui/views.py:116
+#: apps/ui/views.py:132
 msgid "Organisation settings saved."
 msgstr ""
 
-#: apps/ui/views.py:146
+#: apps/ui/views.py:162
 #, python-format
 msgid "Invitation sent to %(email)s."
 msgstr ""
 
-#: apps/ui/views.py:151
+#: apps/ui/views.py:167
 #, python-format
 msgid "%(email)s was added to this organisation."
 msgstr ""
 
-#: apps/ui/views.py:173
+#: apps/ui/views.py:189
 msgid "Joined"
 msgstr ""
 
-#: apps/ui/views.py:207
+#: apps/ui/views.py:223
 msgid "The Owner role always has full access."
 msgstr ""
 
-#: apps/ui/views.py:212 apps/ui/views.py:253
+#: apps/ui/views.py:228 apps/ui/views.py:269
 msgid "Role updated."
 msgstr ""
 
-#: apps/ui/views.py:218
+#: apps/ui/views.py:234
 msgid "Role created."
 msgstr ""
 
-#: apps/ui/views.py:246
+#: apps/ui/views.py:262
 msgid "Owners always have full access; their role cannot limit it."
 msgstr ""
 
@@ -2914,26 +2927,30 @@ msgstr ""
 msgid "Reset your Erpgram password"
 msgstr ""
 
-#: templates/shell.html:16
+#: templates/shell.html:27
 msgid "Primary"
 msgstr ""
 
-#: templates/shell.html:18
+#: templates/shell.html:32
 msgid "Home"
 msgstr ""
 
-#: templates/shell.html:52
+#: templates/shell.html:50
+msgid "Close menu"
+msgstr ""
+
+#: templates/shell.html:114
 msgid "Open menu"
 msgstr ""
 
-#: templates/shell.html:57
+#: templates/shell.html:119
 msgid "Breadcrumb"
 msgstr ""
 
-#: templates/shell.html:76
+#: templates/shell.html:138
 msgid "Support"
 msgstr ""
 
-#: templates/shell.html:78
+#: templates/shell.html:140
 msgid "Notifications"
 msgstr ""

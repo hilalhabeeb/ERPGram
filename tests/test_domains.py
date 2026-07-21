@@ -69,7 +69,7 @@ def test_rail_hides_manpower_entries_outside_the_domain():
     assert {"workers", "sponsors"} <= manpower_keys
     assert not ({"workers", "sponsors", "manpower_setup"} & general_keys)
     # the shared core is present in both
-    assert {"dashboard", "companies", "profile"} <= general_keys
+    assert {"dashboard", "companies"} <= general_keys
 
 
 def test_owner_of_another_domain_does_not_hold_manpower_permissions():

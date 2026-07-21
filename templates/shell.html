@@ -2,6 +2,15 @@
 {% load static i18n ui %}
 
 {% block body %}
+{% comment %}
+The rail is a 64px strip that widens to 240px on hover, and on keyboard focus so
+it is reachable without a mouse. It overlays the content rather than pushing it,
+so nothing reflows while the pointer passes over — the main column keeps a fixed
+64px inset at all times.
+
+Labels are always in the DOM (screen readers and search need them); only their
+width and opacity animate, and `prefers-reduced-motion` disables that globally.
+{% endcomment %}
 <div x-data="{ mobileNav: false }" class="min-h-full">
 
   {# ---- Mobile drawer backdrop ---- #}
@@ -11,36 +20,88 @@
   {# ================= Icon rail ================= #}
   <aside x-cloak
          :class="mobileNav ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full'"
-         class="fixed inset-y-0 start-0 z-40 flex w-16 flex-col items-center border-e border-border
-                bg-card py-4 transition-transform md:translate-x-0 rtl:md:translate-x-0"
+         class="group/rail fixed inset-y-0 start-0 z-40 flex w-60 flex-col border-e border-border
+                bg-card transition-[width,transform] md:w-16 md:translate-x-0 md:hover:w-60
+                md:focus-within:w-60 md:hover:shadow-lg md:focus-within:shadow-lg
+                rtl:md:translate-x-0"
          aria-label="{% trans 'Primary' %}">
-    <a href="{% url 'ui:dashboard' %}" class="mb-6 grid h-9 w-9 place-items-center rounded-control
-              bg-accent-primary text-white" aria-label="{% trans 'Home' %}">
-      {% icon "layout-dashboard" css_class="w-5 h-5" %}
+
+    {# Brand #}
+    <a href="{% url 'ui:dashboard' %}"
+       class="flex h-16 shrink-0 items-center gap-3 px-4 text-text-primary"
+       aria-label="{% trans 'Home' %}">
+      {% comment %}
+      A letter mark, not an icon: the rail's first nav entry is Dashboard and
+      reusing its icon here made the brand look like a duplicate button.
+      {% endcomment %}
+      <span class="grid h-9 w-9 shrink-0 place-items-center rounded-control bg-accent-primary
+                   text-base font-medium leading-none text-white">E</span>
+      <span class="truncate text-heading-sm font-medium opacity-100 transition-opacity
+                   md:opacity-0 md:group-hover/rail:opacity-100 md:group-focus-within/rail:opacity-100">
+        Erpgram
+      </span>
     </a>
 
-    <nav class="flex flex-1 flex-col items-center gap-2">
-      {% for item in nav_items %}
-        {% url item.url_name as item_url %}
-        <a href="{{ item_url }}"
-           class="group relative grid h-10 w-10 place-items-center rounded-control transition-colors
-                  {% if item.key == active_nav %}
-                    bg-accent-primarySoft text-accent-primary
-                  {% else %}
-                    text-text-secondary hover:bg-subtle hover:text-text-primary
-                  {% endif %}"
-           aria-label="{{ item.label }}"
-           {% if item.key == active_nav %}aria-current="page"{% endif %}>
-          {% icon item.icon css_class="w-5 h-5" %}
-          <span class="pointer-events-none absolute start-full ms-3 hidden whitespace-nowrap rounded-control
-                       bg-text-primary px-2 py-1 text-xs text-white group-hover:block">
-            {{ item.label }}
-          </span>
-        </a>
+    {# Closing by tapping the backdrop works but is not discoverable on a phone. #}
+    <button type="button" @click="mobileNav = false"
+            class="absolute end-2 top-4 grid h-9 w-9 place-items-center rounded-control
+                   text-text-secondary hover:bg-subtle md:hidden"
+            aria-label="{% trans 'Close menu' %}">
+      {% icon "x" css_class="w-5 h-5" %}
+    </button>
+
+    <nav class="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-4">
+      {% for group in nav_groups %}
+        {% if group.label %}
+          {# Headings only make sense once labels are visible. #}
+          <p class="mt-4 truncate px-3 pb-1 text-[11px] uppercase tracking-wide text-text-muted
+                    opacity-100 transition-opacity
+                    md:h-0 md:overflow-hidden md:opacity-0
+                    md:group-hover/rail:h-auto md:group-hover/rail:opacity-100
+                    md:group-focus-within/rail:h-auto md:group-focus-within/rail:opacity-100">
+            {{ group.label }}
+          </p>
+        {% else %}
+          <div class="pt-2"></div>
+        {% endif %}
+
+        <ul class="space-y-1">
+          {% for item in group.items %}
+            <li>
+              <a href="{% url item.url_name %}"
+                 class="flex h-10 items-center gap-3 rounded-control px-3 transition-colors
+                        {% if item.key == active_nav %}
+                          bg-accent-primarySoft text-accent-primary
+                        {% else %}
+                          text-text-secondary hover:bg-subtle hover:text-text-primary
+                        {% endif %}"
+                 {% if item.key == active_nav %}aria-current="page"{% endif %}>
+                <span class="grid w-5 shrink-0 place-items-center">
+                  {% icon item.icon css_class="w-5 h-5" %}
+                </span>
+                <span class="truncate text-sm transition-opacity
+                             md:opacity-0 md:group-hover/rail:opacity-100
+                             md:group-focus-within/rail:opacity-100">
+                  {{ item.label }}
+                </span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
       {% endfor %}
     </nav>
 
-    {% include "ui/avatar.html" with user=request.user size="md" %}
+    {# Tenant + user, pinned to the bottom #}
+    <div class="shrink-0 border-t border-border p-3">
+      <div class="flex items-center gap-3">
+        {% include "ui/avatar.html" with user=request.user size="md" %}
+        <div class="min-w-0 flex-1 transition-opacity
+                    md:opacity-0 md:group-hover/rail:opacity-100 md:group-focus-within/rail:opacity-100">
+          <p class="truncate text-sm font-medium text-text-primary">{{ request.user.display_name }}</p>
+          <p class="truncate text-xs text-text-muted">{{ current_tenant.name }}</p>
+        </div>
+      </div>
+    </div>
   </aside>
 
   {# ================= Main column ================= #}
@@ -69,10 +130,10 @@
       </nav>
 
       <div class="ms-auto flex items-center gap-2">
-        <div class="hidden sm:block">
+        <div class="hidden lg:block">
           {% include "ui/search_input.html" with placeholder=_("Search") name="q" url="" %}
         </div>
-        <button type="button" class="grid h-9 w-9 place-items-center rounded-pill text-text-secondary hover:bg-subtle"
+        <button type="button" class="hidden h-9 w-9 place-items-center rounded-pill text-text-secondary hover:bg-subtle sm:grid"
                 aria-label="{% trans 'Support' %}">{% icon "headset" css_class="w-5 h-5" %}</button>
         <button type="button" class="grid h-9 w-9 place-items-center rounded-pill text-text-secondary hover:bg-subtle"
                 aria-label="{% trans 'Notifications' %}">{% icon "bell" css_class="w-5 h-5" %}</button>
@@ -83,7 +144,7 @@
     </header>
 
     {# -------- Page content -------- #}
-    <main id="main-content" class="p-6">
+    <main id="main-content" class="p-4 sm:p-6">
       {% block content %}{% endblock %}
     </main>
   </div>

@@ -29,7 +29,7 @@
     {% endfor %}
   </div>
 
-  <form method="get" class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <form method="get" class="card mb-4 grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end">
     <label class="min-w-[220px] flex-1">
       <span class="mb-1 block text-xs text-text-muted">{% trans "Search" %}</span>
       <input type="search" name="q" value="{{ search }}" class="input" placeholder="{% trans 'Number or sponsor' %}">
@@ -43,9 +43,9 @@
         <option value="cancelled" {% if state == "cancelled" %}selected{% endif %}>{% trans "Cancelled" %}</option>
       </select>
     </label>
-    <button type="submit" class="rounded-control bg-accent-primary px-3 py-2 text-sm text-white">{% trans "Apply" %}</button>
-    <a href="{% url 'billing:invoice_list' %}" class="rounded-control border border-border px-3 py-2 text-sm text-text-secondary hover:bg-subtle">{% trans "Clear" %}</a>
-    <a href="{% url 'billing:receivables' %}" class="ms-auto rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle">
+    <button type="submit" class="self-end rounded-control bg-accent-primary px-3 py-2 text-sm text-white">{% trans "Apply" %}</button>
+    <a href="{% url 'billing:invoice_list' %}" class="self-end rounded-control border border-border px-3 py-2 text-sm text-text-secondary hover:bg-subtle">{% trans "Clear" %}</a>
+    <a href="{% url 'billing:receivables' %}" class="self-end rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle lg:ms-auto">
       {% trans "Receivables" %}
     </a>
   </form>

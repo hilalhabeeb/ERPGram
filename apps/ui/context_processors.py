@@ -9,7 +9,7 @@ from django.utils.translation import get_language
 
 from apps.accounts.permissions import request_permissions
 from apps.accounts.services import memberships_for
-from apps.ui.navigation import active_nav_key, nav_for
+from apps.ui.navigation import active_nav_key, nav_for, nav_groups
 
 
 def language_links(request: HttpRequest) -> dict:
@@ -61,6 +61,7 @@ def shell(request: HttpRequest) -> dict:
         "user_permissions": permissions,
         "tenant_domain": getattr(tenant, "domain", None),
         "nav_items": nav_for(permissions, getattr(tenant, "domain", None)),
+        "nav_groups": nav_groups(permissions, getattr(tenant, "domain", None)),
         "active_nav": active_nav_key(
             getattr(match, "view_name", None), getattr(match, "namespace", None)
         ),

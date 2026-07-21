@@ -16,7 +16,7 @@
     {% endfor %}
   </div>
 
-  <form method="get" class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <form method="get" class="card mb-4 grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end">
     <label class="min-w-[220px] flex-1">
       <span class="mb-1 block text-xs text-text-muted">{% trans "Search" %}</span>
       <input type="search" name="q" value="{{ search }}" class="input" placeholder="{% trans 'Reference, worker or sponsor' %}">
@@ -30,8 +30,8 @@
         {% endfor %}
       </select>
     </label>
-    <button type="submit" class="rounded-control bg-accent-primary px-3 py-2 text-sm text-white">{% trans "Apply" %}</button>
-    <a href="{% url 'manpower:placement_list' %}" class="rounded-control border border-border px-3 py-2 text-sm text-text-secondary hover:bg-subtle">{% trans "Clear" %}</a>
+    <button type="submit" class="self-end rounded-control bg-accent-primary px-3 py-2 text-sm text-white">{% trans "Apply" %}</button>
+    <a href="{% url 'manpower:placement_list' %}" class="self-end rounded-control border border-border px-3 py-2 text-sm text-text-secondary hover:bg-subtle">{% trans "Clear" %}</a>
   </form>
 
   {% include "manpower/_placements_table.html" %}

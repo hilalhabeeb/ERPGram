@@ -1,24 +1,56 @@
 {% extends "shell.html" %}
-{% load i18n ui %}
+{% load i18n ui l10n %}
 
 {% block title %}{% trans "Dashboard" %} · Erpgram{% endblock %}
 
 {% block content %}
   {% include "ui/page_header.html" with title=_("Dashboard") subtitle=current_tenant.name %}
 
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    {% for stat in stats %}
-      {% include "ui/stat_card.html" with label=stat.label value=stat.value icon=stat.icon %}
-    {% endfor %}
-  </div>
+  {% comment %}
+  Counts are grouped under headings rather than shown as one long row: how many
+  workers are free and how many invoices are unpaid are different questions, and
+  identical cards side by side make them read as noise.
+  {% endcomment %}
+  {% for group in stat_groups %}
+    {% if group.stats %}
+      {% if group.label %}
+        <h2 class="mb-2 mt-5 text-xs uppercase tracking-wide text-text-muted first:mt-0">
+          {{ group.label }}
+        </h2>
+      {% endif %}
+      <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        {% for stat in group.stats %}
+          {% include "ui/stat_card.html" with label=stat.label value=stat.value icon=stat.icon %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  {% if money_stats %}
+    <h2 class="mb-2 mt-5 text-xs uppercase tracking-wide text-text-muted">{% trans "Money" %}</h2>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+      {% for stat in money_stats %}
+        <div class="card p-4 sm:p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="truncate text-sm text-text-secondary">{{ stat.label }}</p>
+              <p class="mt-1 text-heading-lg font-medium text-text-primary" dir="ltr">
+                {% if stat.key == "drafts" %}{{ stat.value }}
+                {% else %}{{ current_tenant.currency }} {% localize off %}{{ stat.value }}{% endlocalize %}{% endif %}
+              </p>
+            </div>
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-control bg-accent-primarySoft text-accent-primary">
+              {% icon stat.icon css_class="w-5 h-5" %}
+            </span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   {% if is_manpower %}
-    {% comment %}
-    An agency's dashboard leads with paperwork about to lapse and the files
-    currently moving — not with a branch count.
-    {% endcomment %}
-    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <section class="card overflow-hidden">
+    <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section class="card flex flex-col overflow-hidden">
         <header class="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
             <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Expiring soon" %}</h2>
@@ -32,7 +64,7 @@
               <li class="flex items-center justify-between gap-3 px-5 py-3">
                 <div class="min-w-0">
                   <a href="{% url 'manpower:worker_detail' pk=document.worker_id %}"
-                     class="text-sm font-medium text-text-primary hover:text-accent-primary">
+                     class="truncate text-sm font-medium text-text-primary hover:text-accent-primary">
                     {{ document.worker.full_name }}
                   </a>
                   <p class="text-xs text-text-muted">{{ document.document_type.name }}</p>
@@ -44,11 +76,14 @@
             {% endfor %}
           </ul>
         {% else %}
-          {% include "ui/empty_state.html" with icon="check-circle" title=_("Nothing expiring") description=_("No worker documents lapse in the next 90 days.") %}
+          {# grow so the two panels end level instead of one card dangling short #}
+          <div class="flex flex-1 items-center justify-center">
+            {% include "ui/empty_state.html" with icon="check-circle" title=_("Nothing expiring") description=_("No worker documents lapse in the next 90 days.") %}
+          </div>
         {% endif %}
       </section>
 
-      <section class="card overflow-hidden">
+      <section class="card flex flex-col overflow-hidden">
         <header class="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Recent placements" %}</h2>
           <a href="{% url 'manpower:placement_list' %}" class="text-sm text-accent-primary hover:underline">
@@ -61,10 +96,10 @@
               <li class="flex items-center justify-between gap-3 px-5 py-3">
                 <div class="min-w-0">
                   <a href="{% url 'manpower:placement_detail' pk=placement.pk %}"
-                     class="text-sm font-medium text-text-primary hover:text-accent-primary">
+                     class="truncate text-sm font-medium text-text-primary hover:text-accent-primary">
                     {{ placement.worker_name }}
                   </a>
-                  <p class="text-xs text-text-muted">{{ placement.sponsor.name }}</p>
+                  <p class="truncate text-xs text-text-muted">{{ placement.sponsor.name }}</p>
                 </div>
                 {% if placement.status == "delivered" %}
                   {% include "ui/badge.html" with label=placement.get_status_display tone="success" %}
@@ -77,12 +112,14 @@
             {% endfor %}
           </ul>
         {% else %}
-          {% include "ui/empty_state.html" with icon="briefcase" title=_("No placements yet") description=_("Open a placement when a sponsor picks a worker.") %}
+          <div class="flex flex-1 items-center justify-center">
+            {% include "ui/empty_state.html" with icon="briefcase" title=_("No placements yet") description=_("Open a placement when a sponsor picks a worker.") %}
+          </div>
         {% endif %}
       </section>
     </div>
   {% else %}
-    <section class="card mt-4 p-5">
+    <section class="card mt-5 p-5">
       <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Overview" %}</h2>

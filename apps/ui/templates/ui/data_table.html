@@ -26,7 +26,14 @@ back to normal navigation when JS is off.
             </th>
           {% endif %}
           {% for col in columns %}
-            <th class="px-4 py-3 text-start font-medium">
+            {% comment %}
+            `css` lets a column drop out on narrow screens, e.g.
+            "hidden lg:table-cell". The literal class string lives in the Python
+            column config so Tailwind's scanner still finds it — a composed
+            class built in the template would be purged. The matching cell in
+            the row template must carry the same string.
+            {% endcomment %}
+            <th class="px-4 py-3 text-start font-medium {{ col.css }}">
               {% if col.sortable %}
                 {% if sort_key == col.key and direction == 'asc' %}
                   {% query_string sort=col.key dir='desc' as sort_href %}

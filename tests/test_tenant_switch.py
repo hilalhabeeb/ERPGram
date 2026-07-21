@@ -31,7 +31,8 @@ def user_in_two_tenants():
 
 
 def _company_stat(response) -> int:
-    stats = {s.key: s.value for s in response.context["stats"]}
+    groups = response.context["stat_groups"]
+    stats = {s.key: s.value for group in groups for s in group["stats"]}
     return stats["companies"]
 
 

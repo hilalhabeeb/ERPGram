@@ -11,7 +11,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.accounts.forms import InviteForm, OrganizationForm, ProfileForm, RoleForm
 from apps.accounts.models import Membership, Role
-from apps.accounts.permissions import request_permissions, require_permission
+from apps.accounts.permissions import has_permission, request_permissions, require_permission
 from apps.accounts.services import (
     create_role,
     invite_member,
@@ -21,6 +21,7 @@ from apps.accounts.services import (
 )
 from apps.core.domains import MANPOWER
 from apps.core.permissions import (
+    MANAGE_INVOICES,
     MANAGE_MEMBERS,
     MANAGE_ORGANIZATION,
     MANAGE_ROLES,
@@ -62,17 +63,32 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     }
 
     if getattr(request.tenant, "domain", None) == MANPOWER:
+        from apps.billing import services as billing_services
         from apps.manpower import services as manpower_services
 
+        # Grouped rather than one undifferentiated row: "18 available workers"
+        # and "2 unpaid invoices" are different questions and read as noise when
+        # shown side by side in identical cards.
         context.update(
-            stats=manpower_services.worker_summary(request.tenant)
-            + manpower_services.placement_summary(request.tenant),
+            stat_groups=[
+                {
+                    "label": _("Workers"),
+                    "stats": manpower_services.worker_summary(request.tenant),
+                },
+                {
+                    "label": _("Placements"),
+                    "stats": manpower_services.placement_summary(request.tenant),
+                },
+            ],
+            money_stats=billing_services.billing_summary(request.tenant)
+            if has_permission(request, MANAGE_INVOICES)
+            else [],
             expiring=manpower_services.expiring_documents(request.tenant),
             recent_placements=manpower_services.placements_for(request.tenant)[:5],
             is_manpower=True,
         )
     else:
-        context.update(stats=dashboard_stats())
+        context.update(stat_groups=[{"label": "", "stats": dashboard_stats()}])
 
     return render(request, "ui/dashboard.html", context)
 

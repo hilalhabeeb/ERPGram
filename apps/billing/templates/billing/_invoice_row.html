@@ -15,7 +15,7 @@
       <p class="text-xs text-text-muted">{{ obj.placement.reference }}</p>
     {% endif %}
   </td>
-  <td class="px-4 py-3 text-text-secondary">{{ obj.issue_date|date:"j M Y"|default:"—" }}</td>
+  <td class="hidden px-4 py-3 text-text-secondary lg:table-cell">{{ obj.issue_date|date:"j M Y"|default:"—" }}</td>
   <td class="px-4 py-3 text-text-secondary">
     {{ obj.due_date|date:"j M Y"|default:"—" }}
     {% if obj.is_overdue %}
