@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # domain apps — always installed, surfaced only for tenants in that domain
     # (see apps.core.domains).
     "apps.manpower",
+    "apps.billing",
 ]
 
 MIDDLEWARE = [

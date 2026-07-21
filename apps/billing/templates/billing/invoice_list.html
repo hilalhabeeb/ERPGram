@@ -1,0 +1,58 @@
+{% extends "shell.html" %}
+{% load i18n ui l10n %}
+
+{% block title %}{% trans "Invoices" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% if can_manage %}
+    {% include "ui/page_header.html" with title=_("Invoices") subtitle=_("What has been billed, and what is still owed.") action_label=_("New invoice") action_icon="plus" action_event="open-modal-invoice" %}
+  {% else %}
+    {% include "ui/page_header.html" with title=_("Invoices") subtitle=_("What has been billed, and what is still owed.") %}
+  {% endif %}
+
+  <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    {% for stat in stats %}
+      <div class="card p-5">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-sm text-text-secondary">{{ stat.label }}</p>
+            <p class="mt-1 text-heading-lg font-medium text-text-primary" dir="ltr">
+              {% if stat.key == "drafts" %}{{ stat.value }}
+              {% else %}{{ current_tenant.currency }} {% localize off %}{{ stat.value }}{% endlocalize %}{% endif %}
+            </p>
+          </div>
+          <span class="grid h-9 w-9 place-items-center rounded-control bg-accent-primarySoft text-accent-primary">
+            {% icon stat.icon css_class="w-5 h-5" %}
+          </span>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form method="get" class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+    <label class="min-w-[220px] flex-1">
+      <span class="mb-1 block text-xs text-text-muted">{% trans "Search" %}</span>
+      <input type="search" name="q" value="{{ search }}" class="input" placeholder="{% trans 'Number or sponsor' %}">
+    </label>
+    <label>
+      <span class="mb-1 block text-xs text-text-muted">{% trans "Status" %}</span>
+      <select name="state" class="select">
+        <option value="">{% trans "Any" %}</option>
+        <option value="draft" {% if state == "draft" %}selected{% endif %}>{% trans "Draft" %}</option>
+        <option value="unpaid" {% if state == "unpaid" %}selected{% endif %}>{% trans "Issued" %}</option>
+        <option value="cancelled" {% if state == "cancelled" %}selected{% endif %}>{% trans "Cancelled" %}</option>
+      </select>
+    </label>
+    <button type="submit" class="rounded-control bg-accent-primary px-3 py-2 text-sm text-white">{% trans "Apply" %}</button>
+    <a href="{% url 'billing:invoice_list' %}" class="rounded-control border border-border px-3 py-2 text-sm text-text-secondary hover:bg-subtle">{% trans "Clear" %}</a>
+    <a href="{% url 'billing:receivables' %}" class="ms-auto rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle">
+      {% trans "Receivables" %}
+    </a>
+  </form>
+
+  {% include "billing/_invoices_table.html" %}
+
+  {% if can_manage %}
+    {% include "ui/modal.html" with name="invoice" title=_("New invoice") include_body="billing/_invoice_form.html" %}
+  {% endif %}
+{% endblock %}

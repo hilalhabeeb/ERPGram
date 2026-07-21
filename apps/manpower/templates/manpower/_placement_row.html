@@ -1,5 +1,5 @@
 {% comment %}One placement row. Context: obj (Placement).{% endcomment %}
-{% load i18n ui %}
+{% load i18n ui l10n %}
 {% load l10n %}
 <tr class="hover:bg-subtle">
   <td class="px-4 py-3 font-mono text-xs">
@@ -22,10 +22,16 @@
     {% elif obj.status == "draft" %}{% include "ui/badge.html" with label=obj.get_status_display tone="neutral" %}
     {% else %}{% include "ui/badge.html" with label=obj.get_status_display tone="accent" %}{% endif %}
   </td>
-  <td class="px-4 py-3 text-text-secondary" dir="ltr">
-    {{ current_tenant.currency }} {% localize off %}{{ obj.total }}{% endlocalize %}
-    {% if not obj.is_paid and obj.status != "cancelled" %}
-      <span class="ms-1 text-xs text-amber-600">{% trans "due" %}</span>
+  <td class="px-4 py-3">
+    {% if obj.invoices.exists %}
+      <span class="text-sm text-text-secondary" dir="ltr">
+        {{ current_tenant.currency }} {% localize off %}{{ obj.invoiced_total }}{% endlocalize %}
+      </span>
+      {% if obj.balance_due > 0 %}
+        <span class="ms-1 text-xs text-amber-600">{% trans "due" %}</span>
+      {% endif %}
+    {% else %}
+      <span class="text-xs text-text-muted">{% trans "not invoiced" %}</span>
     {% endif %}
   </td>
 </tr>

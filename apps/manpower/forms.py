@@ -10,16 +10,15 @@ from __future__ import annotations
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from apps.billing.models import TermsTemplate
 from apps.manpower.models import (
     Accommodation,
     Agent,
-    ChargeType,
     Country,
     DocumentType,
     Language,
     Occupation,
     Placement,
-    PlacementCharge,
     Skill,
     Sponsor,
     Worker,
@@ -35,7 +34,9 @@ class TenantScopedModelForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.tenant = tenant
         for field_name, model in self.tenant_fields.items():
-            if field_name not in self.fields:
+            # A missing field or model is a declaration error, not a runtime one:
+            # skip rather than raising AttributeError deep in form construction.
+            if model is None or field_name not in self.fields:
                 continue
             queryset = model.all_tenants.filter(tenant=tenant)
             if hasattr(model, "is_active"):
@@ -172,27 +173,42 @@ class PlacementForm(TenantScopedModelForm):
         )
 
 
-class PlacementInvoiceForm(TenantScopedModelForm):
-    """The money and contract terms on an existing placement."""
+class PlacementAgreementForm(TenantScopedModelForm):
+    """Contract dates and the agreement wording. Money lives on the invoice."""
+
+    terms_template = forms.ModelChoiceField(
+        label=_("Insert terms template"),
+        queryset=TermsTemplate.objects.none(),
+        required=False,
+        help_text=_(
+            "Copies the template text below. Editing it later will not change this agreement."
+        ),
+    )
 
     class Meta:
         model = Placement
-        fields = [
-            "invoice_date",
-            "tax_rate",
-            "discount",
-            "amount_paid",
-            "payment_terms",
-            "contract_start",
-            "contract_end",
-            "terms",
-        ]
+        fields = ["contract_start", "contract_end", "payment_terms", "terms", "notes"]
         widgets = {
-            "invoice_date": forms.DateInput(attrs={"type": "date"}),
             "contract_start": forms.DateInput(attrs={"type": "date"}),
             "contract_end": forms.DateInput(attrs={"type": "date"}),
-            "terms": forms.Textarea(attrs={"rows": 4}),
+            "terms": forms.Textarea(attrs={"rows": 6}),
+            "notes": forms.Textarea(attrs={"rows": 2}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["terms_template"].queryset = TermsTemplate.objects.filter(
+            tenant=self.tenant, is_active=True
+        ).exclude(applies_to=TermsTemplate.Applies.INVOICE)
+
+    def clean(self):
+        cleaned = super().clean()
+        # Choosing a template copies its text in, unless terms were typed.
+        template = cleaned.get("terms_template")
+        if template and not (cleaned.get("terms") or "").strip():
+            cleaned["terms"] = template.body
+        cleaned.pop("terms_template", None)
+        return cleaned
 
 
 class PlacementPipelineForm(TenantScopedModelForm):
@@ -221,18 +237,6 @@ class PlacementPipelineForm(TenantScopedModelForm):
                 "delivered_on",
             ]
         }
-
-
-class ChargeForm(TenantScopedModelForm):
-    class Meta:
-        model = PlacementCharge
-        fields = ["description", "amount", "is_taxable"]
-
-
-class ChargeTypeForm(TenantScopedModelForm):
-    class Meta:
-        model = ChargeType
-        fields = ["name", "default_amount", "is_taxable", "sort_order"]
 
 
 class OccupationForm(TenantScopedModelForm):
@@ -277,5 +281,4 @@ SETUP_FORMS = {
     "agents": (Agent, AgentForm, _("Agents")),
     "accommodation": (Accommodation, AccommodationForm, _("Accommodation")),
     "document-types": (DocumentType, DocumentTypeForm, _("Document types")),
-    "charge-types": (ChargeType, ChargeTypeForm, _("Charge types")),
 }

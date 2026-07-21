@@ -1,14 +1,13 @@
 {% extends "shell.html" %}
-{% load i18n ui %}
-{% load l10n %}
+{% load i18n ui l10n %}
 
 {% block title %}{{ placement.reference }} · Erpgram{% endblock %}
 
 {% block content %}
   {% url 'manpower:placement_print' pk=placement.pk as print_url %}
-  {% include "ui/page_header.html" with title=placement.reference subtitle=placement.worker_name action_label=_("Print document") action_icon="file-text" action_url=print_url %}
+  {% include "ui/page_header.html" with title=placement.reference subtitle=placement.worker_name action_label=_("Print agreement") action_icon="file-text" action_url=print_url %}
 
-  {# Status + pipeline: what stage is this placement at? #}
+  {# Status + pipeline #}
   <section class="card mb-4 p-5">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2">
@@ -43,7 +42,6 @@
       {% endif %}
     </div>
 
-    {# Milestones for this route — a transfer skips travel and medical. #}
     <ol class="mt-5 flex flex-wrap gap-x-6 gap-y-3 border-t border-border pt-4">
       {% for step in placement.milestones %}
         <li class="flex items-center gap-2">
@@ -61,7 +59,6 @@
   </section>
 
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-    {# Parties #}
     <section class="card p-5">
       <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Parties" %}</h2>
       <dl class="mt-3 space-y-3">
@@ -88,103 +85,82 @@
       </dl>
     </section>
 
-    {# Charges = the invoice lines #}
+    {% comment %}
+    Billing lives on invoices now. This panel is a window onto them, not an
+    editor — a placement can carry a deposit invoice and a balance invoice, and
+    an issued invoice must not change when the placement does.
+    {% endcomment %}
     <section class="card overflow-hidden lg:col-span-2">
-      <header class="flex items-center justify-between border-b border-border px-5 py-4">
-        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Charges" %}</h2>
-        <span class="text-sm text-text-secondary" dir="ltr">
-          {{ current_tenant.currency }} {% localize off %}{{ placement.total }}{% endlocalize %}
-        </span>
+      <header class="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
+        <div>
+          <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Invoices" %}</h2>
+          <p class="text-xs text-text-secondary">
+            {% trans "Invoiced" %} <span dir="ltr">{{ current_tenant.currency }} {% localize off %}{{ placement.invoiced_total }}{% endlocalize %}</span>
+            · {% trans "outstanding" %} <span dir="ltr">{% localize off %}{{ placement.balance_due }}{% endlocalize %}</span>
+          </p>
+        </div>
+        {% if can_invoice %}
+          <form method="post" action="{% url 'manpower:placement_invoice' pk=placement.pk %}">
+            {% csrf_token %}
+            {% include "ui/button.html" with label=_("Create invoice") type="submit" variant="secondary" size="sm" icon="plus" %}
+          </form>
+        {% endif %}
       </header>
 
-      <table class="w-full text-sm">
-        <tbody class="divide-y divide-border">
-          {% for charge in charges %}
-            <tr>
-              <td class="px-5 py-2.5 text-text-primary">
-                {{ charge.description }}
-                {% if not charge.is_taxable %}
-                  <span class="ms-1 text-xs text-text-muted">{% trans "(no tax)" %}</span>
-                {% endif %}
-              </td>
-              <td class="px-5 py-2.5 text-end text-text-secondary" dir="ltr">{% localize off %}{{ charge.amount }}{% endlocalize %}</td>
-              <td class="w-10 px-2 py-2.5">
-                {% if can_manage %}
-                  <form method="post" action="{% url 'manpower:placement_charge_delete' pk=placement.pk charge_pk=charge.pk %}">
-                    {% csrf_token %}
-                    <button type="submit" class="rounded-control p-1 text-text-muted hover:bg-subtle hover:text-red-600"
-                            aria-label="{% trans 'Remove charge' %}">{% icon "trash-2" css_class="w-4 h-4" %}</button>
-                  </form>
-                {% endif %}
-              </td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="3" class="px-5 py-4 text-sm text-text-muted">{% trans "No charges yet." %}</td></tr>
-          {% endfor %}
-        </tbody>
-        <tfoot class="border-t border-border bg-subtle text-sm">
-          <tr>
-            <td class="px-5 py-2 text-text-secondary">{% trans "Subtotal" %}</td>
-            <td class="px-5 py-2 text-end text-text-primary" dir="ltr">{% localize off %}{{ placement.subtotal }}{% endlocalize %}</td><td></td>
-          </tr>
-          {% if placement.discount %}
-            <tr>
-              <td class="px-5 py-2 text-text-secondary">{% trans "Discount" %}</td>
-              <td class="px-5 py-2 text-end text-text-primary" dir="ltr">−{% localize off %}{{ placement.discount }}{% endlocalize %}</td><td></td>
-            </tr>
-          {% endif %}
-          <tr>
-            <td class="px-5 py-2 text-text-secondary">{% trans "Tax" %} ({% localize off %}{{ placement.tax_rate }}{% endlocalize %}%)</td>
-            <td class="px-5 py-2 text-end text-text-primary" dir="ltr">{% localize off %}{{ placement.tax_amount }}{% endlocalize %}</td><td></td>
-          </tr>
-          <tr class="font-medium">
-            <td class="px-5 py-2.5 text-text-primary">{% trans "Total" %}</td>
-            <td class="px-5 py-2.5 text-end text-text-primary" dir="ltr">{{ current_tenant.currency }} {% localize off %}{{ placement.total }}{% endlocalize %}</td><td></td>
-          </tr>
-          <tr>
-            <td class="px-5 py-2 text-text-secondary">{% trans "Paid" %}</td>
-            <td class="px-5 py-2 text-end text-text-secondary" dir="ltr">{% localize off %}{{ placement.amount_paid }}{% endlocalize %}</td><td></td>
-          </tr>
-          <tr class="{% if placement.is_paid %}text-green-700{% else %}text-amber-700{% endif %}">
-            <td class="px-5 py-2 font-medium">{% trans "Balance due" %}</td>
-            <td class="px-5 py-2 text-end font-medium" dir="ltr">{% localize off %}{{ placement.balance_due }}{% endlocalize %}</td><td></td>
-          </tr>
-        </tfoot>
-      </table>
-
-      {% if can_manage %}
-        <form method="post" action="{% url 'manpower:placement_charge_add' pk=placement.pk %}"
-              class="flex flex-wrap items-end gap-3 border-t border-border p-4">
-          {% csrf_token %}
-          <div class="min-w-[180px] flex-1">{% include "partials/_field.html" with field=charge_form.description %}</div>
-          <div class="w-32">{% include "partials/_field.html" with field=charge_form.amount %}</div>
-          <label class="flex items-center gap-2 pb-2 text-sm text-text-primary">
-            {{ charge_form.is_taxable }} {% trans "Taxable" %}
-          </label>
-          {% include "ui/button.html" with label=_("Add charge") type="submit" variant="secondary" size="sm" icon="plus" %}
-        </form>
-      {% endif %}
+      <ul class="divide-y divide-border">
+        {% for invoice in invoices %}
+          <li class="flex items-center justify-between gap-3 px-5 py-3">
+            <div class="min-w-0">
+              <a href="{% url 'billing:invoice_detail' pk=invoice.pk %}"
+                 class="font-mono text-xs text-text-primary hover:text-accent-primary">
+                {{ invoice.number|default:_("Draft") }}
+              </a>
+              <p class="text-xs text-text-muted">
+                {{ invoice.issue_date|date:"j M Y"|default:_("not issued") }}
+                {% if invoice.kind == "credit_note" %}· {% trans "credit note" %}{% endif %}
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-sm text-text-primary" dir="ltr">
+                {% localize off %}{{ invoice.total }}{% endlocalize %}
+              </span>
+              {% if invoice.payment_state == "paid" %}
+                {% include "ui/badge.html" with label=_("Paid") tone="success" %}
+              {% elif invoice.payment_state == "part_paid" %}
+                {% include "ui/badge.html" with label=_("Part paid") tone="warning" %}
+              {% elif invoice.payment_state == "unpaid" %}
+                {% include "ui/badge.html" with label=_("Unpaid") tone="accent" %}
+              {% else %}
+                {% include "ui/badge.html" with label=invoice.get_status_display tone="neutral" %}
+              {% endif %}
+            </div>
+          </li>
+        {% empty %}
+          {% include "ui/empty_state.html" with icon="file-text" title=_("Not invoiced yet") description=_("Create an invoice when the sponsor is ready to pay.") %}
+        {% endfor %}
+      </ul>
     </section>
   </div>
 
   {% if can_manage %}
     <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
       <section class="card p-5">
-        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Invoice and contract" %}</h2>
-        <form method="post" action="{% url 'manpower:placement_update' pk=placement.pk section='invoice' %}" class="mt-4 space-y-4">
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Agreement" %}</h2>
+        <p class="mt-0.5 text-sm text-text-secondary">
+          {% trans "Contract dates and the wording printed on the agreement." %}
+        </p>
+        <form method="post" action="{% url 'manpower:placement_update' pk=placement.pk section='agreement' %}" class="mt-4 space-y-4">
           {% csrf_token %}
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {% include "partials/_field.html" with field=invoice_form.invoice_date %}
-            {% include "partials/_field.html" with field=invoice_form.tax_rate %}
-            {% include "partials/_field.html" with field=invoice_form.discount %}
-            {% include "partials/_field.html" with field=invoice_form.amount_paid %}
-            {% include "partials/_field.html" with field=invoice_form.contract_start %}
-            {% include "partials/_field.html" with field=invoice_form.contract_end %}
+            {% include "partials/_field.html" with field=agreement_form.contract_start %}
+            {% include "partials/_field.html" with field=agreement_form.contract_end %}
           </div>
-          {% include "partials/_field.html" with field=invoice_form.payment_terms %}
-          {% include "partials/_field.html" with field=invoice_form.terms %}
+          {% include "partials/_field.html" with field=agreement_form.payment_terms %}
+          {% include "partials/_field.html" with field=agreement_form.terms_template %}
+          {% include "partials/_field.html" with field=agreement_form.terms %}
+          {% include "partials/_field.html" with field=agreement_form.notes %}
           <div class="flex justify-end">
-            {% include "ui/button.html" with label=_("Save invoice") type="submit" variant="primary" size="sm" %}
+            {% include "ui/button.html" with label=_("Save agreement") type="submit" variant="primary" size="sm" %}
           </div>
         </form>
       </section>

@@ -81,6 +81,12 @@ Each of these caused a real bug. Several have tests that will fail if you break 
   `activate_tenant(tenant.id)` — the DB rejects an insert with no `app.tenant_id`.
   Prefer making the function bind its own tenant (see `ensure_tenant_defaults`)
   rather than trusting callers.
+- **Data migrations must use `each_tenant(apps, schema_editor)`** from
+  `apps.core.db`. RLS hides rows from migrations too, so a migration with no
+  tenant bound *reads nothing, writes nothing and reports success*. One that
+  moved placement charges into invoices did exactly that — silently — and the
+  columns were dropped by the next migration. Covered by
+  `tests/test_migration_helpers.py`.
 - RLS policies use `NULLIF(current_setting('app.tenant_id', true), '')::uuid`.
   Once that GUC has been `SET LOCAL` on a connection, Postgres reports it as `''`,
   and `''::uuid` raises — on a pooled connection that is a 500, not an empty list.
@@ -145,6 +151,10 @@ Each of these caused a real bug. Several have tests that will fail if you break 
 - Prove isolation at **both** layers (ORM and raw SQL) for anything new.
 - Rendering a form is not evidence it works. POST it. An invite bug survived a
   release because only the modal was screenshotted.
+- **Give every new screen a "renders 200" test.** The whole suite was green while
+  the invoice list threw a 500: every test either hit a 404 first or called
+  services directly, so nothing ever rendered the page. See
+  `test_every_billing_page_renders`.
 
 ## Definition of done
 

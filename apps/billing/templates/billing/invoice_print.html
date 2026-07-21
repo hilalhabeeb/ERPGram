@@ -1,0 +1,132 @@
+{% extends "print_base.html" %}
+{% load i18n ui l10n %}
+
+{% block title %}{{ invoice.number|default:_("Draft invoice") }}{% endblock %}
+{% block back_url %}{% url 'billing:invoice_detail' pk=invoice.pk %}{% endblock %}
+
+{% block document %}
+  <header class="flex items-start justify-between gap-6 border-b border-border pb-5">
+    <div>
+      <h1 class="text-heading-lg font-medium">{{ current_tenant.name }}</h1>
+      <p class="mt-1 text-sm text-text-secondary">{% trans "Domestic worker recruitment" %}</p>
+    </div>
+    <div class="text-end">
+      <p class="text-heading-md font-medium">
+        {% if invoice.kind == "credit_note" %}{% trans "Credit note" %}{% else %}{% trans "Tax invoice" %}{% endif %}
+      </p>
+      <p class="mt-1 text-sm text-text-secondary" dir="ltr">
+        {{ invoice.number|default:_("DRAFT — not issued") }}
+      </p>
+      {% if invoice.issue_date %}
+        <p class="text-sm text-text-secondary">{{ invoice.issue_date|date:"j M Y" }}</p>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if invoice.status == "cancelled" %}
+    <p class="mt-4 rounded-control border border-border bg-subtle px-4 py-2 text-sm text-text-secondary">
+      {% trans "This invoice has been cancelled." %}
+    </p>
+  {% endif %}
+
+  <section class="mt-6 grid grid-cols-2 gap-6">
+    <div>
+      <h2 class="text-xs uppercase tracking-wide text-text-muted">{% trans "Billed to" %}</h2>
+      <p class="mt-1 text-sm font-medium">{{ invoice.sponsor_name|default:invoice.sponsor.name }}</p>
+      {% if invoice.sponsor.name_ar %}<p class="text-sm">{{ invoice.sponsor.name_ar }}</p>{% endif %}
+      {% if invoice.sponsor_national_id %}
+        <p class="text-sm text-text-secondary" dir="ltr">{% trans "ID" %}: {{ invoice.sponsor_national_id }}</p>
+      {% endif %}
+      {% if invoice.sponsor.phone %}
+        <p class="text-sm text-text-secondary" dir="ltr">{{ invoice.sponsor.phone }}</p>
+      {% endif %}
+    </div>
+    <div>
+      {% if invoice.placement_id %}
+        <h2 class="text-xs uppercase tracking-wide text-text-muted">{% trans "Placement" %}</h2>
+        <p class="mt-1 text-sm">{{ invoice.placement.reference }}</p>
+        <p class="text-sm text-text-secondary">
+          {{ invoice.placement.worker_name }} · {{ invoice.placement.occupation_name }}
+        </p>
+      {% endif %}
+      {% if invoice.due_date %}
+        <p class="mt-2 text-sm text-text-secondary">
+          {% trans "Payment due" %}: {{ invoice.due_date|date:"j M Y" }}
+        </p>
+      {% endif %}
+      {% if invoice.payment_terms %}
+        <p class="text-sm text-text-secondary">{{ invoice.payment_terms }}</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="mt-6">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-y border-border bg-subtle text-xs text-text-secondary">
+          <th class="px-4 py-2.5 text-start font-medium">{% trans "Description" %}</th>
+          <th class="px-4 py-2.5 text-end font-medium">{% trans "Qty" %}</th>
+          <th class="px-4 py-2.5 text-end font-medium">{% trans "Rate" %}</th>
+          <th class="px-4 py-2.5 text-end font-medium">{% trans "Tax" %}</th>
+          <th class="px-4 py-2.5 text-end font-medium">{% trans "Amount" %} ({{ current_tenant.currency }})</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-border">
+        {% for line in lines %}
+          <tr>
+            <td class="px-4 py-2.5">{{ line.description }}</td>
+            <td class="px-4 py-2.5 text-end" dir="ltr">{% localize off %}{{ line.quantity }}{% endlocalize %}</td>
+            <td class="px-4 py-2.5 text-end" dir="ltr">{% localize off %}{{ line.rate }}{% endlocalize %}</td>
+            <td class="px-4 py-2.5 text-end" dir="ltr">
+              {% if line.is_taxable %}{% localize off %}{{ line.tax_rate }}{% endlocalize %}%{% else %}—{% endif %}
+            </td>
+            <td class="px-4 py-2.5 text-end" dir="ltr">{% localize off %}{{ line.amount }}{% endlocalize %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="border-t border-border">
+          <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Subtotal" %}</td>
+          <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ invoice.subtotal }}{% endlocalize %}</td>
+        </tr>
+        {% if invoice.discount %}
+          <tr>
+            <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Discount" %}</td>
+            <td class="px-4 py-2 text-end" dir="ltr">−{% localize off %}{{ invoice.discount }}{% endlocalize %}</td>
+          </tr>
+        {% endif %}
+        <tr>
+          <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Tax" %}</td>
+          <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ invoice.tax_amount }}{% endlocalize %}</td>
+        </tr>
+        <tr class="border-t-2 border-border-strong text-base font-medium">
+          <td colspan="4" class="px-4 py-3 text-end">{% trans "Total" %}</td>
+          <td class="px-4 py-3 text-end" dir="ltr">{{ current_tenant.currency }} {% localize off %}{{ invoice.total }}{% endlocalize %}</td>
+        </tr>
+        {% if invoice.amount_paid %}
+          <tr>
+            <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Paid" %}</td>
+            <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ invoice.amount_paid }}{% endlocalize %}</td>
+          </tr>
+          <tr class="font-medium">
+            <td colspan="4" class="px-4 py-2 text-end">{% trans "Balance due" %}</td>
+            <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ invoice.balance_due }}{% endlocalize %}</td>
+          </tr>
+        {% endif %}
+      </tfoot>
+    </table>
+  </section>
+
+  {% if invoice.terms %}
+    <section class="avoid-break mt-6 border-t border-border pt-4">
+      <h2 class="text-xs uppercase tracking-wide text-text-muted">{% trans "Terms and conditions" %}</h2>
+      <p class="mt-2 whitespace-pre-line text-xs leading-relaxed text-text-secondary">{{ invoice.terms }}</p>
+    </section>
+  {% endif %}
+
+  {% if invoice.notes %}
+    <section class="avoid-break mt-4">
+      <p class="text-xs text-text-secondary">{{ invoice.notes }}</p>
+    </section>
+  {% endif %}
+{% endblock %}

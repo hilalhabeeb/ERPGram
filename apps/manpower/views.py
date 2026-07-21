@@ -15,8 +15,11 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.accounts.permissions import has_permission, require_permission
+from apps.billing import services as billing_services
+from apps.billing.models import Service
 from apps.core.domains import MANPOWER
 from apps.core.permissions import (
+    MANAGE_INVOICES,
     MANAGE_MANPOWER_SETUP,
     MANAGE_PLACEMENTS,
     MANAGE_SPONSORS,
@@ -25,9 +28,8 @@ from apps.core.permissions import (
 from apps.manpower import services
 from apps.manpower.forms import (
     SETUP_FORMS,
-    ChargeForm,
+    PlacementAgreementForm,
     PlacementForm,
-    PlacementInvoiceForm,
     PlacementPipelineForm,
     SponsorForm,
     WorkerForm,
@@ -268,7 +270,7 @@ def placement_list(request: HttpRequest) -> HttpResponse:
             {"key": "sponsor", "label": _("Sponsor"), "sortable": False},
             {"key": "route", "label": _("Route"), "sortable": False},
             {"key": "status", "label": _("Status"), "sortable": False},
-            {"key": "total", "label": _("Total"), "sortable": False},
+            {"key": "billing", "label": _("Billing"), "sortable": False},
         ],
         "page_obj": page,
         "sort_key": sort_key,
@@ -302,11 +304,11 @@ def placement_detail(request: HttpRequest, pk) -> HttpResponse:
             "page_title": placement.reference,
             "breadcrumb": [_("Placements"), placement.reference],
             "placement": placement,
-            "charges": placement.charges.all(),
-            "invoice_form": PlacementInvoiceForm(instance=placement, tenant=request.tenant),
+            "invoices": placement.invoices.prefetch_related("lines", "payments"),
+            "agreement_form": PlacementAgreementForm(instance=placement, tenant=request.tenant),
             "pipeline_form": PlacementPipelineForm(instance=placement, tenant=request.tenant),
-            "charge_form": ChargeForm(tenant=request.tenant),
             "can_manage": has_permission(request, MANAGE_PLACEMENTS),
+            "can_invoice": has_permission(request, MANAGE_INVOICES),
         },
     )
 
@@ -333,12 +335,15 @@ def placement_create(request: HttpRequest) -> HttpResponse:
 
 @require_POST
 def placement_update(request: HttpRequest, pk, section: str) -> HttpResponse:
-    """Save one section of the placement (invoice terms or pipeline dates)."""
+    """Save one section of the placement (agreement wording or pipeline dates)."""
     _require_manpower(request)
     require_permission(request, MANAGE_PLACEMENTS)
     placement = _get_placement(request, pk)
 
-    form_class = {"invoice": PlacementInvoiceForm, "pipeline": PlacementPipelineForm}.get(section)
+    form_class = {
+        "agreement": PlacementAgreementForm,
+        "pipeline": PlacementPipelineForm,
+    }.get(section)
     if form_class is None:
         raise Http404("unknown placement section")
 
@@ -367,51 +372,29 @@ def placement_status(request: HttpRequest, pk) -> HttpResponse:
 
 
 @require_POST
-def placement_charge_add(request: HttpRequest, pk) -> HttpResponse:
+def placement_invoice(request: HttpRequest, pk) -> HttpResponse:
+    """Raise a draft invoice for this placement, pre-filled from the price list."""
     _require_manpower(request)
-    require_permission(request, MANAGE_PLACEMENTS)
+    require_permission(request, MANAGE_INVOICES)
     placement = _get_placement(request, pk)
 
-    form = ChargeForm(request.POST, tenant=request.tenant)
-    if form.is_valid():
-        charge = form.save(commit=False)
-        charge.tenant = request.tenant
-        charge.placement = placement
-        charge.created_by = request.user
-        charge.updated_by = request.user
-        charge.save()
-        messages.success(request, _("Charge added."))
-    else:
-        messages.error(request, _("Please correct the errors and try again."))
-    return redirect("manpower:placement_detail", pk=placement.pk)
-
-
-@require_POST
-def placement_charge_delete(request: HttpRequest, pk, charge_pk) -> HttpResponse:
-    _require_manpower(request)
-    require_permission(request, MANAGE_PLACEMENTS)
-    placement = _get_placement(request, pk)
-    charge = get_object_or_404(placement.charges, pk=charge_pk)
-    charge.delete()
-    messages.success(request, _("Charge removed."))
-    return redirect("manpower:placement_detail", pk=placement.pk)
+    invoice = billing_services.create_invoice(
+        tenant=request.tenant,
+        user=request.user,
+        sponsor=placement.sponsor,
+        placement=placement,
+        services=list(Service.objects.filter(tenant=request.tenant, is_active=True)),
+        payment_terms=placement.payment_terms,
+    )
+    messages.success(request, _("Draft invoice created. Check the lines, then issue it."))
+    return redirect("billing:invoice_detail", pk=invoice.pk)
 
 
 def placement_print(request: HttpRequest, pk) -> HttpResponse:
-    """The final document: agreement + invoice, laid out for print.
-
-    Rendered as a print-styled HTML page rather than a generated PDF so the
-    project stays dependency-free — every browser can save or print it, and the
-    Arabic layout comes out right because it is the same engine that renders the
-    rest of the app.
-    """
+    """The signed agreement. Money is on the invoice, which prints separately."""
     _require_manpower(request)
     placement = _get_placement(request, pk)
-    return render(
-        request,
-        "manpower/placement_print.html",
-        {"placement": placement, "charges": placement.charges.all()},
-    )
+    return render(request, "manpower/placement_print.html", {"placement": placement})
 
 
 # --- setup -------------------------------------------------------------------

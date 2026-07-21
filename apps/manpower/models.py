@@ -340,39 +340,17 @@ class Worker(TenantScopedModel):
         return self.is_active and self.availability == self.Availability.AVAILABLE
 
 
-class ChargeType(TenantScopedModel):
-    """A line an agency puts on a placement invoice, with its usual price."""
-
-    name = models.CharField(_("name"), max_length=120)
-    default_amount = models.DecimalField(
-        _("default amount"), max_digits=10, decimal_places=3, default=0
-    )
-    is_taxable = models.BooleanField(_("taxable"), default=True)
-    sort_order = models.PositiveIntegerField(_("order"), default=0)
-    is_active = models.BooleanField(_("active"), default=True)
-
-    class Meta:
-        verbose_name = _("charge type")
-        verbose_name_plural = _("charge types")
-        ordering = ["sort_order", "name"]
-        base_manager_name = "all_tenants"
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class Placement(TenantScopedModel):
-    """A worker placed with a sponsor — and the invoice for it.
+    """A worker placed with a sponsor: the operational record and the agreement.
 
-    This is the agency's final document: it carries the agreement (which worker,
-    which sponsor, how long the visa runs) *and* the money (ticket, visa
-    processing, medical, margin, tax, terms). One record rather than two because
-    that is how the trade works — the signed paper the sponsor takes away is the
-    same paper that says what they owe.
+    Money lives on ``billing.Invoice``, not here. One placement can need several
+    invoices (a deposit on signing, a balance on delivery), a replacement needs a
+    credit note, and an issued invoice must stay immutable while this record
+    keeps changing as the file moves through the pipeline.
 
-    Worker and occupation are snapshotted onto the row. An invoice must keep
-    saying what was agreed even after someone renames an occupation or corrects
-    a worker's name years later.
+    Worker and occupation are still snapshotted onto the row: the signed
+    agreement must keep saying what was agreed even after someone renames an
+    occupation or corrects a worker's name years later.
     """
 
     class Route(models.TextChoices):
@@ -422,17 +400,8 @@ class Placement(TenantScopedModel):
     contract_start = models.DateField(_("contract start"), null=True, blank=True)
     contract_end = models.DateField(_("contract end"), null=True, blank=True)
 
-    # --- invoice ---
-    invoice_date = models.DateField(_("invoice date"), null=True, blank=True)
-    tax_rate = models.DecimalField(
-        _("tax rate %"),
-        max_digits=5,
-        decimal_places=2,
-        default=Decimal("10.00"),
-        help_text=_("Applied to taxable lines only."),
-    )
-    discount = models.DecimalField(_("discount"), max_digits=10, decimal_places=3, default=0)
-    amount_paid = models.DecimalField(_("amount paid"), max_digits=10, decimal_places=3, default=0)
+    # Agreement wording, copied from a billing.TermsTemplate when chosen so that
+    # editing the template never rewrites a signed agreement.
     payment_terms = models.CharField(_("payment terms"), max_length=200, blank=True)
     terms = models.TextField(_("terms and conditions"), blank=True)
     notes = models.TextField(_("notes"), blank=True)
@@ -453,35 +422,36 @@ class Placement(TenantScopedModel):
         return f"{self.reference} · {self.worker_name}"
 
     # --- money ---
-    # Derived rather than stored: the charge lines are the source of truth, and
-    # a stored total is one edit away from disagreeing with them.
+    # Not stored here. Invoices are separate financial records; these read
+    # across them so a placement can still show what it is worth and what is
+    # still owed, without owning the numbers.
 
     @property
-    def subtotal(self) -> Decimal:
-        return sum((line.amount for line in self.charges.all()), Decimal("0"))
+    def _issued_invoices(self) -> list:
+        """Only issued documents count as money. Drafts and cancellations do not."""
+        return [
+            invoice for invoice in self.invoices.all() if invoice.status == invoice.Status.ISSUED
+        ]
 
     @property
-    def taxable_base(self) -> Decimal:
-        return sum((line.amount for line in self.charges.all() if line.is_taxable), Decimal("0"))
-
-    @property
-    def tax_amount(self) -> Decimal:
-        base = self.taxable_base - self.discount
-        if base <= 0:
-            return Decimal("0.000")
-        return (base * self.tax_rate / Decimal("100")).quantize(Decimal("0.001"))
-
-    @property
-    def total(self) -> Decimal:
-        return (self.subtotal - self.discount + self.tax_amount).quantize(Decimal("0.001"))
+    def invoiced_total(self) -> Decimal:
+        return sum(
+            (invoice.total * invoice.sign for invoice in self._issued_invoices),
+            Decimal("0.000"),
+        )
 
     @property
     def balance_due(self) -> Decimal:
-        return (self.total - self.amount_paid).quantize(Decimal("0.001"))
+        return sum(
+            (invoice.balance_due * invoice.sign for invoice in self._issued_invoices),
+            Decimal("0.000"),
+        )
 
     @property
     def is_paid(self) -> bool:
-        return self.balance_due <= 0
+        # A placement carrying only a draft invoice is not paid — it has not
+        # even been billed yet.
+        return bool(self._issued_invoices) and self.balance_due <= 0
 
     @property
     def milestones(self) -> list[dict]:
@@ -499,27 +469,6 @@ class Placement(TenantScopedModel):
             steps += [(_("Visa transferred"), self.visa_issued_on)]
         steps.append((_("Delivered"), self.delivered_on))
         return [{"label": label, "date": date, "done": date is not None} for label, date in steps]
-
-
-class PlacementCharge(TenantScopedModel):
-    """One priced line on a placement invoice."""
-
-    placement = models.ForeignKey(
-        Placement, verbose_name=_("placement"), on_delete=models.CASCADE, related_name="charges"
-    )
-    description = models.CharField(_("description"), max_length=200)
-    amount = models.DecimalField(_("amount"), max_digits=10, decimal_places=3, default=0)
-    is_taxable = models.BooleanField(_("taxable"), default=True)
-    sort_order = models.PositiveIntegerField(_("order"), default=0)
-
-    class Meta:
-        verbose_name = _("charge")
-        verbose_name_plural = _("charges")
-        ordering = ["sort_order", "id"]
-        base_manager_name = "all_tenants"
-
-    def __str__(self) -> str:
-        return f"{self.description}: {self.amount}"
 
 
 class WorkerDocument(TenantScopedModel):

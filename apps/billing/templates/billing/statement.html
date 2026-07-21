@@ -1,0 +1,65 @@
+{% extends "print_base.html" %}
+{% load i18n ui l10n %}
+
+{% block title %}{% trans "Statement" %} — {{ sponsor.name }}{% endblock %}
+{% block back_url %}{% url 'billing:receivables' %}{% endblock %}
+
+{% block document %}
+  <header class="flex items-start justify-between gap-6 border-b border-border pb-5">
+    <div>
+      <h1 class="text-heading-lg font-medium">{{ current_tenant.name }}</h1>
+      <p class="mt-1 text-sm text-text-secondary">{% trans "Statement of account" %}</p>
+    </div>
+    <div class="text-end">
+      <p class="text-sm font-medium">{{ sponsor.name }}</p>
+      {% if sponsor.national_id %}
+        <p class="text-sm text-text-secondary" dir="ltr">{{ sponsor.national_id }}</p>
+      {% endif %}
+    </div>
+  </header>
+
+  <table class="mt-6 w-full text-sm">
+    <thead>
+      <tr class="border-y border-border bg-subtle text-xs text-text-secondary">
+        <th class="px-4 py-2.5 text-start font-medium">{% trans "Date" %}</th>
+        <th class="px-4 py-2.5 text-start font-medium">{% trans "Document" %}</th>
+        <th class="px-4 py-2.5 text-end font-medium">{% trans "Charged" %}</th>
+        <th class="px-4 py-2.5 text-end font-medium">{% trans "Paid" %}</th>
+        <th class="px-4 py-2.5 text-end font-medium">{% trans "Balance" %}</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-border">
+      {% for row in rows %}
+        <tr>
+          <td class="px-4 py-2.5 text-text-secondary">
+            {% if row.payment %}{{ row.payment.received_on|date:"j M Y" }}
+            {% else %}{{ row.invoice.issue_date|date:"j M Y" }}{% endif %}
+          </td>
+          <td class="px-4 py-2.5">
+            {% if row.payment %}
+              {% trans "Payment" %} — {{ row.payment.get_method_display }}
+            {% else %}
+              {{ row.invoice.number }}
+              {% if row.invoice.kind == "credit_note" %}({% trans "credit note" %}){% endif %}
+            {% endif %}
+          </td>
+          <td class="px-4 py-2.5 text-end" dir="ltr">
+            {% if row.charged %}{% localize off %}{{ row.charged }}{% endlocalize %}{% else %}—{% endif %}
+          </td>
+          <td class="px-4 py-2.5 text-end" dir="ltr">
+            {% if row.paid %}{% localize off %}{{ row.paid }}{% endlocalize %}{% else %}—{% endif %}
+          </td>
+          <td class="px-4 py-2.5 text-end" dir="ltr">{% localize off %}{{ row.balance }}{% endlocalize %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="px-4 py-4 text-text-muted">{% trans "Nothing on this account yet." %}</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr class="border-t-2 border-border-strong text-base font-medium">
+        <td colspan="4" class="px-4 py-3 text-end">{% trans "Balance due" %}</td>
+        <td class="px-4 py-3 text-end" dir="ltr">{{ current_tenant.currency }} {% localize off %}{{ balance }}{% endlocalize %}</td>
+      </tr>
+    </tfoot>
+  </table>
+{% endblock %}

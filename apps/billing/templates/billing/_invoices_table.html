@@ -1,0 +1,2 @@
+{% load i18n %}
+{% include "ui/data_table.html" with table_id="invoices-table" columns=columns page_obj=page_obj row_template="billing/_invoice_row.html" sort_key=sort_key direction=direction selectable=False empty_icon="file-text" empty_title=_("No invoices yet") empty_description=_("Raise one from a placement, or create a standalone invoice.") %}

@@ -1,0 +1,78 @@
+{% extends "shell.html" %}
+{% load i18n ui l10n %}
+
+{% block title %}{% trans "Receivables" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% include "ui/page_header.html" with title=_("Receivables") subtitle=_("What sponsors owe, and how long it has been outstanding.") %}
+
+  <section class="card mb-4 p-5">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="text-sm text-text-secondary">{% trans "Total outstanding" %}</p>
+        <p class="mt-1 text-heading-lg font-medium text-text-primary" dir="ltr">
+          {{ current_tenant.currency }} {% localize off %}{{ total }}{% endlocalize %}
+        </p>
+      </div>
+      <dl class="flex flex-wrap gap-6">
+        {% for label, amount in buckets.items %}
+          <div>
+            <dt class="text-xs text-text-muted">{{ label }}</dt>
+            <dd class="mt-0.5 text-sm text-text-primary" dir="ltr">{% localize off %}{{ amount }}{% endlocalize %}</dd>
+          </div>
+        {% endfor %}
+      </dl>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <section class="card overflow-hidden">
+      <header class="border-b border-border px-5 py-4">
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "By sponsor" %}</h2>
+      </header>
+      <ul class="divide-y divide-border">
+        {% for row in sponsors %}
+          <li class="flex items-center justify-between gap-3 px-5 py-3">
+            <div class="min-w-0">
+              <a href="{% url 'billing:sponsor_statement' sponsor_pk=row.sponsor.pk %}"
+                 class="text-sm font-medium text-text-primary hover:text-accent-primary">{{ row.sponsor.name }}</a>
+              <p class="text-xs text-text-muted">
+                {% blocktrans count counter=row.count %}{{ counter }} invoice{% plural %}{{ counter }} invoices{% endblocktrans %}
+              </p>
+            </div>
+            <span class="text-sm text-text-primary" dir="ltr">{% localize off %}{{ row.total }}{% endlocalize %}</span>
+          </li>
+        {% empty %}
+          {% include "ui/empty_state.html" with icon="check-circle" title=_("Nothing outstanding") description=_("Every issued invoice has been settled.") %}
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card overflow-hidden">
+      <header class="border-b border-border px-5 py-4">
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Open invoices" %}</h2>
+      </header>
+      <ul class="divide-y divide-border">
+        {% for invoice in invoices %}
+          <li class="flex items-center justify-between gap-3 px-5 py-3">
+            <div class="min-w-0">
+              <a href="{% url 'billing:invoice_detail' pk=invoice.pk %}"
+                 class="font-mono text-xs text-text-primary hover:text-accent-primary">{{ invoice.number }}</a>
+              <p class="text-xs text-text-muted">{{ invoice.sponsor_name }}</p>
+            </div>
+            <div class="text-end">
+              <span class="text-sm text-text-primary" dir="ltr">{% localize off %}{{ invoice.balance_due }}{% endlocalize %}</span>
+              {% if invoice.is_overdue %}
+                <p class="text-xs text-red-600">{% trans "overdue" %} {{ invoice.due_date|date:"j M Y" }}</p>
+              {% else %}
+                <p class="text-xs text-text-muted">{{ invoice.due_date|date:"j M Y" }}</p>
+              {% endif %}
+            </div>
+          </li>
+        {% empty %}
+          <li class="px-5 py-4 text-sm text-text-muted">{% trans "Nothing open." %}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+{% endblock %}

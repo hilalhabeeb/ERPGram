@@ -45,6 +45,44 @@ ALTER TABLE "{table}" DISABLE ROW LEVEL SECURITY;
 """
 
 
+def bind_tenant(connection, tenant_id) -> None:
+    """Set ``app.tenant_id`` on this connection for the current transaction.
+
+    Pass an empty string to unbind.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT set_config('app.tenant_id', %s, true)",
+            ["" if tenant_id is None else str(tenant_id)],
+        )
+
+
+def each_tenant(apps, schema_editor):
+    """Yield every tenant id with that tenant bound on the connection.
+
+    **Data migrations that touch tenant-scoped tables must use this.** RLS applies
+    to migrations exactly as it does to requests: with no ``app.tenant_id`` bound,
+    every SELECT returns nothing, so a migration reads zero rows, writes nothing,
+    and reports success. A migration that moved placement charges into invoices
+    did precisely that before this helper existed.
+
+    Usage::
+
+        def forwards(apps, schema_editor):
+            for tenant_id in each_tenant(apps, schema_editor):
+                Thing.objects.filter(tenant_id=tenant_id).update(...)
+    """
+    Tenant = apps.get_model("tenancy", "Tenant")
+    connection = schema_editor.connection
+    try:
+        for tenant_id in Tenant.objects.values_list("id", flat=True):
+            bind_tenant(connection, tenant_id)
+            yield tenant_id
+    finally:
+        # Leave the connection unbound so later operations start clean.
+        bind_tenant(connection, None)
+
+
 def enable_rls(table: str, policy: str = POLICY_NAME) -> list[migrations.RunSQL]:
     """Return migration operations that enable + force tenant RLS on ``table``."""
     return [

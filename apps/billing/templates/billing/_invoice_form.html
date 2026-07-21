@@ -1,0 +1,21 @@
+{% comment %}New-invoice form body, rendered inside the modal.{% endcomment %}
+{% load i18n %}
+<form method="post" action="{% url 'billing:invoice_create' %}" class="space-y-4">
+  {% csrf_token %}
+  {% include "partials/_field.html" with field=form.sponsor %}
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    {% include "partials/_field.html" with field=form.issue_date %}
+    {% include "partials/_field.html" with field=form.due_date %}
+  </div>
+  {% include "partials/_field.html" with field=form.payment_terms %}
+  <p class="text-xs text-text-muted">
+    {% trans "Creates a draft. Add service lines, then issue it to assign a number." %}
+  </p>
+  <div class="flex justify-end gap-2 pt-2">
+    <button type="button" @click="open = false"
+            class="rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle">
+      {% trans "Cancel" %}
+    </button>
+    {% include "ui/button.html" with label=_("Create draft") type="submit" variant="primary" icon="plus" %}
+  </div>
+</form>

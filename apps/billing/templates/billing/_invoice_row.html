@@ -1,0 +1,41 @@
+{% comment %}One invoice row. Context: obj (Invoice).{% endcomment %}
+{% load i18n ui l10n %}
+<tr class="hover:bg-subtle">
+  <td class="px-4 py-3 font-mono text-xs">
+    <a href="{% url 'billing:invoice_detail' pk=obj.pk %}" class="text-text-primary hover:text-accent-primary">
+      {{ obj.number|default:_("Draft") }}
+    </a>
+    {% if obj.kind == "credit_note" %}
+      <span class="ms-1 text-[10px] uppercase text-text-muted">{% trans "credit" %}</span>
+    {% endif %}
+  </td>
+  <td class="px-4 py-3">
+    <span class="text-text-primary">{{ obj.sponsor_name|default:obj.sponsor.name }}</span>
+    {% if obj.placement_id %}
+      <p class="text-xs text-text-muted">{{ obj.placement.reference }}</p>
+    {% endif %}
+  </td>
+  <td class="px-4 py-3 text-text-secondary">{{ obj.issue_date|date:"j M Y"|default:"—" }}</td>
+  <td class="px-4 py-3 text-text-secondary">
+    {{ obj.due_date|date:"j M Y"|default:"—" }}
+    {% if obj.is_overdue %}
+      <span class="ms-1 text-xs text-red-600">{% trans "overdue" %}</span>
+    {% endif %}
+  </td>
+  <td class="px-4 py-3 text-text-secondary" dir="ltr">
+    {{ current_tenant.currency }} {% localize off %}{{ obj.total }}{% endlocalize %}
+  </td>
+  <td class="px-4 py-3">
+    {% if obj.payment_state == "paid" %}
+      {% include "ui/badge.html" with label=_("Paid") tone="success" %}
+    {% elif obj.payment_state == "part_paid" %}
+      {% include "ui/badge.html" with label=_("Part paid") tone="warning" %}
+    {% elif obj.payment_state == "unpaid" %}
+      {% include "ui/badge.html" with label=_("Unpaid") tone="accent" %}
+    {% elif obj.payment_state == "cancelled" %}
+      {% include "ui/badge.html" with label=_("Cancelled") tone="neutral" %}
+    {% else %}
+      {% include "ui/badge.html" with label=_("Draft") tone="neutral" %}
+    {% endif %}
+  </td>
+</tr>

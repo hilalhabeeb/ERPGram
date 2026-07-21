@@ -47,6 +47,11 @@ MANAGE_SPONSORS = "manpower.manage_sponsors"
 MANAGE_MANPOWER_SETUP = "manpower.manage_setup"
 MANAGE_PLACEMENTS = "manpower.manage_placements"
 
+# billing / accounting
+MANAGE_INVOICES = "billing.manage_invoices"
+RECORD_PAYMENTS = "billing.record_payments"
+MANAGE_BILLING_SETUP = "billing.manage_setup"
+
 PERMISSIONS: tuple[Permission, ...] = (
     Permission(
         codename=MANAGE_STRUCTURE,
@@ -92,6 +97,27 @@ PERMISSIONS: tuple[Permission, ...] = (
         label=_("Manage placements"),
         description=_("Place workers with sponsors, price the contract and issue invoices."),
         group=_("Manpower"),
+        domains=(MANPOWER,),
+    ),
+    Permission(
+        codename=MANAGE_INVOICES,
+        label=_("Manage invoices"),
+        description=_("Create, price, issue and credit invoices."),
+        group=_("Accounting"),
+        domains=(MANPOWER,),
+    ),
+    Permission(
+        codename=RECORD_PAYMENTS,
+        label=_("Record payments"),
+        description=_("Enter money received against an invoice."),
+        group=_("Accounting"),
+        domains=(MANPOWER,),
+    ),
+    Permission(
+        codename=MANAGE_BILLING_SETUP,
+        label=_("Manage services and terms"),
+        description=_("Edit the price list of services and the terms templates."),
+        group=_("Accounting"),
         domains=(MANPOWER,),
     ),
     Permission(

@@ -1,13 +1,11 @@
-"""Placements: the invoice arithmetic, the pipeline, and worker availability.
+"""Placements: the operational record and the agreement.
 
-The placement doubles as the agency's invoice, so the totals are load-bearing —
-they are what a sponsor is asked to pay.
+Money lives on invoices now — see tests/test_invoicing.py.
 """
 
 from __future__ import annotations
 
 import datetime as dt
-from decimal import Decimal
 
 import pytest
 from django.db.models import ProtectedError
@@ -17,7 +15,7 @@ from apps.accounts.services import ensure_system_roles
 from apps.core.domains import MANPOWER
 from apps.core.tenant import activate_tenant
 from apps.manpower import services
-from apps.manpower.models import ChargeType, Country, Occupation, Placement, Sponsor, Worker
+from apps.manpower.models import Country, Occupation, Placement, Sponsor, Worker
 from tests.factories import MembershipFactory, TenantFactory, UserFactory
 
 pytestmark = pytest.mark.django_db
@@ -29,7 +27,6 @@ def agency():
     ensure_system_roles(tenant)
     services.ensure_reference_data()
     services.ensure_tenant_defaults(tenant)
-    services.ensure_charge_types(tenant)
     return tenant
 
 
@@ -94,7 +91,7 @@ def test_transfer_pipeline_skips_travel_and_medical(agency):
 
 
 def test_worker_and_occupation_are_snapshotted(agency):
-    """The invoice must keep saying what was agreed, even after later edits."""
+    """The signed agreement must keep saying what was agreed."""
     user = UserFactory()
     worker = _worker(agency, user, full_name="Original Name")
     placement = _placement(agency, user, worker=worker)
@@ -104,78 +101,6 @@ def test_worker_and_occupation_are_snapshotted(agency):
         placement.refresh_from_db()
 
     assert placement.worker_name == "Original Name"
-
-
-# --- money ------------------------------------------------------------------
-
-
-def test_default_charges_are_copied_from_the_price_list(agency):
-    user = UserFactory()
-    placement = _placement(agency, user)
-
-    with activate_tenant(agency.id):
-        assert placement.charges.count() == ChargeType.objects.filter(tenant=agency).count()
-
-
-def test_totals_apply_tax_only_to_taxable_lines(agency):
-    user = UserFactory()
-    placement = _placement(agency, user)
-
-    with activate_tenant(agency.id):
-        placement.charges.all().delete()
-        placement.charges.create(
-            tenant=agency, description="Service fee", amount=Decimal("100.000"), is_taxable=True
-        )
-        placement.charges.create(
-            tenant=agency, description="Air ticket", amount=Decimal("50.000"), is_taxable=False
-        )
-        placement.tax_rate = Decimal("10.00")
-        placement.save()
-        placement.refresh_from_db()
-
-        assert placement.subtotal == Decimal("150.000")
-        # tax on the taxable 100 only, not on the ticket
-        assert placement.tax_amount == Decimal("10.000")
-        assert placement.total == Decimal("160.000")
-
-
-def test_discount_reduces_the_taxable_base(agency):
-    user = UserFactory()
-    placement = _placement(agency, user)
-
-    with activate_tenant(agency.id):
-        placement.charges.all().delete()
-        placement.charges.create(
-            tenant=agency, description="Service fee", amount=Decimal("200.000"), is_taxable=True
-        )
-        placement.tax_rate = Decimal("10.00")
-        placement.discount = Decimal("50.000")
-        placement.save()
-        placement.refresh_from_db()
-
-        assert placement.tax_amount == Decimal("15.000")  # 10% of 150, not of 200
-        assert placement.total == Decimal("165.000")
-
-
-def test_balance_and_paid_flag_track_payment(agency):
-    user = UserFactory()
-    placement = _placement(agency, user)
-
-    with activate_tenant(agency.id):
-        placement.charges.all().delete()
-        placement.charges.create(
-            tenant=agency, description="Fee", amount=Decimal("100.000"), is_taxable=False
-        )
-        placement.save()
-        placement.refresh_from_db()
-        assert placement.balance_due == Decimal("100.000")
-        assert placement.is_paid is False
-
-        placement.amount_paid = Decimal("100.000")
-        placement.save()
-        placement.refresh_from_db()
-        assert placement.balance_due == Decimal("0.000")
-        assert placement.is_paid is True
 
 
 # --- pipeline and worker availability ---------------------------------------
@@ -207,7 +132,6 @@ def test_delivering_places_the_worker_and_sets_the_contract(agency):
     # Delivered means the worker is now here, on the sponsor's visa.
     assert worker.location == Worker.Location.IN_COUNTRY
     assert placement.contract_start == placement.delivered_on
-    # two-year visa by default
     assert placement.contract_end == services.add_months(placement.contract_start, 24)
 
 
@@ -240,10 +164,8 @@ def test_only_available_workers_are_offered(agency, client):
     taken = _worker(agency, user, full_name="Busy Worker")
 
     with activate_tenant(agency.id):
-        services.set_worker_active(taken, user=user, is_active=True)
         taken.availability = Worker.Availability.PLACED
         taken.save()
-
         offered = {w.pk for w in PlacementForm(tenant=agency).fields["worker"].queryset}
 
     assert available.pk in offered
@@ -255,21 +177,20 @@ def test_placement_of_another_tenant_404s(client, agency):
 
     other = TenantFactory(domain=MANPOWER)
     services.ensure_tenant_defaults(other)
-    services.ensure_charge_types(other)
     foreign = _placement(other, UserFactory())
 
     assert client.get(reverse("manpower:placement_detail", args=[foreign.pk])).status_code == 404
     assert client.get(reverse("manpower:placement_print", args=[foreign.pk])).status_code == 404
 
 
-def test_printable_documents_render(client, agency):
+def test_agreement_and_biodata_documents_render(client, agency):
     user = _sign_in(client, agency)
     worker = _worker(agency, user)
     placement = _placement(agency, user, worker=worker)
 
-    invoice = client.get(reverse("manpower:placement_print", args=[placement.pk]))
-    assert invoice.status_code == 200
-    assert placement.reference in invoice.content.decode()
+    agreement = client.get(reverse("manpower:placement_print", args=[placement.pk]))
+    assert agreement.status_code == 200
+    assert placement.reference in agreement.content.decode()
 
     cv = client.get(reverse("manpower:worker_cv", args=[worker.pk]))
     assert cv.status_code == 200
@@ -277,7 +198,7 @@ def test_printable_documents_render(client, agency):
 
 
 def test_sponsors_are_protected_from_deletion(agency):
-    """A placement is a financial record; its parties must not vanish."""
+    """A placement is a business record; its parties must not vanish."""
     user = UserFactory()
     sponsor = _sponsor(agency, user)
     _placement(agency, user, sponsor=sponsor)

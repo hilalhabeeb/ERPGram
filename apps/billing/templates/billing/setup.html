@@ -1,0 +1,74 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Billing setup" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% include "ui/page_header.html" with title=_("Billing setup") subtitle=_("Your price list of services, and the terms you put on documents.") %}
+
+  <nav class="mb-5 border-b border-border" aria-label="{% trans 'Setup sections' %}">
+    <ul class="-mb-px flex gap-1 overflow-x-auto">
+      {% for key, label in sections %}
+        <li>
+          <a href="{% url 'billing:setup_section' section=key %}"
+             class="inline-block whitespace-nowrap border-b-2 px-3 py-2.5 text-sm transition-colors
+                    {% if key == section %}border-accent-primary font-medium text-accent-primary
+                    {% else %}border-transparent text-text-secondary hover:border-border-strong hover:text-text-primary{% endif %}"
+             {% if key == section %}aria-current="page"{% endif %}>{{ label }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <section class="card overflow-hidden lg:col-span-2">
+      {% if rows %}
+        <ul class="divide-y divide-border">
+          {% for row in rows %}
+            <li class="flex items-center justify-between gap-3 px-4 py-3 hover:bg-subtle {% if not row.is_active %}opacity-60{% endif %}">
+              <div class="min-w-0">
+                <span class="text-sm font-medium text-text-primary">{{ row.name }}</span>
+                {% if not row.is_active %}
+                  {% include "ui/badge.html" with label=_("Archived") tone="neutral" %}
+                {% endif %}
+              </div>
+              <div class="flex items-center gap-1">
+                <a href="?edit={{ row.pk }}" class="rounded-control px-2 py-1 text-sm text-text-secondary hover:bg-subtle hover:text-text-primary">{% trans "Edit" %}</a>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="id" value="{{ row.pk }}">
+                  <input type="hidden" name="archive" value="1">
+                  <button type="submit" class="rounded-control px-2 py-1 text-sm text-text-secondary hover:bg-subtle hover:text-text-primary">
+                    {% if row.is_active %}{% trans "Archive" %}{% else %}{% trans "Restore" %}{% endif %}
+                  </button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        {% include "ui/empty_state.html" with icon="sliders" title=_("Nothing here yet") description=_("Add the first entry using the form beside this list.") %}
+      {% endif %}
+    </section>
+
+    <section class="card h-fit p-5">
+      <h2 class="text-heading-sm font-medium text-text-primary">
+        {% if editing %}{% trans "Edit entry" %}{% else %}{% trans "Add entry" %}{% endif %}
+      </h2>
+      <form method="post" class="mt-4 space-y-4">
+        {% csrf_token %}
+        {% if editing %}<input type="hidden" name="id" value="{{ editing.pk }}">{% endif %}
+        {% for field in form %}
+          {% include "partials/_field.html" with field=field %}
+        {% endfor %}
+        <div class="flex justify-end gap-2 pt-1">
+          {% if editing %}
+            <a href="{% url 'billing:setup_section' section=section %}"
+               class="rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle">{% trans "Cancel" %}</a>
+          {% endif %}
+          {% include "ui/button.html" with label=_("Save") type="submit" variant="primary" %}
+        </div>
+      </form>
+    </section>
+  </div>
+{% endblock %}

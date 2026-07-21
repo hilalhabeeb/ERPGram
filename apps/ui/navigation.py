@@ -11,7 +11,12 @@ from dataclasses import dataclass
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.domains import MANPOWER, applies_to
-from apps.core.permissions import MANAGE_MANPOWER_SETUP, MANAGE_ORGANIZATION
+from apps.core.permissions import (
+    MANAGE_BILLING_SETUP,
+    MANAGE_INVOICES,
+    MANAGE_MANPOWER_SETUP,
+    MANAGE_ORGANIZATION,
+)
 
 
 @dataclass(frozen=True)
@@ -52,11 +57,27 @@ PRIMARY_NAV: list[NavItem] = [
         domains=(MANPOWER,),
     ),
     NavItem(
+        "invoices",
+        _("Invoices"),
+        icon="file-text",
+        url_name="billing:invoice_list",
+        requires=MANAGE_INVOICES,
+        domains=(MANPOWER,),
+    ),
+    NavItem(
         "manpower_setup",
         _("Manpower setup"),
         icon="sliders",
         url_name="manpower:setup",
         requires=MANAGE_MANPOWER_SETUP,
+        domains=(MANPOWER,),
+    ),
+    NavItem(
+        "billing_setup",
+        _("Billing setup"),
+        icon="settings-2",
+        url_name="billing:setup",
+        requires=MANAGE_BILLING_SETUP,
         domains=(MANPOWER,),
     ),
     # --- shared core ---

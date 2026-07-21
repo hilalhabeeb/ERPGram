@@ -12,12 +12,15 @@ from __future__ import annotations
 
 import datetime as dt
 import random
+from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.accounts.models import Membership
 from apps.accounts.services import ensure_system_roles
+from apps.billing import services as billing_services
+from apps.billing.models import Service
 from apps.core.domains import MANPOWER
 from apps.core.permissions import MANAGE_SPONSORS, MANAGE_WORKERS
 from apps.core.tenant import activate_tenant
@@ -578,10 +581,10 @@ class Command(BaseCommand):
     def _placements(self, tenant, owner):
         """A few placements across the pipeline, so the module has a story.
 
-        One delivered (paid), one mid-processing overseas, one draft transfer —
-        enough to show both routes and the invoice in different states.
+        One delivered and paid, one mid-processing overseas, one draft transfer —
+        enough to show both routes, and invoices in draft, issued and paid states.
         """
-        services.ensure_charge_types(tenant, user=owner)
+        billing_services.ensure_billing_defaults(tenant, user=owner)
 
         if Placement.all_tenants.filter(tenant=tenant).exists():
             return
@@ -622,7 +625,6 @@ class Command(BaseCommand):
                     "is unable to continue.\n"
                     "3. Fees are non-refundable after the visa has been issued."
                 ),
-                invoice_date=today + dt.timedelta(days=offset),
             )
 
             if placement.route == Placement.Route.OVERSEAS:
@@ -635,12 +637,43 @@ class Command(BaseCommand):
             elif status == Placement.Status.DELIVERED:
                 placement.visa_issued_on = placement.agreed_on + dt.timedelta(days=10)
 
-            if paid:
-                placement.amount_paid = placement.total
             placement.save()
 
             if status != Placement.Status.DRAFT:
                 services.set_placement_status(placement, user=owner, status=status)
+
+            # Each placement gets its invoice. A draft placement keeps a draft
+            # invoice so the "not yet issued" state is visible in the demo.
+            invoice = billing_services.create_invoice(
+                tenant=tenant,
+                user=owner,
+                sponsor=placement.sponsor,
+                placement=placement,
+                services=list(Service.objects.filter(tenant=tenant, is_active=True)[:6]),
+                payment_terms=placement.payment_terms,
+                issue_date=placement.agreed_on,
+            )
+            if status != Placement.Status.DRAFT:
+                billing_services.issue_invoice(invoice, user=owner, on=placement.agreed_on)
+                if paid:
+                    billing_services.record_payment(
+                        invoice,
+                        user=owner,
+                        received_on=placement.agreed_on + dt.timedelta(days=2),
+                        amount=invoice.total,
+                        method="transfer",
+                        reference="Demo settlement",
+                    )
+                elif status == Placement.Status.PROCESSING:
+                    # A deposit taken, balance still outstanding.
+                    billing_services.record_payment(
+                        invoice,
+                        user=owner,
+                        received_on=placement.agreed_on,
+                        amount=(invoice.total / 2).quantize(Decimal("0.001")),
+                        method="cash",
+                        reference="Deposit",
+                    )
             made += 1
 
         self.stdout.write(f"  placements created: {made}")

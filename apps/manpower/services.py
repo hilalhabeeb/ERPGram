@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import calendar
 import datetime as dt
-from decimal import Decimal
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -15,13 +14,11 @@ from apps.core.tenant import activate_tenant
 from apps.manpower.models import (
     Accommodation,
     Agent,
-    ChargeType,
     Country,
     DocumentType,
     Language,
     Occupation,
     Placement,
-    PlacementCharge,
     Skill,
     Sponsor,
     Worker,
@@ -351,34 +348,6 @@ def next_placement_reference(tenant: Tenant) -> str:
     return f"PL-{number + 1:04d}"
 
 
-DEFAULT_CHARGE_TYPES = [
-    # (name, default amount, taxable) — the lines a GCC agency actually bills.
-    ("Service fee", Decimal("450.000"), True),
-    ("Visa processing", Decimal("150.000"), True),
-    ("Air ticket", Decimal("120.000"), False),
-    ("Medical examination", Decimal("40.000"), True),
-    ("Insurance", Decimal("25.000"), True),
-    ("Agency margin", Decimal("100.000"), True),
-]
-
-
-def ensure_charge_types(tenant: Tenant, *, user=None) -> None:
-    """Starting price list, so a new agency can raise an invoice immediately."""
-    with activate_tenant(tenant.id), transaction.atomic():
-        for order, (name, amount, taxable) in enumerate(DEFAULT_CHARGE_TYPES):
-            ChargeType.all_tenants.get_or_create(
-                tenant=tenant,
-                name=name,
-                defaults={
-                    "default_amount": amount,
-                    "is_taxable": taxable,
-                    "sort_order": order,
-                    "created_by": user,
-                    "updated_by": user,
-                },
-            )
-
-
 @transaction.atomic
 def create_placement(
     *, tenant: Tenant, user, sponsor: Sponsor, worker: Worker, **fields
@@ -408,25 +377,7 @@ def create_placement(
         updated_by=user,
         **fields,
     )
-    apply_default_charges(placement, user=user)
     return placement
-
-
-def apply_default_charges(placement: Placement, *, user=None) -> None:
-    """Copy the price list onto a placement that has no lines yet."""
-    if placement.charges.exists():
-        return
-    for charge_type in ChargeType.objects.filter(tenant=placement.tenant, is_active=True):
-        PlacementCharge.objects.create(
-            tenant=placement.tenant,
-            placement=placement,
-            description=charge_type.name,
-            amount=charge_type.default_amount,
-            is_taxable=charge_type.is_taxable,
-            sort_order=charge_type.sort_order,
-            created_by=user,
-            updated_by=user,
-        )
 
 
 @transaction.atomic
@@ -524,12 +475,14 @@ def placement_summary(tenant: Tenant) -> list[dict]:
         {
             "key": "unpaid",
             "label": _("Awaiting payment"),
+            # Money now hangs off invoices, so prefetch those and their lines and
+            # payments — the totals are computed from them.
             "value": sum(
                 1
                 for placement in base.exclude(status=Placement.Status.CANCELLED).prefetch_related(
-                    "charges"
+                    "invoices__lines", "invoices__payments"
                 )
-                if not placement.is_paid
+                if placement._issued_invoices and not placement.is_paid
             ),
             "icon": "file-text",
         },
