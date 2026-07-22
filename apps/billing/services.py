@@ -191,6 +191,29 @@ def assert_editable(invoice: Invoice) -> None:
 
 
 @transaction.atomic
+def replace_invoice_lines(invoice: Invoice, *, lines: list[dict], user=None) -> None:
+    """Replace every line on a draft in one save.
+
+    The items grid posts the whole table at once (like a Frappe child table),
+    so the honest operation is "these are the lines now", not a diff. Each entry
+    in ``lines`` is already-validated cleaned data from ``InvoiceLineForm`` —
+    service resolved, tax following the item — so this function only persists.
+    Wrapped in a transaction: a bad row must not half-rewrite the invoice.
+    """
+    assert_editable(invoice)
+    invoice.lines.all().delete()
+    for order, values in enumerate(lines):
+        InvoiceLine.objects.create(
+            tenant=invoice.tenant,
+            invoice=invoice,
+            sort_order=order,
+            created_by=user,
+            updated_by=user,
+            **values,
+        )
+
+
+@transaction.atomic
 def issue_invoice(invoice: Invoice, *, user, on: dt.date | None = None) -> Invoice:
     """Assign the number and lock the document."""
     if invoice.status != Invoice.Status.DRAFT:

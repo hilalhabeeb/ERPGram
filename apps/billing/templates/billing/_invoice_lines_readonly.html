@@ -1,0 +1,67 @@
+{% load i18n ui l10n %}
+{% comment %}
+The lines as a fixed document: issued invoices are locked, and an empty price
+list has nothing to edit. Correct an issued invoice with a credit note, never by
+rewriting it.
+{% endcomment %}
+<div class="overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-border bg-subtle text-xs text-text-secondary">
+        <th class="px-4 py-2.5 text-start font-medium">{% trans "Item" %}</th>
+        <th class="px-4 py-2.5 text-end font-medium">{% trans "Qty" %}</th>
+        <th class="px-4 py-2.5 text-end font-medium">{% trans "Rate" %}</th>
+        <th class="hidden px-4 py-2.5 text-end font-medium sm:table-cell">{% trans "Tax" %}</th>
+        <th class="px-4 py-2.5 text-end font-medium">{% trans "Amount" %}</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-border">
+      {% for line in lines %}
+        <tr>
+          <td class="px-4 py-2.5">
+            <span class="text-text-primary">{{ line.description }}</span>
+            {% if line.service.code %}
+              <span class="ms-1 font-mono text-xs text-text-muted">{{ line.service.code }}</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-2.5 text-end text-text-secondary" dir="ltr">{% localize off %}{{ line.quantity }}{% endlocalize %}</td>
+          <td class="px-4 py-2.5 text-end text-text-secondary" dir="ltr">{% localize off %}{{ line.rate }}{% endlocalize %}</td>
+          <td class="hidden px-4 py-2.5 text-end text-text-secondary sm:table-cell" dir="ltr">
+            {% if line.is_taxable %}{% localize off %}{{ line.tax_rate }}{% endlocalize %}%{% else %}—{% endif %}
+          </td>
+          <td class="px-4 py-2.5 text-end text-text-primary" dir="ltr">{% localize off %}{{ line.amount }}{% endlocalize %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="px-5 py-4 text-sm text-text-muted">{% trans "No items." %}</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot class="border-t border-border bg-subtle text-sm">
+      <tr>
+        <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Subtotal" %}</td>
+        <td class="px-4 py-2 text-end text-text-primary" dir="ltr">{% localize off %}{{ invoice.subtotal }}{% endlocalize %}</td>
+      </tr>
+      {% if invoice.discount %}
+        <tr>
+          <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Discount" %}</td>
+          <td class="px-4 py-2 text-end text-text-primary" dir="ltr">−{% localize off %}{{ invoice.discount }}{% endlocalize %}</td>
+        </tr>
+      {% endif %}
+      <tr>
+        <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Tax" %}</td>
+        <td class="px-4 py-2 text-end text-text-primary" dir="ltr">{% localize off %}{{ invoice.tax_amount }}{% endlocalize %}</td>
+      </tr>
+      <tr class="font-medium">
+        <td colspan="4" class="px-4 py-2.5 text-end text-text-primary">{% trans "Total" %}</td>
+        <td class="px-4 py-2.5 text-end text-text-primary" dir="ltr">{{ current_tenant.currency }} {% localize off %}{{ invoice.total }}{% endlocalize %}</td>
+      </tr>
+      <tr>
+        <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Paid" %}</td>
+        <td class="px-4 py-2 text-end text-text-secondary" dir="ltr">{% localize off %}{{ invoice.amount_paid }}{% endlocalize %}</td>
+      </tr>
+      <tr class="{% if invoice.is_paid %}text-green-700{% else %}text-amber-700{% endif %} font-medium">
+        <td colspan="4" class="px-4 py-2 text-end">{% trans "Balance due" %}</td>
+        <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ invoice.balance_due }}{% endlocalize %}</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>

@@ -18,12 +18,7 @@ urlpatterns = [
     path("invoices/<uuid:pk>/cancel/", views.invoice_cancel, name="invoice_cancel"),
     path("invoices/<uuid:pk>/credit/", views.invoice_credit, name="invoice_credit"),
     path("invoices/<uuid:pk>/save/<slug:section>/", views.invoice_update, name="invoice_update"),
-    path("invoices/<uuid:pk>/lines/add/", views.invoice_line_add, name="invoice_line_add"),
-    path(
-        "invoices/<uuid:pk>/lines/<uuid:line_pk>/delete/",
-        views.invoice_line_delete,
-        name="invoice_line_delete",
-    ),
+    path("invoices/<uuid:pk>/lines/save/", views.invoice_lines_save, name="invoice_lines_save"),
     path("invoices/<uuid:pk>/payments/add/", views.payment_add, name="payment_add"),
     path(
         "sponsors/<uuid:sponsor_pk>/statement/",

@@ -21,6 +21,29 @@ CI · domains & manpower masters · placements/invoices · biodata sheets.
   invoice. ERPNext's Payment Entry can settle several at once; worth it once an
   agency runs monthly statements.
 
+## Frappe / Odoo parity — invoicing
+
+The items grid is now an inline child table (add row, edit cells, delete, live
+totals, one save), matching how both do line items. Remaining gaps, ranked:
+
+- **Row reordering** — Frappe lets you drag rows to set the order. Ours has a
+  `sort_order` and saves in table order, but there is no drag handle yet.
+- **UOM / quantity semantics** — every line is qty × rate today. Fine for
+  services; if goods ever appear (uniforms, kits) they will want a unit.
+- **Keyboard entry** — Frappe adds a row on Enter/Tab from the last cell and is
+  fully keyboard-drivable. Ours needs the mouse for "Add row".
+- **Live discount + grand-total on the grid** — the grid previews subtotal/tax/
+  total live, but the invoice-level discount is edited in a separate card, so a
+  discount change only shows after save. Consider folding discount into the grid.
+- **Number/currency formatting in inputs** — rates show raw (`450.000`); Frappe
+  formats with the currency's precision as you leave the cell.
+- **"Fetch from" defaults** — Frappe pulls an item's description/rate and can
+  also pull tax templates. We pull description/rate/taxability; a full tax
+  *template* (multiple tax rows) is not modelled — one rate per line for now.
+- **Stock/GL posting** — both post to a ledger on submit. We deliberately have no
+  GL yet (`Service.income_account` is reserved). That is the big one when real
+  accounting is needed, and is its own project.
+
 ## Manpower module
 
 - **Replacement / refund flow** — the "one free replacement within three months"

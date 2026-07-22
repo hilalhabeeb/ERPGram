@@ -7,6 +7,7 @@ send to a customer, so they are pinned tightly.
 from __future__ import annotations
 
 import datetime as dt
+import json
 from decimal import Decimal
 
 import pytest
@@ -221,10 +222,11 @@ def test_editing_a_locked_invoice_through_the_view_is_refused(client, agency):
     with activate_tenant(agency.id):
         invoice = billing.issue_invoice(_invoice(agency, user), user=user)
         line_count = invoice.lines.count()
+        service = Service.objects.get(tenant=agency, name="Service fee")
 
     client.post(
-        reverse("billing:invoice_line_add", args=[invoice.pk]),
-        {"description": "Sneaky", "quantity": "1", "rate": "999", "tax_rate": "10"},
+        reverse("billing:invoice_lines_save", args=[invoice.pk]),
+        {"lines": json.dumps([{"service": str(service.pk), "quantity": "1", "rate": "999"}])},
     )
 
     with activate_tenant(agency.id):
@@ -427,6 +429,23 @@ def test_every_billing_page_renders(client, agency):
         assert response.status_code == 200, f"{url} returned {response.status_code}"
 
 
+def test_a_draft_gets_the_editable_grid_and_an_issued_invoice_does_not(client, agency):
+    """The draft is a form; an issued document is read-only evidence."""
+    user = _sign_in(client, agency)
+    with activate_tenant(agency.id):
+        draft = _invoice(agency, user)
+        issued = billing.issue_invoice(_invoice(agency, user), user=user)
+
+    save_url = reverse("billing:invoice_lines_save", args=[draft.pk])
+    draft_html = client.get(reverse("billing:invoice_detail", args=[draft.pk])).content.decode()
+    assert save_url in draft_html
+    assert 'id="grid-services"' in draft_html  # the price list is handed to Alpine
+
+    issued_html = client.get(reverse("billing:invoice_detail", args=[issued.pk])).content.decode()
+    assert 'id="grid-services"' not in issued_html
+    assert reverse("billing:invoice_lines_save", args=[issued.pk]) not in issued_html
+
+
 def test_placement_pages_render_after_the_billing_split(client, agency):
     user = _sign_in(client, agency)
     with activate_tenant(agency.id):
@@ -502,6 +521,109 @@ def test_new_lines_use_the_tenant_default_tax_rate(agency):
         invoice = billing.create_invoice(tenant=agency, user=user, sponsor=_sponsor(agency, user))
         line = billing.add_line_from_service(invoice, service=service, user=user)
         assert line.tax_rate == Decimal("15.00")
+
+
+# --- items grid (bulk save) --------------------------------------------------
+# The grid submits the whole table at once, like a Frappe child table. The
+# server, not the browser, decides the lines: it validates each against the
+# price list and sets the tax from the item.
+
+
+def _save_grid(client, invoice, rows):
+    return client.post(
+        reverse("billing:invoice_lines_save", args=[invoice.pk]),
+        {"lines": json.dumps(rows)},
+    )
+
+
+def test_the_grid_replaces_the_whole_table(client, agency):
+    user = _sign_in(client, agency)
+    with activate_tenant(agency.id):
+        invoice = _invoice(agency, user)  # starts with one "Service fee" line
+        visa = Service.objects.get(tenant=agency, name="Visa processing")
+        medical = Service.objects.get(tenant=agency, name="Medical examination")
+
+    _save_grid(
+        client,
+        invoice,
+        [
+            {"service": str(visa.pk), "quantity": "1", "rate": "150"},
+            {"service": str(medical.pk), "quantity": "2", "rate": "40"},
+        ],
+    )
+
+    with activate_tenant(agency.id):
+        invoice.refresh_from_db()
+        lines = list(invoice.lines.order_by("sort_order"))
+        assert [line.service_id for line in lines] == [visa.pk, medical.pk]
+        assert lines[0].sort_order == 0 and lines[1].sort_order == 1
+        assert lines[1].quantity == Decimal("2.00")
+
+
+def test_the_grid_drops_blank_rows(client, agency):
+    user = _sign_in(client, agency)
+    with activate_tenant(agency.id):
+        invoice = _invoice(agency, user)
+        fee = Service.objects.get(tenant=agency, name="Service fee")
+
+    _save_grid(
+        client,
+        invoice,
+        [
+            {"service": str(fee.pk), "quantity": "1", "rate": "450"},
+            {"service": "", "quantity": "1", "rate": "99"},  # a row the user never filled
+        ],
+    )
+
+    with activate_tenant(agency.id):
+        invoice.refresh_from_db()
+        assert invoice.lines.count() == 1
+
+
+def test_the_grid_sets_tax_from_the_service_not_the_browser(client, agency):
+    """A non-taxable item stays untaxed; a taxable one takes the tenant rate."""
+    user = _sign_in(client, agency)
+    with activate_tenant(agency.id):
+        invoice = _invoice(agency, user)
+        ticket = Service.objects.get(tenant=agency, name="Air ticket")  # not taxable
+        fee = Service.objects.get(tenant=agency, name="Service fee")  # taxable
+
+    _save_grid(
+        client,
+        invoice,
+        [
+            {"service": str(ticket.pk), "quantity": "1", "rate": "120"},
+            {"service": str(fee.pk), "quantity": "1", "rate": "450"},
+        ],
+    )
+
+    with activate_tenant(agency.id):
+        invoice.refresh_from_db()
+        by_service = {line.service_id: line for line in invoice.lines.all()}
+        assert by_service[ticket.pk].is_taxable is False
+        assert by_service[ticket.pk].tax_rate == Decimal("0.00")
+        assert by_service[fee.pk].is_taxable is True
+        assert by_service[fee.pk].tax_rate == agency.default_tax_rate
+
+
+def test_the_grid_rejects_a_service_from_another_tenant(client, agency):
+    """Item-master enforcement holds at the boundary, not just in the form."""
+    user = _sign_in(client, agency)
+    other = TenantFactory(domain=MANPOWER)
+    billing.ensure_billing_defaults(other)
+    with activate_tenant(other.id):
+        foreign = Service.objects.get(tenant=other, name="Service fee")
+    with activate_tenant(agency.id):
+        invoice = _invoice(agency, user)
+        before = invoice.lines.count()
+
+    _save_grid(client, invoice, [{"service": str(foreign.pk), "quantity": "1", "rate": "999"}])
+
+    with activate_tenant(agency.id):
+        invoice.refresh_from_db()
+        # The whole save is rejected; the existing lines are left untouched.
+        assert invoice.lines.count() == before
+        assert not invoice.lines.filter(rate=Decimal("999.000")).exists()
 
 
 # --- payment guards ----------------------------------------------------------

@@ -6,6 +6,8 @@ billing, and the user must hold the permission.
 
 from __future__ import annotations
 
+import json
+
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import Http404, HttpRequest, HttpResponse
@@ -92,6 +94,38 @@ def invoice_list(request: HttpRequest) -> HttpResponse:
 def invoice_detail(request: HttpRequest, pk) -> HttpResponse:
     _require_billing(request)
     invoice = _get_invoice(request, pk)
+    tenant = request.tenant
+    services_qs = Service.objects.filter(tenant=tenant, is_active=True)
+
+    # The items grid is an Alpine child table: it needs the price list and the
+    # current lines as JSON to edit in place. Money fields go over as strings so
+    # the Arabic locale never turns a decimal point into a comma in transit.
+    services_data = [
+        {
+            "id": str(service.id),
+            "name": service.name,
+            "code": service.code,
+            "rate": str(service.default_rate),
+            "taxable": service.is_taxable,
+            "description": service.description or service.name,
+        }
+        for service in services_qs
+    ]
+    lines_data = [
+        {
+            "service": str(line.service_id) if line.service_id else "",
+            "description": line.description,
+            "quantity": str(line.quantity),
+            "rate": str(line.rate),
+        }
+        for line in invoice.lines.all()
+    ]
+    grid_config = {
+        "currency": tenant.currency,
+        "defaultTax": str(tenant.default_tax_rate),
+        "discount": str(invoice.discount),
+    }
+
     return render(
         request,
         "billing/invoice_detail.html",
@@ -101,11 +135,13 @@ def invoice_detail(request: HttpRequest, pk) -> HttpResponse:
             "invoice": invoice,
             "lines": invoice.lines.all(),
             "payments": invoice.payments.all(),
-            "line_form": InvoiceLineForm(tenant=request.tenant),
             "terms_form": InvoiceTermsForm(instance=invoice, tenant=request.tenant),
             "payment_form": PaymentForm(tenant=request.tenant),
             "header_form": InvoiceForm(instance=invoice, tenant=request.tenant),
-            "services": Service.objects.filter(tenant=request.tenant, is_active=True),
+            "services": services_qs,
+            "services_data": services_data,
+            "lines_data": lines_data,
+            "grid_config": grid_config,
             "can_manage": has_permission(request, MANAGE_INVOICES),
             "can_pay": has_permission(request, RECORD_PAYMENTS),
         },
@@ -159,37 +195,53 @@ def invoice_update(request: HttpRequest, pk, section: str) -> HttpResponse:
 
 
 @require_POST
-def invoice_line_add(request: HttpRequest, pk) -> HttpResponse:
+def invoice_lines_save(request: HttpRequest, pk) -> HttpResponse:
+    """Save the whole items grid in one post.
+
+    The grid edits rows in place and submits the entire table as JSON, the way
+    a Frappe child table saves with its parent — not row-by-row. Each row is put
+    through ``InvoiceLineForm`` so the server, not the browser, decides the tax
+    and defaults; a blank row (no service chosen) is dropped rather than rejected.
+    """
     _require_billing(request)
     require_permission(request, MANAGE_INVOICES)
     invoice = _get_invoice(request, pk)
     if blocked := _guard_editable(request, invoice):
         return blocked
 
-    form = InvoiceLineForm(request.POST, tenant=request.tenant)
-    if form.is_valid():
-        line = form.save(commit=False)
-        line.tenant = request.tenant
-        line.invoice = invoice
-        line.created_by = request.user
-        line.updated_by = request.user
-        line.save()
-        messages.success(request, _("Line added."))
-    else:
-        messages.error(request, _("Please correct the errors and try again."))
-    return redirect("billing:invoice_detail", pk=invoice.pk)
+    try:
+        rows = json.loads(request.POST.get("lines") or "[]")
+    except json.JSONDecodeError:
+        rows = None
+    if not isinstance(rows, list):
+        messages.error(request, _("Could not read the items. Please try again."))
+        return redirect("billing:invoice_detail", pk=invoice.pk)
 
+    cleaned: list[dict] = []
+    for index, row in enumerate(rows, start=1):
+        if not isinstance(row, dict) or not row.get("service"):
+            continue  # a blank row is a removed row, not an error
+        form = InvoiceLineForm(
+            {
+                "service": row.get("service") or "",
+                "description": row.get("description") or "",
+                "quantity": row.get("quantity") or "",
+                "rate": row.get("rate") or "",
+            },
+            tenant=request.tenant,
+        )
+        if form.is_valid():
+            cleaned.append(form.cleaned_data)
+        else:
+            first_error = next(iter(form.errors.values()))[0]
+            messages.error(
+                request,
+                _("Row %(n)d: %(error)s") % {"n": index, "error": first_error},
+            )
+            return redirect("billing:invoice_detail", pk=invoice.pk)
 
-@require_POST
-def invoice_line_delete(request: HttpRequest, pk, line_pk) -> HttpResponse:
-    _require_billing(request)
-    require_permission(request, MANAGE_INVOICES)
-    invoice = _get_invoice(request, pk)
-    if blocked := _guard_editable(request, invoice):
-        return blocked
-
-    get_object_or_404(invoice.lines, pk=line_pk).delete()
-    messages.success(request, _("Line removed."))
+    services.replace_invoice_lines(invoice, lines=cleaned, user=request.user)
+    messages.success(request, _("Items saved."))
     return redirect("billing:invoice_detail", pk=invoice.pk)
 
 

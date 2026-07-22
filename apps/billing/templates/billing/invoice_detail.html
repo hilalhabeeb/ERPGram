@@ -78,151 +78,126 @@
       <header class="border-b border-border px-5 py-4">
         <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Items" %}</h2>
         <p class="text-xs text-text-secondary">
-          {% trans "Every line is a service from your price list. Rate and tax fill in from it and can be adjusted here." %}
+          {% if can_manage and not invoice.is_locked %}
+            {% trans "Every line is a service from your price list. Rate and tax fill in from it and can be adjusted here." %}
+          {% else %}
+            {% trans "Each line is a service from the price list, with its rate and tax." %}
+          {% endif %}
         </p>
       </header>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-border bg-subtle text-xs text-text-secondary">
-              <th class="px-4 py-2.5 text-start font-medium">{% trans "Item" %}</th>
-              <th class="px-4 py-2.5 text-end font-medium">{% trans "Qty" %}</th>
-              <th class="px-4 py-2.5 text-end font-medium">{% trans "Rate" %}</th>
-              <th class="hidden px-4 py-2.5 text-end font-medium sm:table-cell">{% trans "Tax" %}</th>
-              <th class="px-4 py-2.5 text-end font-medium">{% trans "Amount" %}</th>
-              <th class="w-10"></th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-border">
-            {% for line in lines %}
-              <tr>
-                <td class="px-4 py-2.5">
-                  <span class="text-text-primary">{{ line.description }}</span>
-                  {% if line.service.code %}
-                    <span class="ms-1 font-mono text-xs text-text-muted">{{ line.service.code }}</span>
-                  {% endif %}
-                </td>
-                <td class="px-4 py-2.5 text-end text-text-secondary" dir="ltr">{% localize off %}{{ line.quantity }}{% endlocalize %}</td>
-                <td class="px-4 py-2.5 text-end text-text-secondary" dir="ltr">{% localize off %}{{ line.rate }}{% endlocalize %}</td>
-                <td class="hidden px-4 py-2.5 text-end text-text-secondary sm:table-cell" dir="ltr">
-                  {% if line.is_taxable %}{% localize off %}{{ line.tax_rate }}{% endlocalize %}%{% else %}—{% endif %}
-                </td>
-                <td class="px-4 py-2.5 text-end text-text-primary" dir="ltr">{% localize off %}{{ line.amount }}{% endlocalize %}</td>
-                <td class="px-2 py-2.5">
-                  {% if can_manage and not invoice.is_locked %}
-                    <form method="post" action="{% url 'billing:invoice_line_delete' pk=invoice.pk line_pk=line.pk %}">
-                      {% csrf_token %}
-                      <button type="submit" class="rounded-control p-1 text-text-muted hover:bg-subtle hover:text-red-600"
+      {% if can_manage and not invoice.is_locked and services %}
+        {% comment %}
+        Inline editable grid, the way Frappe/ERPNext and Odoo do line items: edit
+        every cell in place, add or remove rows, watch the totals recompute, and
+        save the whole table at once. Choosing a service fills the description,
+        rate and tax from the price list. There is deliberately no free-text
+        item — everything billed must be a registered service, so the price list
+        stays the single source of truth. The live totals are a preview; the
+        server recomputes the authoritative figures (and the tax, from the item)
+        on save.
+        {% endcomment %}
+        {{ services_data|json_script:"grid-services" }}
+        {{ lines_data|json_script:"grid-lines" }}
+        {{ grid_config|json_script:"grid-config" }}
+        <form method="post" action="{% url 'billing:invoice_lines_save' pk=invoice.pk %}"
+              x-data="invoiceItems" @submit="serialize()">
+          {% csrf_token %}
+          <input type="hidden" name="lines" x-ref="payload">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-border bg-subtle text-xs text-text-secondary">
+                  <th class="px-3 py-2.5 text-start font-medium">{% trans "Item" %}</th>
+                  <th class="px-3 py-2.5 text-start font-medium">{% trans "Description" %}</th>
+                  <th class="w-20 px-3 py-2.5 text-end font-medium">{% trans "Qty" %}</th>
+                  <th class="w-28 px-3 py-2.5 text-end font-medium">{% trans "Rate" %}</th>
+                  <th class="hidden w-16 px-3 py-2.5 text-end font-medium sm:table-cell">{% trans "Tax" %}</th>
+                  <th class="w-28 px-3 py-2.5 text-end font-medium">{% trans "Amount" %}</th>
+                  <th class="w-10"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                <template x-for="(row, i) in rows" :key="row._k">
+                  <tr>
+                    <td class="px-3 py-2 align-top">
+                      <select class="select" x-model="row.service" @change="onServiceChange(row)"
+                              aria-label="{% trans 'Service' %}">
+                        <option value="">{% trans "Choose a service…" %}</option>
+                        {% for service in services %}
+                          <option value="{{ service.id }}">{{ service.name }}{% if service.code %} · {{ service.code }}{% endif %}</option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                    <td class="px-3 py-2 align-top">
+                      <input type="text" class="input" x-model="row.description"
+                             placeholder="{% trans 'From the service' %}" aria-label="{% trans 'Description' %}">
+                    </td>
+                    <td class="px-3 py-2 align-top">
+                      <input type="number" step="0.01" min="0" class="input text-end" dir="ltr"
+                             x-model="row.quantity" aria-label="{% trans 'Qty' %}">
+                    </td>
+                    <td class="px-3 py-2 align-top">
+                      <input type="number" step="0.001" min="0" class="input text-end" dir="ltr"
+                             x-model="row.rate" aria-label="{% trans 'Rate' %}">
+                    </td>
+                    <td class="hidden px-3 py-2 text-end align-middle text-text-secondary sm:table-cell" dir="ltr">
+                      <span x-text="taxable(row) ? taxRate(row) + '%' : '—'"></span>
+                    </td>
+                    <td class="px-3 py-2 text-end align-middle text-text-primary" dir="ltr">
+                      <span x-text="money(amount(row))"></span>
+                    </td>
+                    <td class="px-2 py-2 align-middle">
+                      <button type="button" @click="removeRow(i)"
+                              class="rounded-control p-1 text-text-muted hover:bg-subtle hover:text-red-600"
                               aria-label="{% trans 'Remove line' %}">{% icon "trash-2" css_class="w-4 h-4" %}</button>
-                    </form>
-                  {% endif %}
-                </td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="6" class="px-5 py-4 text-sm text-text-muted">{% trans "No items yet — add one below." %}</td></tr>
-            {% endfor %}
-          </tbody>
-          <tfoot class="border-t border-border bg-subtle text-sm">
-            <tr>
-              <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Subtotal" %}</td>
-              <td class="px-4 py-2 text-end text-text-primary" dir="ltr">{% localize off %}{{ invoice.subtotal }}{% endlocalize %}</td><td></td>
-            </tr>
-            {% if invoice.discount %}
-              <tr>
-                <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Discount" %}</td>
-                <td class="px-4 py-2 text-end text-text-primary" dir="ltr">−{% localize off %}{{ invoice.discount }}{% endlocalize %}</td><td></td>
-              </tr>
-            {% endif %}
-            <tr>
-              <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Tax" %}</td>
-              <td class="px-4 py-2 text-end text-text-primary" dir="ltr">{% localize off %}{{ invoice.tax_amount }}{% endlocalize %}</td><td></td>
-            </tr>
-            <tr class="font-medium">
-              <td colspan="4" class="px-4 py-2.5 text-end text-text-primary">{% trans "Total" %}</td>
-              <td class="px-4 py-2.5 text-end text-text-primary" dir="ltr">{{ current_tenant.currency }} {% localize off %}{{ invoice.total }}{% endlocalize %}</td><td></td>
-            </tr>
-            <tr>
-              <td colspan="4" class="px-4 py-2 text-end text-text-secondary">{% trans "Paid" %}</td>
-              <td class="px-4 py-2 text-end text-text-secondary" dir="ltr">{% localize off %}{{ invoice.amount_paid }}{% endlocalize %}</td><td></td>
-            </tr>
-            <tr class="{% if invoice.is_paid %}text-green-700{% else %}text-amber-700{% endif %} font-medium">
-              <td colspan="4" class="px-4 py-2 text-end">{% trans "Balance due" %}</td>
-              <td class="px-4 py-2 text-end" dir="ltr">{% localize off %}{{ invoice.balance_due }}{% endlocalize %}</td><td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      {% if can_manage and not invoice.is_locked %}
-        {% if services %}
-          {% comment %}
-          Add-item row. Choosing a service fills description, rate and tax from
-          the price list (the values are carried on each option's data-* so no
-          extra request is needed), and they stay editable before adding. There
-          is deliberately no free-text item: everything billed must be a
-          registered service, so the price list is the single source of truth.
-          {% endcomment %}
-          <form method="post" action="{% url 'billing:invoice_line_add' pk=invoice.pk %}"
-                class="border-t border-border p-4"
-                x-data="{
-                  rate: '', description: '', taxable: null,
-                  taxRate: '{{ current_tenant.default_tax_rate|stringformat:'s' }}',
-                  pick(e) {
-                    const o = e.target.selectedOptions[0];
-                    if (!o || !o.value) { this.taxable = null; return; }
-                    this.rate = o.dataset.rate;
-                    this.description = o.dataset.desc;
-                    this.taxable = o.dataset.taxable === '1';
-                  }
-                }">
-            {% csrf_token %}
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-12">
-              <div class="sm:col-span-4">
-                <label class="mb-1 block text-xs text-text-muted">{% trans "Service" %}</label>
-                <select name="service" class="select" required @change="pick($event)">
-                  <option value="">{% trans "Choose a service…" %}</option>
-                  {% for service in services %}
-                    <option value="{{ service.id }}"
-                            data-rate="{{ service.default_rate|stringformat:'s' }}"
-                            data-desc="{{ service.description|default:service.name }}"
-                            data-taxable="{% if service.is_taxable %}1{% else %}0{% endif %}">
-                      {{ service.name }}{% if service.code %} · {{ service.code }}{% endif %}
-                    </option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="sm:col-span-4">
-                <label class="mb-1 block text-xs text-text-muted">{% trans "Description" %}</label>
-                <input type="text" name="description" class="input" x-model="description"
-                       placeholder="{% trans 'From the service' %}">
-              </div>
-              <div class="sm:col-span-1">
-                <label class="mb-1 block text-xs text-text-muted">{% trans "Qty" %}</label>
-                <input type="number" step="0.01" min="0" name="quantity" value="1" class="input" dir="ltr">
-              </div>
-              <div class="sm:col-span-2">
-                <label class="mb-1 block text-xs text-text-muted">{% trans "Rate" %}</label>
-                <input type="number" step="0.001" min="0" name="rate" class="input" x-model="rate" dir="ltr">
-              </div>
-              <div class="flex items-end sm:col-span-1">
-                {% include "ui/button.html" with label=_("Add") type="submit" variant="primary" size="sm" full=True %}
-              </div>
-            </div>
-            {# Tax follows the service; shown here so it is not a surprise. #}
-            <p class="mt-2 text-xs text-text-muted" x-show="taxable !== null" x-cloak>
-              <span x-show="taxable">{% trans "Taxable at" %} <span x-text="taxRate"></span>%</span>
-              <span x-show="!taxable">{% trans "Not taxable." %}</span>
-            </p>
-          </form>
-        {% else %}
-          <div class="border-t border-border p-4 text-sm text-text-secondary">
-            {% trans "No services in your price list yet." %}
-            <a href="{% url 'billing:setup' %}" class="text-accent-primary hover:underline">
-              {% trans "Add one in billing setup." %}
-            </a>
+                    </td>
+                  </tr>
+                </template>
+                <tr x-show="rows.length === 0">
+                  <td colspan="7" class="px-5 py-4 text-sm text-text-muted">{% trans "No items yet — add a row." %}</td>
+                </tr>
+              </tbody>
+              <tfoot class="border-t border-border bg-subtle text-sm">
+                <tr>
+                  <td colspan="5" class="px-3 py-2 text-end text-text-secondary">{% trans "Subtotal" %}</td>
+                  <td class="px-3 py-2 text-end text-text-primary" dir="ltr"><span x-text="money(subtotal)"></span></td><td></td>
+                </tr>
+                <tr x-show="discount > 0">
+                  <td colspan="5" class="px-3 py-2 text-end text-text-secondary">{% trans "Discount" %}</td>
+                  <td class="px-3 py-2 text-end text-text-primary" dir="ltr">−<span x-text="money(discount)"></span></td><td></td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="px-3 py-2 text-end text-text-secondary">{% trans "Tax" %}</td>
+                  <td class="px-3 py-2 text-end text-text-primary" dir="ltr"><span x-text="money(taxTotal)"></span></td><td></td>
+                </tr>
+                <tr class="font-medium">
+                  <td colspan="5" class="px-3 py-2.5 text-end text-text-primary">{% trans "Total" %}</td>
+                  <td class="px-3 py-2.5 text-end text-text-primary" dir="ltr">{{ current_tenant.currency }} <span x-text="money(total)"></span></td><td></td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
-        {% endif %}
+          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border p-4">
+            <button type="button" @click="addRow()"
+                    class="inline-flex items-center gap-1.5 rounded-control border border-border px-3 py-1.5 text-sm text-text-primary hover:bg-subtle">
+              {% icon "plus" css_class="w-4 h-4" %}{% trans "Add row" %}
+            </button>
+            {% include "ui/button.html" with label=_("Save items") type="submit" variant="primary" size="sm" %}
+          </div>
+        </form>
+      {% elif can_manage and not invoice.is_locked %}
+        {# Editable, but the price list is empty — nothing can be added yet. #}
+        {% include "billing/_invoice_lines_readonly.html" %}
+        <div class="border-t border-border p-4 text-sm text-text-secondary">
+          {% trans "No services in your price list yet." %}
+          <a href="{% url 'billing:setup' %}" class="text-accent-primary hover:underline">
+            {% trans "Add one in billing setup." %}
+          </a>
+        </div>
+      {% else %}
+        {# Issued or cancelled: a tax document is evidence, not a form. #}
+        {% include "billing/_invoice_lines_readonly.html" %}
       {% endif %}
     </section>
 
@@ -314,4 +289,91 @@
       </section>
     </div>
   {% endif %}
+{% endblock %}
+
+{% block scripts %}{{ block.super }}
+  {% comment %}
+  The items grid. Registered on alpine:init because alpine.min.js is deferred,
+  so this component must exist before Alpine walks the DOM. Money is displayed
+  with three decimals to match the currency; the browser figure is a preview
+  only — the server recomputes the authoritative total and the tax (which
+  follows the item, never a browser-sent value) when the table is saved.
+  {% endcomment %}
+  <script>
+    document.addEventListener("alpine:init", () => {
+      Alpine.data("invoiceItems", () => ({
+        services: JSON.parse(document.getElementById("grid-services").textContent),
+        rows: JSON.parse(document.getElementById("grid-lines").textContent),
+        config: JSON.parse(document.getElementById("grid-config").textContent),
+        uid: 0,
+
+        init() {
+          this.rows.forEach((row) => (row._k = this.uid++));
+        },
+        get defaultTax() {
+          return parseFloat(this.config.defaultTax) || 0;
+        },
+        get discount() {
+          return parseFloat(this.config.discount) || 0;
+        },
+        service(id) {
+          return this.services.find((s) => s.id === id) || null;
+        },
+        addRow() {
+          this.rows.push({ _k: this.uid++, service: "", description: "", quantity: "1", rate: "" });
+        },
+        removeRow(index) {
+          this.rows.splice(index, 1);
+        },
+        onServiceChange(row) {
+          const svc = this.service(row.service);
+          if (!svc) return;
+          // Overwrite the rate always, but keep a description the user has typed.
+          row.rate = svc.rate;
+          if (!row.description) row.description = svc.description;
+        },
+        taxable(row) {
+          const svc = this.service(row.service);
+          return svc ? svc.taxable : false;
+        },
+        taxRate(row) {
+          return this.taxable(row) ? this.defaultTax : 0;
+        },
+        amount(row) {
+          return (parseFloat(row.quantity) || 0) * (parseFloat(row.rate) || 0);
+        },
+        lineTax(row) {
+          return (this.amount(row) * this.taxRate(row)) / 100;
+        },
+        get subtotal() {
+          return this.rows.reduce((sum, row) => sum + this.amount(row), 0);
+        },
+        get taxTotal() {
+          return this.rows.reduce((sum, row) => sum + this.lineTax(row), 0);
+        },
+        get total() {
+          return this.subtotal - this.discount + this.taxTotal;
+        },
+        money(value) {
+          return (value || 0).toLocaleString("en-US", {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3,
+          });
+        },
+        serialize() {
+          // Drop blank rows (no service chosen) and send only what the server needs.
+          this.$refs.payload.value = JSON.stringify(
+            this.rows
+              .filter((row) => row.service)
+              .map((row) => ({
+                service: row.service,
+                description: row.description,
+                quantity: row.quantity,
+                rate: row.rate,
+              })),
+          );
+        },
+      }));
+    });
+  </script>
 {% endblock %}
