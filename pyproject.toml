@@ -9,6 +9,10 @@ dependencies = [
     "django-environ>=0.11",
     "django-htmx>=1.19",
     "whitenoise>=6.7",
+    # Production WSGI server. Unused in local dev (runserver), but kept in the
+    # base deps so the one image serves both dev and prod — the runtime differs
+    # only by settings module and launch command, not by what is installed.
+    "gunicorn>=23.0",
 ]
 
 [dependency-groups]

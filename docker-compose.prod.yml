@@ -1,0 +1,85 @@
+# Production stack for a single VPS: Postgres + gunicorn + Caddy (auto-HTTPS).
+#
+# This file is completely separate from docker-compose.yml (local dev). It never
+# bind-mounts the source, runs the production settings, and puts Caddy in front
+# to terminate TLS and serve user uploads.
+#
+# Deploy:  docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+# See DEPLOY.md for the full runbook.
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      # Superuser for the container itself. The app does NOT connect as this —
+      # the init script below creates a separate non-superuser role.
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+      # Password for the least-privilege application role the init script creates.
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+      - ./docker/postgres-init.prod.sh:/docker-entrypoint-initdb.d/10-init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      # Built from a single source of truth so the password is not duplicated.
+      DATABASE_URL: postgres://erpgram_app:${APP_DB_PASSWORD}@db:5432/erpgram
+    volumes:
+      # Uploads persist here and are shared (read-only) with Caddy to serve.
+      - media_prod:/app/media
+    entrypoint: ["/app/docker/entrypoint.prod.sh"]
+    command:
+      - uv
+      - run
+      - gunicorn
+      - config.wsgi:application
+      - --bind
+      - 0.0.0.0:8000
+      - --timeout
+      - "60"
+      - --access-logfile
+      - "-"
+      - --error-logfile
+      - "-"
+    # No published ports — only Caddy reaches the app, over the internal network.
+    expose:
+      - "8000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - media_prod:/srv/media:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  pgdata_prod:
+  media_prod:
+  caddy_data:
+  caddy_config:

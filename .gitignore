@@ -12,6 +12,8 @@ db.sqlite3
 
 # Environment / secrets
 .env
+.env.prod
+.env.*.local
 
 # Tailwind build output (generated)
 /static/css/app.css

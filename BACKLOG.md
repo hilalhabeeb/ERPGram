@@ -10,9 +10,12 @@ CI · domains & manpower masters · placements/invoices · biodata sheets.
 
 ## Next up
 
-- **Production deploy** — the main thing between this and real users. Needs
-  `gunicorn`, a production image, `collectstatic`, SMTP, and a non-superuser DB
-  role. Today it only runs under `runserver`.
+- **Production deploy — done** (see [DEPLOY.md](DEPLOY.md)). VPS + Docker:
+  Postgres + gunicorn + Caddy (automatic HTTPS), non-superuser DB role,
+  `collectstatic` + `migrate` on boot, env-driven SMTP. Local dev is untouched.
+  Follow-ups: (a) slim prod image — today one image ships dev tooling too;
+  (b) move `migrate` off the boot path before running more than one web replica;
+  (c) offsite/automated backups beyond the documented cron.
 - **Amount in words on the printed invoice** — a common GCC requirement ERPNext
   provides; we do not yet.
 - **Per-line discount** — invoice-level discount exists; ERPNext/Odoo also allow

@@ -148,6 +148,15 @@ MEDIA_ROOT = BASE_DIR / "media"
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@erpgram.local")
 
+# SMTP details, read from the environment so production can point at a real
+# mail service without touching code. Ignored while the console backend is in
+# use (local dev), so they are harmless defaults.
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+
 # --- Misc -------------------------------------------------------------------
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

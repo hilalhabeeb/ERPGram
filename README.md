@@ -121,6 +121,15 @@ seeds a demo agency (Gulf Domestic Services) with 28 workers across Indonesia,
 the Philippines, Sri Lanka, Ethiopia, Kenya, India and Nepal, plus agents,
 accommodation and sponsors. Sign in as `owner@gulfdomestic.test`.
 
+## Deployment
+
+Production runs on a single VPS with Docker — Postgres + gunicorn + Caddy
+(automatic HTTPS) — and is fully separate from local dev. See
+[DEPLOY.md](DEPLOY.md) for the runbook: DNS, secrets, `docker-compose.prod.yml`,
+backups and updates.
+
+---
+
 ## Continuous integration
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to

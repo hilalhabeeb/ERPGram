@@ -1,0 +1,27 @@
+# Caddy reverse proxy — automatic HTTPS (Let's Encrypt) for the production host.
+#
+# The domain and ACME email come from the environment (DOMAIN, ACME_EMAIL) set
+# in .env.prod. Caddy provisions and renews the TLS certificate on its own, so
+# there is nothing to configure by hand once DNS points at this server.
+
+{$DOMAIN} {
+	encode gzip zstd
+
+	# User uploads. Django stops serving MEDIA in production, so Caddy serves it
+	# straight from the shared volume. Files live under /srv/media/<tenant>/...,
+	# already namespaced by tenant id, so a URL cannot be guessed across tenants.
+	@media path /media/*
+	handle @media {
+		root * /srv
+		file_server
+	}
+
+	# Everything else — including /static, which WhiteNoise serves with far-future
+	# cache headers — goes to gunicorn. Caddy adds X-Forwarded-Proto=https, which
+	# the production settings trust so Django knows the request arrived over TLS.
+	handle {
+		reverse_proxy web:8000
+	}
+
+	tls {$ACME_EMAIL}
+}
