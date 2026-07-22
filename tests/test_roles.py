@@ -266,3 +266,34 @@ def test_invites_never_grant_ownership(client):
     assert membership.is_owner is False
     # They do get the chosen role's permissions, just not implicit ownership.
     assert membership.role_id == roles["owner"].pk
+
+
+def test_billing_identity_saves_from_organisation_settings(client):
+    from apps.tenancy.models import Tenant
+
+    tenant, roles = _tenant_with_roles()
+    _sign_in(client, tenant, role=roles["owner"], is_owner=True)
+
+    resp = client.post(
+        reverse("ui:settings_organization"),
+        {
+            "name": tenant.name,
+            "timezone": "Asia/Bahrain",
+            "default_locale": "en",
+            "currency": "SAR",
+            "default_tax_rate": "15.00",
+            "vat_number": "300000000000003",
+            "cr_number": "1010101010",
+            "legal_name": "Gulf Domestic W.L.L.",
+            "phone": "+973 1700 0000",
+            "email": "billing@example.test",
+            "address": "Building 1, Manama",
+        },
+    )
+    assert resp.status_code == 302
+
+    tenant = Tenant.objects.get(pk=tenant.pk)
+    assert tenant.vat_number == "300000000000003"
+    assert tenant.currency == "SAR"
+    assert str(tenant.default_tax_rate) == "15.00"
+    assert tenant.legal_name == "Gulf Domestic W.L.L."

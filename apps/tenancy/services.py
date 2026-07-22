@@ -248,16 +248,30 @@ def restore_department(department: Department, *, user: User) -> Department:
     return department
 
 
-def update_organization(
-    tenant: Tenant,
-    *,
-    name: str,
-    timezone: str,
-    default_locale: str,
-) -> Tenant:
-    """Update a tenant's organisation-level settings and persist."""
-    tenant.name = name.strip()
-    tenant.timezone = timezone
-    tenant.default_locale = default_locale
-    tenant.save(update_fields=["name", "timezone", "default_locale", "updated_at"])
+ORGANIZATION_FIELDS = (
+    "name",
+    "timezone",
+    "default_locale",
+    "legal_name",
+    "currency",
+    "vat_number",
+    "cr_number",
+    "default_tax_rate",
+    "phone",
+    "email",
+    "address",
+)
+
+
+def update_organization(tenant: Tenant, **values) -> Tenant:
+    """Update a tenant's organisation-level settings and persist.
+
+    Only the known organisation fields are written, so a stray key in the form's
+    cleaned data can never set an arbitrary attribute on the tenant.
+    """
+    for field in ORGANIZATION_FIELDS:
+        if field in values:
+            value = values[field]
+            setattr(tenant, field, value.strip() if isinstance(value, str) else value)
+    tenant.save(update_fields=[*ORGANIZATION_FIELDS, "updated_at"])
     return tenant

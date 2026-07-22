@@ -13,11 +13,13 @@ CI · domains & manpower masters · placements/invoices · biodata sheets.
 - **Production deploy** — the main thing between this and real users. Needs
   `gunicorn`, a production image, `collectstatic`, SMTP, and a non-superuser DB
   role. Today it only runs under `runserver`.
-- **Payments on a placement** — currently a single `amount_paid`. Agencies take a
-  deposit then a balance, so a payments table with dates and methods is the
-  natural follow-up to the invoice.
-- **Tenant-level default tax rate** — defaults to 10% (Bahrain). Saudi is 15%,
-  UAE 5%. Editable per placement today, but the default should be per tenant.
+- **Amount in words on the printed invoice** — a common GCC requirement ERPNext
+  provides; we do not yet.
+- **Per-line discount** — invoice-level discount exists; ERPNext/Odoo also allow
+  a discount % per line.
+- **Payment allocation across invoices** — a payment is recorded against one
+  invoice. ERPNext's Payment Entry can settle several at once; worth it once an
+  agency runs monthly statements.
 
 ## Manpower module
 

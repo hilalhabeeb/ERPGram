@@ -172,6 +172,24 @@ class OrganizationForm(StyledForm):
         label=_("Default language"),
         choices=[("en", _("English")), ("ar", _("العربية"))],
     )
+    # --- billing identity: what appears on a tax invoice ---
+    legal_name = forms.CharField(label=_("Legal name"), max_length=200, required=False)
+    currency = forms.CharField(label=_("Currency"), max_length=8)
+    vat_number = forms.CharField(
+        label=_("VAT registration no."),
+        max_length=40,
+        required=False,
+        help_text=_("Required on a valid tax invoice."),
+    )
+    cr_number = forms.CharField(label=_("CR number"), max_length=60, required=False)
+    default_tax_rate = forms.DecimalField(
+        label=_("Default tax rate %"), max_digits=5, decimal_places=2, min_value=0
+    )
+    phone = forms.CharField(label=_("Phone"), max_length=40, required=False)
+    email = forms.EmailField(label=_("Email"), required=False)
+    address = forms.CharField(
+        label=_("Address"), required=False, widget=forms.Textarea(attrs={"rows": 2})
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

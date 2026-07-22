@@ -7,8 +7,19 @@
 {% block document %}
   <header class="flex items-start justify-between gap-6 border-b border-border pb-5">
     <div>
-      <h1 class="text-heading-lg font-medium">{{ current_tenant.name }}</h1>
+      <h1 class="text-heading-lg font-medium">{{ current_tenant.legal_name|default:current_tenant.name }}</h1>
       <p class="mt-1 text-sm text-text-secondary">{% trans "Domestic worker recruitment" %}</p>
+      {% if current_tenant.address %}
+        <p class="mt-1 whitespace-pre-line text-xs text-text-secondary">{{ current_tenant.address }}</p>
+      {% endif %}
+      <div class="mt-1 text-xs text-text-secondary">
+        {% if current_tenant.vat_number %}
+          <span dir="ltr">{% trans "VAT" %}: {{ current_tenant.vat_number }}</span>
+        {% endif %}
+        {% if current_tenant.cr_number %}
+          <span class="ms-2" dir="ltr">{% trans "CR" %}: {{ current_tenant.cr_number }}</span>
+        {% endif %}
+      </div>
     </div>
     <div class="text-end">
       <p class="text-heading-md font-medium">
@@ -22,6 +33,13 @@
       {% endif %}
     </div>
   </header>
+
+  {% if invoice.kind != "credit_note" and not current_tenant.vat_number %}
+    {# A tax invoice without the supplier's VAT number is not a valid document. #}
+    <p class="no-print mt-3 rounded-control border border-amber-300 bg-amber-50 px-4 py-2 text-xs text-amber-800">
+      {% trans "Add your VAT registration number in Organisation settings so this is a valid tax invoice." %}
+    </p>
+  {% endif %}
 
   {% if invoice.status == "cancelled" %}
     <p class="mt-4 rounded-control border border-border bg-subtle px-4 py-2 text-sm text-text-secondary">
@@ -74,7 +92,12 @@
       <tbody class="divide-y divide-border">
         {% for line in lines %}
           <tr>
-            <td class="px-4 py-2.5">{{ line.description }}</td>
+            <td class="px-4 py-2.5">
+              {{ line.description }}
+              {% if line.service.code %}
+                <span class="ms-1 font-mono text-xs text-text-muted">{{ line.service.code }}</span>
+              {% endif %}
+            </td>
             <td class="px-4 py-2.5 text-end" dir="ltr">{% localize off %}{{ line.quantity }}{% endlocalize %}</td>
             <td class="px-4 py-2.5 text-end" dir="ltr">{% localize off %}{{ line.rate }}{% endlocalize %}</td>
             <td class="px-4 py-2.5 text-end" dir="ltr">

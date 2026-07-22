@@ -448,3 +448,77 @@ def test_placement_pages_render_after_the_billing_split(client, agency):
     ]:
         response = client.get(url)
         assert response.status_code == 200, f"{url} returned {response.status_code}"
+
+
+# --- service master enforcement ----------------------------------------------
+
+
+def test_a_line_requires_a_registered_service(agency):
+    """Nothing is billed that is not in the price list."""
+    from apps.billing.forms import InvoiceLineForm
+
+    with activate_tenant(agency.id):
+        form = InvoiceLineForm({"quantity": "1", "rate": "50"}, tenant=agency)
+        assert not form.is_valid()
+        assert "service" in form.errors
+
+
+def test_a_line_inherits_rate_description_and_tax_from_the_service(agency):
+    from apps.billing.forms import InvoiceLineForm
+
+    with activate_tenant(agency.id):
+        service = Service.objects.get(tenant=agency, name="Visa processing")
+        # Only the service is supplied; everything else fills in.
+        form = InvoiceLineForm({"service": str(service.pk), "quantity": "1"}, tenant=agency)
+        assert form.is_valid(), form.errors
+        assert form.cleaned_data["rate"] == service.default_rate
+        assert form.cleaned_data["description"] == (service.description or service.name)
+        assert form.cleaned_data["tax_rate"] == agency.default_tax_rate
+
+
+def test_a_non_taxable_service_forces_the_line_non_taxable(agency):
+    from apps.billing.forms import InvoiceLineForm
+
+    with activate_tenant(agency.id):
+        ticket = Service.objects.get(tenant=agency, name="Air ticket")
+        assert ticket.is_taxable is False
+        # Even if the POST claims taxable, a non-taxable service wins.
+        form = InvoiceLineForm(
+            {"service": str(ticket.pk), "quantity": "1", "is_taxable": "on", "tax_rate": "10"},
+            tenant=agency,
+        )
+        assert form.is_valid(), form.errors
+        assert form.cleaned_data["is_taxable"] is False
+        assert form.cleaned_data["tax_rate"] == Decimal("0.00")
+
+
+def test_new_lines_use_the_tenant_default_tax_rate(agency):
+    from apps.tenancy.services import update_organization
+
+    user = UserFactory()
+    with activate_tenant(agency.id):
+        update_organization(agency, default_tax_rate=Decimal("15.00"))
+        service = Service.objects.get(tenant=agency, name="Service fee")
+        invoice = billing.create_invoice(tenant=agency, user=user, sponsor=_sponsor(agency, user))
+        line = billing.add_line_from_service(invoice, service=service, user=user)
+        assert line.tax_rate == Decimal("15.00")
+
+
+# --- payment guards ----------------------------------------------------------
+
+
+def test_a_payment_cannot_exceed_the_balance(agency):
+    user = UserFactory()
+    invoice = _invoice(agency, user, lines=[("Fee", Decimal("100.000"), False, Decimal("0"))])
+    with activate_tenant(agency.id):
+        billing.issue_invoice(invoice, user=user)
+        with pytest.raises(ValidationError):
+            billing.record_payment(
+                invoice, user=user, received_on=dt.date(2026, 7, 1), amount=Decimal("150.000")
+            )
+        # a payment up to the balance is fine
+        billing.record_payment(
+            invoice, user=user, received_on=dt.date(2026, 7, 1), amount=Decimal("100.000")
+        )
+        invoice.refresh_from_db()
+        assert invoice.is_paid

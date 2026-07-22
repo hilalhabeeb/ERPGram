@@ -405,9 +405,16 @@ class Command(BaseCommand):
                 "domain": MANPOWER,
             },
         )
-        if tenant.domain != MANPOWER:  # an older seed may predate the domain field
-            tenant.domain = MANPOWER
-            tenant.save(update_fields=["domain"])
+        # Billing identity, so the demo invoice prints as a valid tax invoice.
+        tenant.domain = MANPOWER
+        tenant.legal_name = "Gulf Domestic Services W.L.L."
+        tenant.vat_number = "220000123400002"
+        tenant.cr_number = "98765-1"
+        tenant.address = "Office 402, Building 1420, Road 2815, Seef District, Manama"
+        tenant.phone = "+973 1700 1420"
+        tenant.email = "accounts@gulfdomestic.test"
+        tenant.default_tax_rate = Decimal("10.00")
+        tenant.save()
         return tenant, created
 
     @transaction.atomic

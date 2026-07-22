@@ -8,18 +8,42 @@
   {% include "ui/settings/_nav.html" %}
 
   <div class="max-w-2xl">
-    <section class="card p-6">
-      <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Organisation" %}</h2>
-      <p class="mt-0.5 text-sm text-text-secondary">{% trans "Details for this organisation. Owners only." %}</p>
-      <form method="post" class="mt-5 space-y-4">
-        {% csrf_token %}
-        {% include "partials/_field.html" with field=form.name %}
-        {% include "partials/_field.html" with field=form.timezone %}
-        {% include "partials/_field.html" with field=form.default_locale %}
-        <div class="flex justify-end pt-2">
-          {% include "ui/button.html" with label=_("Save settings") type="submit" variant="primary" %}
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <section class="card p-6">
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Organisation" %}</h2>
+        <p class="mt-0.5 text-sm text-text-secondary">{% trans "Details for this organisation. Owners only." %}</p>
+        <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {% include "partials/_field.html" with field=form.name %}
+          {% include "partials/_field.html" with field=form.legal_name %}
+          {% include "partials/_field.html" with field=form.timezone %}
+          {% include "partials/_field.html" with field=form.default_locale %}
         </div>
-      </form>
-    </section>
+      </section>
+
+      {# Everything a valid GCC tax invoice must carry about the seller. #}
+      <section class="card p-6">
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Billing and tax" %}</h2>
+        <p class="mt-0.5 text-sm text-text-secondary">
+          {% trans "Printed on every invoice. The VAT number is required for a valid tax invoice." %}
+        </p>
+        <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {% include "partials/_field.html" with field=form.currency %}
+          {% include "partials/_field.html" with field=form.default_tax_rate %}
+          {% include "partials/_field.html" with field=form.vat_number %}
+          {% include "partials/_field.html" with field=form.cr_number %}
+          {% include "partials/_field.html" with field=form.phone %}
+          {% include "partials/_field.html" with field=form.email %}
+        </div>
+        <div class="mt-4">
+          {% include "partials/_field.html" with field=form.address %}
+        </div>
+      </section>
+
+      <div class="flex justify-end">
+        {% include "ui/button.html" with label=_("Save settings") type="submit" variant="primary" %}
+      </div>
+    </form>
   </div>
 {% endblock %}

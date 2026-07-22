@@ -160,11 +160,17 @@ def create_invoice(
 
 
 def add_line_from_service(invoice: Invoice, *, service: Service, user=None, **overrides):
-    """Copy a service onto the invoice. The rate is a starting point, not a rule."""
+    """Copy a service onto the invoice.
+
+    Description and rate come from the service master (like an ERPNext item) and
+    the tax rate from the tenant default; all three are starting points the user
+    can then adjust on the line, so tuning one invoice never rewrites the master.
+    """
     values = {
-        "description": service.name,
+        "description": service.description or service.name,
         "rate": service.default_rate,
         "is_taxable": service.is_taxable,
+        "tax_rate": invoice.tenant.default_tax_rate if service.is_taxable else Decimal("0.00"),
         "quantity": Decimal("1.00"),
     }
     values.update(overrides)
@@ -263,6 +269,14 @@ def create_credit_note(invoice: Invoice, *, user, reason: str = "") -> Invoice:
 def record_payment(invoice: Invoice, *, user, **fields) -> Payment:
     if invoice.status != Invoice.Status.ISSUED:
         raise ValidationError(_("Only an issued invoice can take a payment."))
+    amount = fields.get("amount") or Decimal("0")
+    # A payment larger than the balance would leave a negative balance and quietly
+    # misstate receivables. Refunds go through a credit note, not a bigger payment.
+    if amount > invoice.balance_due:
+        raise ValidationError(
+            _("That is more than the %(balance)s still due on this invoice.")
+            % {"balance": invoice.balance_due}
+        )
     return Payment.objects.create(
         tenant=invoice.tenant, invoice=invoice, created_by=user, updated_by=user, **fields
     )

@@ -9,6 +9,7 @@ policy protects every level uniformly.
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -28,6 +29,20 @@ class Tenant(TimeStampedModel):
     default_locale = models.CharField(_("default locale"), max_length=8, default="en")
     # Printed on invoices. Gulf currencies are quoted to three decimals.
     currency = models.CharField(_("currency"), max_length=8, default="BHD")
+    # Seller identity on a tax invoice. GCC VAT rules require the supplier's VAT
+    # registration number on every tax invoice, so an invoice without it is not
+    # a valid document — these feed the printed letterhead.
+    legal_name = models.CharField(_("legal name"), max_length=200, blank=True)
+    vat_number = models.CharField(_("VAT registration no."), max_length=40, blank=True)
+    cr_number = models.CharField(_("CR number"), max_length=60, blank=True)
+    address = models.TextField(_("address"), blank=True)
+    phone = models.CharField(_("phone"), max_length=40, blank=True)
+    email = models.EmailField(_("email"), blank=True)
+    # Default VAT rate applied to new taxable invoice lines. Bahrain 10, Saudi
+    # 15, UAE 5 — editable per line, but this is what a new line starts from.
+    default_tax_rate = models.DecimalField(
+        _("default tax rate %"), max_digits=5, decimal_places=2, default=Decimal("10.00")
+    )
     # Chosen at sign-up; decides which industry modules exist for this tenant.
     # See apps.core.domains — choices are resolved lazily so adding a domain
     # does not require a migration.

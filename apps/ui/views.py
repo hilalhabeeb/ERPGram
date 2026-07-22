@@ -116,19 +116,23 @@ def settings_profile(request: HttpRequest) -> HttpResponse:
 def settings_organization(request: HttpRequest) -> HttpResponse:
     require_permission(request, MANAGE_ORGANIZATION)
     tenant = request.tenant
-    initial = {
-        "name": tenant.name,
-        "timezone": tenant.timezone,
-        "default_locale": tenant.default_locale,
-    }
+    fields = [
+        "name",
+        "timezone",
+        "default_locale",
+        "legal_name",
+        "currency",
+        "vat_number",
+        "cr_number",
+        "default_tax_rate",
+        "phone",
+        "email",
+        "address",
+    ]
+    initial = {name: getattr(tenant, name) for name in fields}
     form = OrganizationForm(request.POST or None, initial=initial)
     if request.method == "POST" and form.is_valid():
-        update_organization(
-            tenant,
-            name=form.cleaned_data["name"],
-            timezone=form.cleaned_data["timezone"],
-            default_locale=form.cleaned_data["default_locale"],
-        )
+        update_organization(tenant, **form.cleaned_data)
         messages.success(request, _("Organisation settings saved."))
         return redirect("ui:settings_organization")
     return render(

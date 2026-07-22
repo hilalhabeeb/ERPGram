@@ -132,6 +132,16 @@ Each of these caused a real bug. Several have tests that will fail if you break 
 - Brand names are not translatable strings.
 
 ### General
+- **User uploads (`FileField`/`ImageField`) need media served and namespaced.**
+  WhiteNoise serves static, not `MEDIA_ROOT`, so `config/urls.py` serves it in
+  `DEBUG` — without that every uploaded photo 404s. Uploads go through
+  `tenant_upload_to("subdir")` (random filename under the tenant id) so files
+  cannot be reached by guessing another tenant's path. In production a real web
+  server / object store serves media.
+- **Money masters mirror ERPNext.** Every invoice line references a registered
+  `billing.Service` (the item master) — nothing is billed ad hoc. Rate,
+  description and tax fill in from the service and the tenant's `default_tax_rate`
+  and stay editable on the line; taxability is a property of the item.
 - **Ask before adding a dependency.** `add_months()` is hand-rolled rather than
   pulling in python-dateutil for one call.
 - Snapshot data onto financial records (`Placement.worker_name`) — an invoice must

@@ -28,6 +28,15 @@ urlpatterns += i18n_patterns(
     prefix_default_language=False,
 )
 
+# Serve user uploads (worker photos, documents) in development. WhiteNoise
+# handles static files but not MEDIA, so without this /media/... 404s and every
+# uploaded photo renders broken. In production the web server / object store
+# serves MEDIA_ROOT instead.
+if settings.DEBUG:
+    from django.conf.urls.static import static
+
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 handler403 = "apps.ui.views.error_403"
 handler404 = "apps.ui.views.error_404"
 handler500 = "apps.ui.views.error_500"

@@ -25,7 +25,12 @@ from decimal import Decimal
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.models import TenantScopedModel, TimeStampedModel, UUIDPrimaryKeyModel
+from apps.core.models import (
+    TenantScopedModel,
+    TimeStampedModel,
+    UUIDPrimaryKeyModel,
+    tenant_upload_to,
+)
 
 # --- shared reference data ---------------------------------------------------
 
@@ -248,7 +253,7 @@ class Worker(TenantScopedModel):
         help_text=_("The code sponsors see when choosing a worker."),
     )
     full_name = models.CharField(_("full name"), max_length=200)
-    photo = models.FileField(_("photo"), upload_to="workers/", blank=True)
+    photo = models.FileField(_("photo"), upload_to=tenant_upload_to("workers"), blank=True)
     gender = models.CharField(
         _("gender"), max_length=10, choices=Gender.choices, default=Gender.FEMALE
     )
@@ -486,7 +491,7 @@ class WorkerDocument(TenantScopedModel):
     number = models.CharField(_("number"), max_length=80, blank=True)
     issued_on = models.DateField(_("issued on"), null=True, blank=True)
     expires_on = models.DateField(_("expires on"), null=True, blank=True)
-    file = models.FileField(_("file"), upload_to="worker-documents/", blank=True)
+    file = models.FileField(_("file"), upload_to=tenant_upload_to("worker-documents"), blank=True)
     notes = models.CharField(_("notes"), max_length=200, blank=True)
 
     class Meta:

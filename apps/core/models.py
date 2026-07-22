@@ -12,9 +12,40 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.tenant import get_current_tenant_id
+
+
+@deconstructible
+class tenant_upload_to:
+    """An ``upload_to`` that namespaces files by tenant and randomises the name.
+
+    Uploaded files are served straight from disk, so the stored path must not be
+    guessable: keeping the user's original filename would let one tenant reach
+    another's photo by trying likely names. The result is
+    ``<subdir>/<tenant_id>/<uuid><ext>``.
+
+    A ``@deconstructible`` class rather than a closure so migrations can
+    serialise it — a nested function cannot be referenced by import path.
+    """
+
+    def __init__(self, subdir: str) -> None:
+        self.subdir = subdir
+
+    def __call__(self, instance, filename: str) -> str:
+        from pathlib import Path
+
+        ext = Path(filename).suffix.lower()[:10]
+        tenant_id = getattr(instance, "tenant_id", None) or "shared"
+        return f"{self.subdir}/{tenant_id}/{uuid.uuid4().hex}{ext}"
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, tenant_upload_to) and other.subdir == self.subdir
+
+    def __hash__(self) -> int:
+        return hash((type(self), self.subdir))
 
 
 class TimeStampedModel(models.Model):

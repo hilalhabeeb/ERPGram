@@ -76,9 +76,9 @@
     {# Lines — the editable services table #}
     <section class="card overflow-hidden lg:col-span-2">
       <header class="border-b border-border px-5 py-4">
-        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Services" %}</h2>
+        <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Items" %}</h2>
         <p class="text-xs text-text-secondary">
-          {% trans "Pick a service to fill its default rate, then adjust anything." %}
+          {% trans "Every line is a service from your price list. Rate and tax fill in from it and can be adjusted here." %}
         </p>
       </header>
 
@@ -86,10 +86,10 @@
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-border bg-subtle text-xs text-text-secondary">
-              <th class="px-4 py-2.5 text-start font-medium">{% trans "Description" %}</th>
+              <th class="px-4 py-2.5 text-start font-medium">{% trans "Item" %}</th>
               <th class="px-4 py-2.5 text-end font-medium">{% trans "Qty" %}</th>
               <th class="px-4 py-2.5 text-end font-medium">{% trans "Rate" %}</th>
-              <th class="px-4 py-2.5 text-end font-medium">{% trans "Tax" %}</th>
+              <th class="hidden px-4 py-2.5 text-end font-medium sm:table-cell">{% trans "Tax" %}</th>
               <th class="px-4 py-2.5 text-end font-medium">{% trans "Amount" %}</th>
               <th class="w-10"></th>
             </tr>
@@ -97,10 +97,15 @@
           <tbody class="divide-y divide-border">
             {% for line in lines %}
               <tr>
-                <td class="px-4 py-2.5 text-text-primary">{{ line.description }}</td>
+                <td class="px-4 py-2.5">
+                  <span class="text-text-primary">{{ line.description }}</span>
+                  {% if line.service.code %}
+                    <span class="ms-1 font-mono text-xs text-text-muted">{{ line.service.code }}</span>
+                  {% endif %}
+                </td>
                 <td class="px-4 py-2.5 text-end text-text-secondary" dir="ltr">{% localize off %}{{ line.quantity }}{% endlocalize %}</td>
                 <td class="px-4 py-2.5 text-end text-text-secondary" dir="ltr">{% localize off %}{{ line.rate }}{% endlocalize %}</td>
-                <td class="px-4 py-2.5 text-end text-text-secondary" dir="ltr">
+                <td class="hidden px-4 py-2.5 text-end text-text-secondary sm:table-cell" dir="ltr">
                   {% if line.is_taxable %}{% localize off %}{{ line.tax_rate }}{% endlocalize %}%{% else %}—{% endif %}
                 </td>
                 <td class="px-4 py-2.5 text-end text-text-primary" dir="ltr">{% localize off %}{{ line.amount }}{% endlocalize %}</td>
@@ -115,7 +120,7 @@
                 </td>
               </tr>
             {% empty %}
-              <tr><td colspan="6" class="px-5 py-4 text-sm text-text-muted">{% trans "No lines yet." %}</td></tr>
+              <tr><td colspan="6" class="px-5 py-4 text-sm text-text-muted">{% trans "No items yet — add one below." %}</td></tr>
             {% endfor %}
           </tbody>
           <tfoot class="border-t border-border bg-subtle text-sm">
@@ -150,19 +155,74 @@
       </div>
 
       {% if can_manage and not invoice.is_locked %}
-        <form method="post" action="{% url 'billing:invoice_line_add' pk=invoice.pk %}"
-              class="flex flex-wrap items-end gap-3 border-t border-border p-4">
-          {% csrf_token %}
-          <div class="min-w-[160px]">{% include "partials/_field.html" with field=line_form.service %}</div>
-          <div class="min-w-[160px] flex-1">{% include "partials/_field.html" with field=line_form.description %}</div>
-          <div class="w-20">{% include "partials/_field.html" with field=line_form.quantity %}</div>
-          <div class="w-28">{% include "partials/_field.html" with field=line_form.rate %}</div>
-          <div class="w-24">{% include "partials/_field.html" with field=line_form.tax_rate %}</div>
-          <label class="flex items-center gap-2 pb-2 text-sm text-text-primary">
-            {{ line_form.is_taxable }} {% trans "Taxable" %}
-          </label>
-          {% include "ui/button.html" with label=_("Add line") type="submit" variant="secondary" size="sm" icon="plus" %}
-        </form>
+        {% if services %}
+          {% comment %}
+          Add-item row. Choosing a service fills description, rate and tax from
+          the price list (the values are carried on each option's data-* so no
+          extra request is needed), and they stay editable before adding. There
+          is deliberately no free-text item: everything billed must be a
+          registered service, so the price list is the single source of truth.
+          {% endcomment %}
+          <form method="post" action="{% url 'billing:invoice_line_add' pk=invoice.pk %}"
+                class="border-t border-border p-4"
+                x-data="{
+                  rate: '', description: '', taxable: null,
+                  taxRate: '{{ current_tenant.default_tax_rate|stringformat:'s' }}',
+                  pick(e) {
+                    const o = e.target.selectedOptions[0];
+                    if (!o || !o.value) { this.taxable = null; return; }
+                    this.rate = o.dataset.rate;
+                    this.description = o.dataset.desc;
+                    this.taxable = o.dataset.taxable === '1';
+                  }
+                }">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-12">
+              <div class="sm:col-span-4">
+                <label class="mb-1 block text-xs text-text-muted">{% trans "Service" %}</label>
+                <select name="service" class="select" required @change="pick($event)">
+                  <option value="">{% trans "Choose a service…" %}</option>
+                  {% for service in services %}
+                    <option value="{{ service.id }}"
+                            data-rate="{{ service.default_rate|stringformat:'s' }}"
+                            data-desc="{{ service.description|default:service.name }}"
+                            data-taxable="{% if service.is_taxable %}1{% else %}0{% endif %}">
+                      {{ service.name }}{% if service.code %} · {{ service.code }}{% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="sm:col-span-4">
+                <label class="mb-1 block text-xs text-text-muted">{% trans "Description" %}</label>
+                <input type="text" name="description" class="input" x-model="description"
+                       placeholder="{% trans 'From the service' %}">
+              </div>
+              <div class="sm:col-span-1">
+                <label class="mb-1 block text-xs text-text-muted">{% trans "Qty" %}</label>
+                <input type="number" step="0.01" min="0" name="quantity" value="1" class="input" dir="ltr">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="mb-1 block text-xs text-text-muted">{% trans "Rate" %}</label>
+                <input type="number" step="0.001" min="0" name="rate" class="input" x-model="rate" dir="ltr">
+              </div>
+              <div class="flex items-end sm:col-span-1">
+                {% include "ui/button.html" with label=_("Add") type="submit" variant="primary" size="sm" full=True %}
+              </div>
+            </div>
+            {# Tax follows the service; shown here so it is not a surprise. #}
+            <p class="mt-2 text-xs text-text-muted" x-show="taxable !== null" x-cloak>
+              <span x-show="taxable">{% trans "Taxable at" %} <span x-text="taxRate"></span>%</span>
+              <span x-show="!taxable">{% trans "Not taxable." %}</span>
+            </p>
+          </form>
+        {% else %}
+          <div class="border-t border-border p-4 text-sm text-text-secondary">
+            {% trans "No services in your price list yet." %}
+            <a href="{% url 'billing:setup' %}" class="text-accent-primary hover:underline">
+              {% trans "Add one in billing setup." %}
+            </a>
+          </div>
+        {% endif %}
       {% endif %}
     </section>
 

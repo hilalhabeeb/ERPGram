@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -65,7 +67,14 @@ class InvoiceTermsForm(TenantScopedModelForm):
 
 
 class InvoiceLineForm(TenantScopedModelForm):
-    """One line. Picking a service fills the rate; it stays editable."""
+    """One invoice line — always a registered service.
+
+    Every line must reference a Service (the item master), the way ERPNext
+    requires an Item. Anything you want to bill has to exist as a service first,
+    so the price list stays the single source of truth and nothing is invented
+    ad hoc on an invoice. The rate, description and tax fill in from the service
+    and can be adjusted on the line without touching the master.
+    """
 
     tenant_fields = {"service": Service}
 
@@ -73,15 +82,34 @@ class InvoiceLineForm(TenantScopedModelForm):
         model = InvoiceLine
         fields = ["service", "description", "quantity", "rate", "is_taxable", "tax_rate"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["service"].required = True
+        self.fields["service"].empty_label = _("Choose a service…")
+        # Rate/description/tax are optional on the form: a blank line inherits
+        # them from the chosen service in clean().
+        for name in ("description", "rate", "tax_rate", "is_taxable"):
+            self.fields[name].required = False
+
     def clean(self):
         cleaned = super().clean()
         service = cleaned.get("service")
-        # Let a line be added by picking a service alone.
-        if service:
-            if not (cleaned.get("description") or "").strip():
-                cleaned["description"] = service.name
-            if not cleaned.get("rate"):
-                cleaned["rate"] = service.default_rate
+        if service is None:
+            return cleaned
+        if not (cleaned.get("description") or "").strip():
+            cleaned["description"] = service.description or service.name
+        if cleaned.get("rate") in (None, ""):
+            cleaned["rate"] = service.default_rate
+        # Taxability is a property of the item, not a per-line choice — a
+        # checkbox cannot tell "unchecked" from "not sent", so it would default a
+        # taxable service to untaxed. The service decides; the rate defaults to
+        # the tenant's rate and stays adjustable.
+        cleaned["is_taxable"] = service.is_taxable
+        if service.is_taxable:
+            if cleaned.get("tax_rate") in (None, ""):
+                cleaned["tax_rate"] = self.tenant.default_tax_rate
+        else:
+            cleaned["tax_rate"] = Decimal("0.00")
         return cleaned
 
 
