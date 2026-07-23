@@ -1,5 +1,5 @@
 {% extends "shell.html" %}
-{% load i18n ui l10n %}
+{% load i18n ui l10n comments %}
 
 {% block title %}{{ invoice.number|default:_("Draft invoice") }} · Erpgram{% endblock %}
 
@@ -355,6 +355,8 @@
       {% endif %}
     </section>
   {% endif %}
+
+  {% comment_thread invoice %}
 {% endblock %}
 
 {% block scripts %}{{ block.super }}

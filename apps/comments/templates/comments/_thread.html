@@ -1,0 +1,61 @@
+{% load i18n ui %}
+{% comment %}
+Comment thread for one document. Rendered by {% comment_thread obj %} and
+re-rendered (same partial) on each HTMX add/delete, so the whole section swaps
+in place. Context comes from apps.comments.services.thread_context.
+{% endcomment %}
+<section id="comments-{{ object_id }}" class="card mt-4 p-5">
+  <h2 class="text-heading-sm font-medium text-text-primary">{% trans "Comments" %}</h2>
+
+  <ul class="mt-4 space-y-4">
+    {% for comment in comments %}
+      <li class="flex gap-3">
+        {% if comment.created_by %}
+          {% include "ui/avatar.html" with user=comment.created_by size="sm" %}
+        {% else %}
+          <span class="grid h-8 w-8 place-items-center rounded-pill bg-subtle text-text-muted" aria-hidden="true">
+            {% icon "user" css_class="w-4 h-4" %}
+          </span>
+        {% endif %}
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-x-2">
+            <span class="text-sm font-medium text-text-primary">
+              {% if comment.created_by %}{{ comment.created_by.full_name|default:comment.created_by.email }}{% else %}{% trans "Removed user" %}{% endif %}
+            </span>
+            <span class="text-xs text-text-muted" title="{{ comment.created_at }}">
+              {% blocktrans with when=comment.created_at|timesince %}{{ when }} ago{% endblocktrans %}
+            </span>
+            {% if comment.created_by_id and comment.created_by_id == current_user.id %}
+              <form method="post" action="{% url 'comments:delete' pk=comment.pk %}"
+                    hx-post="{% url 'comments:delete' pk=comment.pk %}"
+                    hx-target="#comments-{{ object_id }}" hx-swap="outerHTML"
+                    @submit="if (!confirm('{% trans "Delete this comment?" %}')) $event.preventDefault()">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="text-xs text-text-muted hover:text-red-600">{% trans "Delete" %}</button>
+              </form>
+            {% endif %}
+          </div>
+          <p class="mt-0.5 whitespace-pre-line break-words text-sm text-text-secondary">{{ comment.body }}</p>
+        </div>
+      </li>
+    {% empty %}
+      <li class="text-sm text-text-muted">{% trans "No comments yet — add the first one." %}</li>
+    {% endfor %}
+  </ul>
+
+  {# outerHTML swap replaces this whole section, so the form comes back empty. #}
+  <form class="mt-4" method="post"
+        action="{% url 'comments:add' content_type_id=content_type_id object_id=object_id %}"
+        hx-post="{% url 'comments:add' content_type_id=content_type_id object_id=object_id %}"
+        hx-target="#comments-{{ object_id }}" hx-swap="outerHTML">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <label class="sr-only" for="comment-body-{{ object_id }}">{% trans "Add a comment" %}</label>
+    <textarea id="comment-body-{{ object_id }}" name="body" rows="2" class="input"
+              placeholder="{% trans 'Add a comment…' %}" required></textarea>
+    <div class="mt-2 flex justify-end">
+      {% include "ui/button.html" with label=_("Comment") type="submit" variant="primary" size="sm" %}
+    </div>
+  </form>
+</section>

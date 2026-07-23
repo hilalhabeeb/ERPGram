@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "apps.tenancy",
     "apps.accounts",
     "apps.ui",
+    "apps.comments",
     # domain apps — always installed, surfaced only for tenants in that domain
     # (see apps.core.domains).
     "apps.manpower",

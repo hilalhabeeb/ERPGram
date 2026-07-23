@@ -1,5 +1,5 @@
 {% extends "shell.html" %}
-{% load i18n ui l10n %}
+{% load i18n ui l10n comments %}
 
 {% block title %}{{ placement.reference }} · Erpgram{% endblock %}
 
@@ -209,4 +209,6 @@
       </section>
     </div>
   {% endif %}
+
+  {% comment_thread placement %}
 {% endblock %}

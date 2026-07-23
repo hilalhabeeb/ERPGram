@@ -1,5 +1,5 @@
 {% extends "shell.html" %}
-{% load i18n ui %}
+{% load i18n ui comments %}
 
 {% block title %}{{ worker.full_name }} · Erpgram{% endblock %}
 
@@ -166,4 +166,6 @@
       {% include "ui/empty_state.html" with icon="file-text" title=_("No documents yet") description=_("Passport, medical and visa documents will be listed here.") %}
     {% endif %}
   </section>
+
+  {% comment_thread worker %}
 {% endblock %}

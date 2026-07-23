@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-23 11:29+0300\n"
+"POT-Creation-Date: 2026-07-23 12:27+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -638,7 +638,6 @@ msgstr "حذف البند"
 msgid "No items yet — add a row."
 msgstr "لا توجد بنود بعد — أضف صفًا."
 
-#| msgid "(no tax)"
 msgid "No tax"
 msgstr "بدون ضريبة"
 
@@ -775,11 +774,9 @@ msgstr "تمت تسوية جميع الفواتير الصادرة."
 msgid "Open invoices"
 msgstr "الفواتير المفتوحة"
 
-#| msgid "Nothing open."
 msgid "Nothing open"
 msgstr "لا فواتير مفتوحة"
 
-#| msgid "Only an issued invoice can take a payment."
 msgid "No issued invoice is waiting on payment."
 msgstr "لا توجد فاتورة صادرة تنتظر السداد."
 
@@ -891,6 +888,55 @@ msgstr "تم إعداد مسودة إشعار دائن. راجعها ثم أصد
 
 msgid "Payment recorded."
 msgstr "تم تسجيل الدفعة."
+
+msgid "document type"
+msgstr "نوع مستند"
+
+#| msgid "document type"
+msgid "document id"
+msgstr "معرّف المستند"
+
+#| msgid "Document"
+msgid "comment"
+msgstr "تعليق"
+
+#| msgid "Documents"
+msgid "comments"
+msgstr "التعليقات"
+
+#| msgid "Documents"
+msgid "Comments"
+msgstr "التعليقات"
+
+#| msgid "Remove line"
+msgid "Removed user"
+msgstr "مستخدم محذوف"
+
+#, python-format
+msgid "%(when)s ago"
+msgstr "منذ %(when)s"
+
+msgid "Delete this comment?"
+msgstr "حذف هذا التعليق؟"
+
+msgid "Delete"
+msgstr "حذف"
+
+#| msgid "No items yet — add a row."
+msgid "No comments yet — add the first one."
+msgstr "لا توجد تعليقات بعد — أضف أول تعليق."
+
+#| msgid "Add a company"
+msgid "Add a comment"
+msgstr "أضف تعليقًا"
+
+#| msgid "Add a company"
+msgid "Add a comment…"
+msgstr "أضف تعليقًا…"
+
+#| msgid "Document"
+msgid "Comment"
+msgstr "تعليق"
 
 msgid "Domestic worker supply"
 msgstr "توريد العمالة المنزلية"
@@ -1074,9 +1120,6 @@ msgstr "يتتبع تاريخ الانتهاء"
 
 msgid "Documents of this type are watched for upcoming expiry."
 msgstr "تتم مراقبة مستندات هذا النوع لقرب انتهاء صلاحيتها."
-
-msgid "document type"
-msgstr "نوع مستند"
 
 msgid "document types"
 msgstr "أنواع المستندات"
@@ -1351,7 +1394,6 @@ msgid "Print agreement"
 msgstr "طباعة الاتفاقية"
 
 #, python-format
-#| msgid "Archive %(name)s"
 msgid "Mark %(name)s"
 msgstr "تحديد كـ %(name)s"
 
@@ -1400,7 +1442,6 @@ msgstr "تواريخ الإجراءات"
 msgid "Fill these in as the file moves through medical, visa and travel."
 msgstr "أدخل هذه التواريخ مع تقدّم المعاملة عبر الفحص الطبي والتأشيرة والسفر."
 
-#| msgid "Processing"
 msgid "Visa processing"
 msgstr "معالجة التأشيرة"
 
@@ -1905,20 +1946,18 @@ msgstr "تحديد الكل"
 msgid "Close"
 msgstr "إغلاق"
 
-#| msgid "Place workers with sponsors, price the contract and issue invoices."
 msgid "Search workers, sponsors, placements, invoices…"
 msgstr "ابحث في العمال والكفلاء والتعيينات والفواتير…"
 
-#| msgid "Search sponsors"
 msgid "Search your records"
 msgstr "ابحث في سجلاتك"
 
 msgid ""
 "Find a worker by name or passport, a sponsor, a placement reference or an "
 "invoice number."
-msgstr "ابحث عن عامل بالاسم أو رقم الجواز، أو عن كفيل أو مرجع تعيين أو رقم فاتورة."
+msgstr ""
+"ابحث عن عامل بالاسم أو رقم الجواز، أو عن كفيل أو مرجع تعيين أو رقم فاتورة."
 
-#| msgid "No branches yet"
 msgid "No matches"
 msgstr "لا نتائج"
 
