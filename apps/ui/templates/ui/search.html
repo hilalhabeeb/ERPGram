@@ -1,0 +1,54 @@
+{% extends "shell.html" %}
+{% load i18n ui %}
+
+{% block title %}{% trans "Search" %} · Erpgram{% endblock %}
+
+{% block content %}
+  {% include "ui/page_header.html" with title=_("Search") %}
+
+  {# The same box as the topbar, so a search can be refined from the results. #}
+  <form action="{% url 'ui:search' %}" method="get" role="search" class="mb-6 max-w-xl">
+    {% include "ui/search_input.html" with name="q" value=query placeholder=_("Search workers, sponsors, placements, invoices…") %}
+  </form>
+
+  {% if not query %}
+    {% include "ui/empty_state.html" with icon="search" title=_("Search your records") description=_("Find a worker by name or passport, a sponsor, a placement reference or an invoice number.") %}
+  {% elif not groups %}
+    {% include "ui/empty_state.html" with icon="search" title=_("No matches") description=_("Try a different name, reference or number.") %}
+  {% else %}
+    <p class="mb-4 text-sm text-text-secondary">
+      {% blocktrans count counter=result_count %}{{ counter }} result for “{{ query }}”{% plural %}{{ counter }} results for “{{ query }}”{% endblocktrans %}
+    </p>
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {% for group in groups %}
+        <section class="card overflow-hidden">
+          <header class="flex items-center gap-2 border-b border-border px-5 py-3">
+            <span class="text-text-muted">{% icon group.icon css_class="w-4 h-4" %}</span>
+            <h2 class="text-heading-sm font-medium text-text-primary">{{ group.label }}</h2>
+          </header>
+          <ul class="divide-y divide-border">
+            {% for item in group.items %}
+              <li>
+                <a href="{{ item.url }}"
+                   class="flex items-center justify-between gap-3 px-5 py-3 hover:bg-subtle">
+                  <span class="min-w-0">
+                    <span class="block truncate text-sm text-text-primary">{{ item.title }}</span>
+                    {% if item.subtitle %}
+                      <span class="block truncate text-xs text-text-muted">{{ item.subtitle }}</span>
+                    {% endif %}
+                  </span>
+                  {% icon "chevron-right" css_class="w-4 h-4 shrink-0 text-text-muted rtl:hidden" %}
+                  {% icon "chevron-left" css_class="w-4 h-4 shrink-0 text-text-muted hidden rtl:inline" %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+          <a href="{{ group.more_url }}"
+             class="block border-t border-border px-5 py-2.5 text-sm text-accent-primary hover:bg-subtle">
+            {% blocktrans with label=group.label %}View all in {{ label }}{% endblocktrans %}
+          </a>
+        </section>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

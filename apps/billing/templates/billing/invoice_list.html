@@ -4,32 +4,23 @@
 {% block title %}{% trans "Invoices" %} · Erpgram{% endblock %}
 
 {% block content %}
+  {% url 'billing:receivables' as receivables_url %}
   {% if can_manage %}
-    {% include "ui/page_header.html" with title=_("Invoices") subtitle=_("What has been billed, and what is still owed.") action_label=_("New invoice") action_icon="plus" action_event="open-modal-invoice" %}
+    {% include "ui/page_header.html" with title=_("Invoices") subtitle=_("What has been billed, and what is still owed.") secondary_label=_("Receivables") secondary_icon="chart" secondary_url=receivables_url action_label=_("New invoice") action_icon="plus" action_event="open-modal-invoice" %}
   {% else %}
-    {% include "ui/page_header.html" with title=_("Invoices") subtitle=_("What has been billed, and what is still owed.") %}
+    {% include "ui/page_header.html" with title=_("Invoices") subtitle=_("What has been billed, and what is still owed.") secondary_label=_("Receivables") secondary_icon="chart" secondary_url=receivables_url %}
   {% endif %}
 
   <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
     {% for stat in stats %}
-      <div class="card p-5">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <p class="text-sm text-text-secondary">{{ stat.label }}</p>
-            <p class="mt-1 text-heading-lg font-medium text-text-primary" dir="ltr">
-              {% if stat.key == "drafts" %}{{ stat.value }}
-              {% else %}{{ current_tenant.currency }} {% localize off %}{{ stat.value }}{% endlocalize %}{% endif %}
-            </p>
-          </div>
-          <span class="grid h-9 w-9 place-items-center rounded-control bg-accent-primarySoft text-accent-primary">
-            {% icon stat.icon css_class="w-5 h-5" %}
-          </span>
-        </div>
-      </div>
+      {% include "ui/stat_card.html" with label=stat.label value=stat.display icon=stat.icon %}
     {% endfor %}
   </div>
 
-  <form method="get" class="card mb-4 grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end">
+  {# Auto-submit on change/search, matching the worker list — one filter idiom across every register. #}
+  <form method="get" class="card mb-4 grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end"
+        hx-get="{% url 'billing:invoice_list' %}" hx-target="#invoices-table" hx-swap="outerHTML"
+        hx-trigger="change from:select, search delay:300ms from:input[type=search]" hx-push-url="true">
     <label class="min-w-[220px] flex-1">
       <span class="mb-1 block text-xs text-text-muted">{% trans "Search" %}</span>
       <input type="search" name="q" value="{{ search }}" class="input" placeholder="{% trans 'Number or sponsor' %}">
@@ -43,11 +34,8 @@
         <option value="cancelled" {% if state == "cancelled" %}selected{% endif %}>{% trans "Cancelled" %}</option>
       </select>
     </label>
-    <button type="submit" class="self-end rounded-control bg-accent-primary px-3 py-2 text-sm text-white">{% trans "Apply" %}</button>
     <a href="{% url 'billing:invoice_list' %}" class="self-end rounded-control border border-border px-3 py-2 text-sm text-text-secondary hover:bg-subtle">{% trans "Clear" %}</a>
-    <a href="{% url 'billing:receivables' %}" class="self-end rounded-control border border-border px-3 py-2 text-sm text-text-primary hover:bg-subtle lg:ms-auto">
-      {% trans "Receivables" %}
-    </a>
+    <noscript><button type="submit" class="self-end rounded-control bg-accent-primary px-3 py-2 text-sm text-white">{% trans "Apply" %}</button></noscript>
   </form>
 
   {% include "billing/_invoices_table.html" %}

@@ -5,16 +5,16 @@
 
 {% block content %}
   {% url 'manpower:worker_update' pk=worker.pk as edit_url %}
+  {% url 'manpower:worker_cv' pk=worker.pk as cv_url %}
+  {% comment %}
+  All worker actions live in the header — Biodata as the secondary action next to
+  Edit — so a clerk finds every action in one place rather than a second row.
+  {% endcomment %}
   {% if can_manage %}
-    {% include "ui/page_header.html" with title=worker.full_name subtitle=worker.reference action_label=_("Edit worker") action_icon="pencil" action_url=edit_url %}
+    {% include "ui/page_header.html" with title=worker.full_name subtitle=worker.reference secondary_label=_("Biodata sheet") secondary_icon="file-text" secondary_url=cv_url action_label=_("Edit worker") action_icon="pencil" action_url=edit_url %}
   {% else %}
-    {% include "ui/page_header.html" with title=worker.full_name subtitle=worker.reference %}
+    {% include "ui/page_header.html" with title=worker.full_name subtitle=worker.reference secondary_label=_("Biodata sheet") secondary_icon="file-text" secondary_url=cv_url %}
   {% endif %}
-
-  <div class="mb-4 flex flex-wrap gap-2">
-    {% url 'manpower:worker_cv' pk=worker.pk as cv_url %}
-    {% include "ui/button.html" with label=_("Biodata sheet") variant="secondary" size="sm" icon="file-text" url=cv_url %}
-  </div>
 
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
     {# Profile #}

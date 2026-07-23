@@ -20,7 +20,7 @@ from apps.core.permissions import (
     clean_codenames,
     codenames_for_domain,
 )
-from apps.manpower.models import Occupation, Worker
+from apps.manpower.models import Country, Occupation, Worker
 from apps.tenancy.models import Tenant
 from apps.ui.navigation import nav_for
 from tests.factories import MembershipFactory, TenantFactory, UserFactory
@@ -58,6 +58,44 @@ def test_manpower_pages_are_present_for_a_manpower_tenant(client):
 
     assert client.get(reverse("manpower:worker_list")).status_code == 200
     assert client.get(reverse("manpower:sponsor_list")).status_code == 200
+
+
+# --- global search -----------------------------------------------------------
+
+
+def test_search_page_renders_empty_and_with_a_query(client):
+    tenant = TenantFactory(domain=MANPOWER)
+    ensure_system_roles(tenant)
+    _sign_in(client, tenant)
+
+    # Renders with no query (the prompt state) and with a query (the results
+    # state) — both must be 200, guarding the new page against a silent 500.
+    assert client.get(reverse("ui:search")).status_code == 200
+    assert client.get(reverse("ui:search"), {"q": "anything"}).status_code == 200
+
+
+def test_search_finds_a_worker_by_name(client):
+    from apps.core.tenant import activate_tenant
+    from apps.manpower import services as manpower
+
+    tenant = TenantFactory(domain=MANPOWER)
+    ensure_system_roles(tenant)
+    manpower.ensure_reference_data()
+    manpower.ensure_tenant_defaults(tenant)
+    _sign_in(client, tenant)
+
+    with activate_tenant(tenant.id):
+        manpower.create_worker(
+            tenant=tenant,
+            user=UserFactory(),
+            full_name="Ratna Wijaya",
+            nationality=Country.objects.get(iso_code="ID"),
+            occupation=Occupation.objects.filter(tenant=tenant).first(),
+        )
+
+    response = client.get(reverse("ui:search"), {"q": "Wijaya"})
+    assert response.status_code == 200
+    assert b"Wijaya" in response.content
 
 
 def test_rail_hides_manpower_entries_outside_the_domain():

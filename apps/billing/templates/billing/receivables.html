@@ -70,7 +70,7 @@
             </div>
           </li>
         {% empty %}
-          <li class="px-5 py-4 text-sm text-text-muted">{% trans "Nothing open." %}</li>
+          {% include "ui/empty_state.html" with icon="check-circle" title=_("Nothing open") description=_("No issued invoice is waiting on payment.") %}
         {% endfor %}
       </ul>
     </section>

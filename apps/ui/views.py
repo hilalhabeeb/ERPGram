@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db.models import Count
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods, require_POST
 
@@ -24,7 +25,10 @@ from apps.core.permissions import (
     MANAGE_INVOICES,
     MANAGE_MEMBERS,
     MANAGE_ORGANIZATION,
+    MANAGE_PLACEMENTS,
     MANAGE_ROLES,
+    MANAGE_SPONSORS,
+    MANAGE_WORKERS,
     grouped_permissions,
 )
 from apps.tenancy.services import update_organization
@@ -91,6 +95,145 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         context.update(stat_groups=[{"label": "", "stats": dashboard_stats()}])
 
     return render(request, "ui/dashboard.html", context)
+
+
+SEARCH_LIMIT = 6
+
+
+def search(request: HttpRequest) -> HttpResponse:
+    """Global search across the records a user can reach.
+
+    Groups mirror the nav: a group only appears if the user holds the same
+    permission that puts its list in the sidebar, so search never surfaces a
+    record they could not otherwise open. Each group links to its full list
+    (pre-filtered by the query) so a long result set has a natural home.
+    """
+    from django.db.models import Q
+    from django.utils.http import urlencode
+
+    query = request.GET.get("q", "").strip()
+    groups: list[dict] = []
+
+    if query and getattr(request.tenant, "domain", None) == MANPOWER:
+        from apps.billing.models import Invoice
+        from apps.manpower.models import Placement, Sponsor, Worker
+
+        suffix = "?" + urlencode({"q": query})
+
+        if has_permission(request, MANAGE_WORKERS):
+            workers = list(
+                Worker.objects.filter(
+                    Q(full_name__icontains=query)
+                    | Q(reference__icontains=query)
+                    | Q(passport_no__icontains=query)
+                ).select_related("occupation")[:SEARCH_LIMIT]
+            )
+            if workers:
+                groups.append(
+                    {
+                        "label": _("Workers"),
+                        "icon": "users",
+                        "items": [
+                            {
+                                "title": w.full_name,
+                                "subtitle": w.reference
+                                or (w.occupation.name if w.occupation_id else ""),
+                                "url": reverse("manpower:worker_detail", args=[w.pk]),
+                            }
+                            for w in workers
+                        ],
+                        "more_url": reverse("manpower:worker_list") + suffix,
+                    }
+                )
+
+        if has_permission(request, MANAGE_SPONSORS):
+            sponsors = list(
+                Sponsor.objects.filter(
+                    Q(name__icontains=query)
+                    | Q(national_id__icontains=query)
+                    | Q(phone__icontains=query)
+                )[:SEARCH_LIMIT]
+            )
+            if sponsors:
+                groups.append(
+                    {
+                        "label": _("Sponsors"),
+                        "icon": "user-check",
+                        "items": [
+                            {
+                                "title": s.name,
+                                # No sponsor detail page yet — land on the sponsor
+                                # row in its list, filtered to this name.
+                                "subtitle": s.national_id or s.phone,
+                                "url": reverse("manpower:sponsor_list")
+                                + "?"
+                                + urlencode({"q": s.name}),
+                            }
+                            for s in sponsors
+                        ],
+                        "more_url": reverse("manpower:sponsor_list") + suffix,
+                    }
+                )
+
+        if has_permission(request, MANAGE_PLACEMENTS):
+            placements = list(
+                Placement.objects.filter(
+                    Q(reference__icontains=query)
+                    | Q(worker_name__icontains=query)
+                    | Q(sponsor__name__icontains=query)
+                ).select_related("sponsor")[:SEARCH_LIMIT]
+            )
+            if placements:
+                groups.append(
+                    {
+                        "label": _("Placements"),
+                        "icon": "briefcase",
+                        "items": [
+                            {
+                                "title": p.reference,
+                                "subtitle": f"{p.worker_name} · {p.sponsor.name}",
+                                "url": reverse("manpower:placement_detail", args=[p.pk]),
+                            }
+                            for p in placements
+                        ],
+                        "more_url": reverse("manpower:placement_list") + suffix,
+                    }
+                )
+
+        if has_permission(request, MANAGE_INVOICES):
+            invoices = list(
+                Invoice.objects.filter(
+                    Q(number__icontains=query) | Q(sponsor_name__icontains=query)
+                ).select_related("sponsor")[:SEARCH_LIMIT]
+            )
+            if invoices:
+                groups.append(
+                    {
+                        "label": _("Invoices"),
+                        "icon": "file-text",
+                        "items": [
+                            {
+                                "title": i.number or _("Draft"),
+                                "subtitle": i.sponsor_name or i.sponsor.name,
+                                "url": reverse("billing:invoice_detail", args=[i.pk]),
+                            }
+                            for i in invoices
+                        ],
+                        "more_url": reverse("billing:invoice_list") + suffix,
+                    }
+                )
+
+    return render(
+        request,
+        "ui/search.html",
+        {
+            "page_title": _("Search"),
+            "breadcrumb": [_("Search")],
+            "query": query,
+            "groups": groups,
+            "result_count": sum(len(g["items"]) for g in groups),
+        },
+    )
 
 
 @require_http_methods(["GET", "POST"])

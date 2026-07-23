@@ -412,13 +412,32 @@ def billing_summary(tenant: Tenant) -> list[dict]:
         Decimal("0.000"),
     )
     drafts = Invoice.objects.filter(tenant=tenant, status=Invoice.Status.DRAFT).count()
+
+    # Pre-format money to a plain string here (currency + grouped decimals) so the
+    # stat card can stay dumb and the Arabic locale never rewrites the separators.
+    def money(value: Decimal) -> str:
+        return f"{tenant.currency} {value:,.3f}"
+
     return [
         {
             "key": "outstanding",
             "label": _("Outstanding"),
             "value": data["total"],
+            "display": money(data["total"]),
             "icon": "file-text",
         },
-        {"key": "overdue", "label": _("Overdue"), "value": overdue, "icon": "alert-triangle"},
-        {"key": "drafts", "label": _("Draft invoices"), "value": drafts, "icon": "pencil"},
+        {
+            "key": "overdue",
+            "label": _("Overdue"),
+            "value": overdue,
+            "display": money(overdue),
+            "icon": "alert-triangle",
+        },
+        {
+            "key": "drafts",
+            "label": _("Draft invoices"),
+            "value": drafts,
+            "display": str(drafts),
+            "icon": "pencil",
+        },
     ]

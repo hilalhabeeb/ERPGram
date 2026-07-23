@@ -1,19 +1,24 @@
 {% comment %}
 Button / link button.
 Context:
-  label    (str)  required — visible text
-  variant  (str)  primary | secondary | ghost | danger  (default primary)
-  size     (str)  sm | md                               (default md)
-  type     (str)  button | submit                       (default button)
-  url      (str)  if set, renders an <a> instead of <button>
-  icon     (str)  optional leading lucide icon name
-  event    (str)  optional CustomEvent name dispatched on click (e.g. modal open)
-  full     (bool) full width
-  attrs    (str)  optional extra raw attributes (hx-*, x-on, etc.)
+  label     (str)  required — visible text
+  variant   (str)  primary | secondary | ghost | danger  (default primary)
+  size      (str)  sm | md                               (default md)
+  type      (str)  button | submit                       (default button)
+  url       (str)  if set, renders an <a> instead of <button>
+  icon      (str)  optional leading lucide icon name
+  event     (str)  optional CustomEvent name dispatched on click (e.g. modal open)
+  full      (bool) full width
+  disabled  (bool) render the button disabled
+  busy_expr (str)  Alpine expression; when truthy the button disables and shows a
+                   spinner. Pair with a form that sets it on submit, e.g.
+                   <form x-data="{busy:false}" @submit="busy=true"> ... busy_expr="busy".
+                   Guards the money-moving POSTs against a double-click.
+  attrs     (str)  optional extra raw attributes (hx-*, x-on, etc.)
 {% endcomment %}
 {% load ui %}
 {% spaceless %}
-<{% if url %}a href="{{ url }}"{% else %}button type="{{ type|default:'button' }}"{% endif %}
+<{% if url %}a href="{{ url }}"{% else %}button type="{{ type|default:'button' }}"{% if disabled %} disabled{% endif %}{% endif %}
   class="inline-flex items-center justify-center gap-2 rounded-control font-medium transition-colors
          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary
          focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none
@@ -21,10 +26,17 @@ Context:
          {% if full %}w-full{% endif %}
          {% if variant == 'secondary' %}bg-card text-text-primary border border-border hover:bg-subtle
          {% elif variant == 'ghost' %}bg-transparent text-text-secondary hover:bg-subtle
-         {% elif variant == 'danger' %}bg-transparent text-red-600 border border-border hover:bg-red-50
+         {% elif variant == 'danger' %}bg-transparent text-red-600 border border-red-200 hover:bg-red-50
          {% else %}bg-accent-primary text-white hover:bg-accent-primary/90{% endif %}"
   {% if event %}onclick="window.dispatchEvent(new CustomEvent('{{ event }}'))"{% endif %}
+  {% if busy_expr %}x-bind:disabled="{{ busy_expr }}"{% endif %}
   {{ attrs|safe }}>
+  {% if busy_expr %}
+    <svg x-show="{{ busy_expr }}" x-cloak class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z"></path>
+    </svg>
+  {% endif %}
   {% if icon %}{% icon icon css_class="w-4 h-4" %}{% endif %}
   <span>{{ label }}</span>
 </{% if url %}a{% else %}button{% endif %}>

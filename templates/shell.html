@@ -130,13 +130,15 @@ width and opacity animate, and `prefers-reduced-motion` disables that globally.
       </nav>
 
       <div class="ms-auto flex items-center gap-2">
-        <div class="hidden lg:block">
-          {% include "ui/search_input.html" with placeholder=_("Search") name="q" url="" %}
-        </div>
-        <button type="button" class="hidden h-9 w-9 place-items-center rounded-pill text-text-secondary hover:bg-subtle sm:grid"
-                aria-label="{% trans 'Support' %}">{% icon "headset" css_class="w-5 h-5" %}</button>
-        <button type="button" class="grid h-9 w-9 place-items-center rounded-pill text-text-secondary hover:bg-subtle"
-                aria-label="{% trans 'Notifications' %}">{% icon "bell" css_class="w-5 h-5" %}</button>
+        {# Global search: submits to the results page, so it works on every screen. #}
+        <form action="{% url 'ui:search' %}" method="get" role="search" class="hidden lg:block">
+          {% include "ui/search_input.html" with placeholder=_("Search") name="q" %}
+        </form>
+        {# Compact search affordance for tablet and phone. #}
+        <a href="{% url 'ui:search' %}" aria-label="{% trans 'Search' %}"
+           class="grid h-9 w-9 place-items-center rounded-pill text-text-secondary hover:bg-subtle lg:hidden">
+          {% icon "search" css_class="w-5 h-5" %}
+        </a>
 
         {% include "ui/_tenant_switcher.html" %}
         {% include "ui/_avatar_menu.html" %}

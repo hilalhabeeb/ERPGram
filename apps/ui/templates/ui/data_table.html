@@ -14,7 +14,18 @@ Sorting & pagination links use HTMX to swap this wrapper (outerHTML) and fall
 back to normal navigation when JS is off.
 {% endcomment %}
 {% load i18n ui %}
-<div id="{{ table_id }}" class="card overflow-hidden">
+{% comment %}
+hx-indicator is inherited, so every sort/pagination request inside this wrapper
+shows the same overlay — the table no longer freezes silently on a slow swap.
+{% endcomment %}
+<div id="{{ table_id }}" class="card relative overflow-hidden" hx-indicator="#{{ table_id }}-loader">
+  <div id="{{ table_id }}-loader"
+       class="htmx-indicator pointer-events-none absolute inset-0 z-10 grid place-items-center bg-card/60">
+    <svg class="h-6 w-6 animate-spin text-accent-primary" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z"></path>
+    </svg>
+  </div>
   <div class="overflow-x-auto" x-data="{ toggleAll(e){ this.$root.querySelectorAll('[data-row-check]').forEach(c => c.checked = e.target.checked) } }">
     <table class="w-full text-sm">
       <thead>

@@ -30,20 +30,7 @@
     <h2 class="mb-2 mt-5 text-xs uppercase tracking-wide text-text-muted">{% trans "Money" %}</h2>
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
       {% for stat in money_stats %}
-        <div class="card p-4 sm:p-5">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <p class="truncate text-sm text-text-secondary">{{ stat.label }}</p>
-              <p class="mt-1 text-heading-lg font-medium text-text-primary" dir="ltr">
-                {% if stat.key == "drafts" %}{{ stat.value }}
-                {% else %}{{ current_tenant.currency }} {% localize off %}{{ stat.value }}{% endlocalize %}{% endif %}
-              </p>
-            </div>
-            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-control bg-accent-primarySoft text-accent-primary">
-              {% icon stat.icon css_class="w-5 h-5" %}
-            </span>
-          </div>
-        </div>
+        {% include "ui/stat_card.html" with label=stat.label value=stat.display icon=stat.icon %}
       {% endfor %}
     </div>
   {% endif %}

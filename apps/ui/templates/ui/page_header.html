@@ -1,12 +1,19 @@
 {% comment %}
-Page header: title on the start side, a primary action on the end side.
+Page header: title on the start side, actions on the end side.
 Context:
-  title         (str)  required
-  subtitle      (str)  optional
-  action_label  (str)  optional — renders a primary button/link
-  action_icon   (str)  optional lucide icon for the action (default "plus")
-  action_url    (str)  optional — action is a link to this URL
-  action_event  (str)  optional — action dispatches this CustomEvent (e.g. modal)
+  title            (str)  required
+  subtitle         (str)  optional
+  action_label     (str)  optional — primary button/link
+  action_icon      (str)  optional lucide icon for the action (default "plus")
+  action_url       (str)  optional — primary action is a link to this URL
+  action_event     (str)  optional — primary action dispatches this CustomEvent
+  secondary_label  (str)  optional — a secondary (outline) action shown before the primary
+  secondary_icon   (str)  optional lucide icon for the secondary action
+  secondary_url    (str)  optional — secondary action is a link to this URL
+  secondary_event  (str)  optional — secondary action dispatches this CustomEvent
+
+All detail actions live here so a clerk finds every action in one place rather
+than hunting a second row below the header.
 {% endcomment %}
 {% load ui %}
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -14,11 +21,22 @@ Context:
     <h1 class="text-heading-lg font-medium text-text-primary">{{ title }}</h1>
     {% if subtitle %}<p class="mt-1 text-sm text-text-secondary">{{ subtitle }}</p>{% endif %}
   </div>
-  {% if action_label %}
-    {% if action_url %}
-      {% include "ui/button.html" with label=action_label icon=action_icon|default:"plus" url=action_url variant="primary" %}
-    {% else %}
-      {% include "ui/button.html" with label=action_label icon=action_icon|default:"plus" event=action_event variant="primary" %}
-    {% endif %}
+  {% if action_label or secondary_label %}
+    <div class="flex flex-wrap items-center gap-2">
+      {% if secondary_label %}
+        {% if secondary_url %}
+          {% include "ui/button.html" with label=secondary_label icon=secondary_icon url=secondary_url variant="secondary" %}
+        {% else %}
+          {% include "ui/button.html" with label=secondary_label icon=secondary_icon event=secondary_event variant="secondary" %}
+        {% endif %}
+      {% endif %}
+      {% if action_label %}
+        {% if action_url %}
+          {% include "ui/button.html" with label=action_label icon=action_icon|default:"plus" url=action_url variant="primary" %}
+        {% else %}
+          {% include "ui/button.html" with label=action_label icon=action_icon|default:"plus" event=action_event variant="primary" %}
+        {% endif %}
+      {% endif %}
+    </div>
   {% endif %}
 </div>

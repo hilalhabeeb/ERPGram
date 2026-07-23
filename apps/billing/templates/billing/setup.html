@@ -38,7 +38,8 @@
                   {% csrf_token %}
                   <input type="hidden" name="id" value="{{ row.pk }}">
                   <input type="hidden" name="archive" value="1">
-                  <button type="submit" class="rounded-control px-2 py-1 text-sm text-text-secondary hover:bg-subtle hover:text-text-primary">
+                  <button type="submit" class="rounded-control px-2 py-1 text-sm text-text-secondary hover:bg-subtle hover:text-text-primary"
+                          {% if row.is_active %}onclick="return confirm('{% trans "Archive this entry? It stays on past records but is no longer offered on new ones." %}')"{% endif %}>
                     {% if row.is_active %}{% trans "Archive" %}{% else %}{% trans "Restore" %}{% endif %}
                   </button>
                 </form>

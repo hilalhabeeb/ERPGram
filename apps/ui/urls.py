@@ -10,6 +10,7 @@ app_name = "ui"
 
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
+    path("search/", views.search, name="search"),
     path("settings/profile/", views.settings_profile, name="settings_profile"),
     path("settings/organization/", views.settings_organization, name="settings_organization"),
     path("settings/users/", views.settings_users, name="settings_users"),

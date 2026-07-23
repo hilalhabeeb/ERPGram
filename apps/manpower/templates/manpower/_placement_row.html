@@ -1,6 +1,5 @@
 {% comment %}One placement row. Context: obj (Placement).{% endcomment %}
 {% load i18n ui l10n %}
-{% load l10n %}
 <tr class="hover:bg-subtle">
   <td class="px-4 py-3 font-mono text-xs">
     <a href="{% url 'manpower:placement_detail' pk=obj.pk %}" class="text-text-primary hover:text-accent-primary">{{ obj.reference }}</a>

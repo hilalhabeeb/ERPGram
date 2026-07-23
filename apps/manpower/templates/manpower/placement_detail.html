@@ -27,14 +27,17 @@
         <div class="flex flex-wrap gap-2">
           {% for value, label in placement.Status.choices %}
             {% if value != placement.status and value != "draft" %}
-              <form method="post" action="{% url 'manpower:placement_status' pk=placement.pk %}">
+              {% blocktrans with name=label|lower asvar mark_label %}Mark {{ name }}{% endblocktrans %}
+              <form method="post" action="{% url 'manpower:placement_status' pk=placement.pk %}"
+                    x-data="{busy:false}"
+                    {% if value == "cancelled" %}@submit="if (!confirm('{% trans "Cancel this placement and free the worker?" %}')) { $event.preventDefault(); return } busy=true"{% else %}@submit="busy=true"{% endif %}>
                 {% csrf_token %}
                 <input type="hidden" name="status" value="{{ value }}">
-                <button type="submit"
-                        class="rounded-control border border-border px-3 py-1.5 text-sm text-text-primary hover:bg-subtle"
-                        {% if value == "cancelled" %}onclick="return confirm('{% trans "Cancel this placement and free the worker?" %}')"{% endif %}>
-                  {% trans "Mark" %} {{ label|lower }}
-                </button>
+                {% if value == "cancelled" %}
+                  {% include "ui/button.html" with label=mark_label type="submit" variant="danger" size="sm" busy_expr="busy" %}
+                {% else %}
+                  {% include "ui/button.html" with label=mark_label type="submit" variant="secondary" size="sm" busy_expr="busy" %}
+                {% endif %}
               </form>
             {% endif %}
           {% endfor %}
@@ -170,15 +173,37 @@
         <p class="mt-0.5 text-sm text-text-secondary">
           {% trans "Fill these in as the file moves through medical, visa and travel." %}
         </p>
-        <form method="post" action="{% url 'manpower:placement_update' pk=placement.pk section='pipeline' %}" class="mt-4 space-y-4">
+        {% comment %}
+        Grouped by stage — the same stages the milestone strip above tracks — so
+        entering a date sits next to the milestone it ticks.
+        {% endcomment %}
+        <form method="post" action="{% url 'manpower:placement_update' pk=placement.pk section='pipeline' %}"
+              class="mt-4 space-y-5" x-data="{busy:false}" @submit="busy=true">
           {% csrf_token %}
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {% for field in pipeline_form %}
-              {% include "partials/_field.html" with field=field %}
-            {% endfor %}
+          <div>
+            <h3 class="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">{% trans "Agreement" %}</h3>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {% include "partials/_field.html" with field=pipeline_form.agreed_on %}
+            </div>
+          </div>
+          <div>
+            <h3 class="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">{% trans "Visa processing" %}</h3>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {% include "partials/_field.html" with field=pipeline_form.medical_on %}
+              {% include "partials/_field.html" with field=pipeline_form.visa_applied_on %}
+              {% include "partials/_field.html" with field=pipeline_form.visa_issued_on %}
+            </div>
+          </div>
+          <div>
+            <h3 class="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">{% trans "Travel and delivery" %}</h3>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {% include "partials/_field.html" with field=pipeline_form.travel_on %}
+              {% include "partials/_field.html" with field=pipeline_form.arrival_on %}
+              {% include "partials/_field.html" with field=pipeline_form.delivered_on %}
+            </div>
           </div>
           <div class="flex justify-end">
-            {% include "ui/button.html" with label=_("Save dates") type="submit" variant="primary" size="sm" %}
+            {% include "ui/button.html" with label=_("Save dates") type="submit" variant="primary" size="sm" busy_expr="busy" %}
           </div>
         </form>
       </section>
