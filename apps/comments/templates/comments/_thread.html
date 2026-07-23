@@ -29,7 +29,9 @@ in place. Context comes from apps.comments.services.thread_context.
               <form method="post" action="{% url 'comments:delete' pk=comment.pk %}"
                     hx-post="{% url 'comments:delete' pk=comment.pk %}"
                     hx-target="#comments-{{ object_id }}" hx-swap="outerHTML"
-                    @submit="if (!confirm('{% trans "Delete this comment?" %}')) $event.preventDefault()">
+                    data-confirm="{% trans 'This cannot be undone.' %}"
+                    data-confirm-title="{% trans 'Delete this comment?' %}"
+                    data-confirm-label="{% trans 'Delete' %}">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                 <button type="submit" class="text-xs text-text-muted hover:text-red-600">{% trans "Delete" %}</button>

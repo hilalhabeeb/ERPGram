@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-23 12:27+0300\n"
+"POT-Creation-Date: 2026-07-23 15:00+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -602,8 +602,13 @@ msgstr "مستحق"
 msgid "Issue invoice"
 msgstr "إصدار الفاتورة"
 
-msgid "Cancel this invoice? The number is kept and cannot be reused."
-msgstr "إلغاء هذه الفاتورة؟ يُحتفظ بالرقم ولا يمكن إعادة استخدامه."
+#| msgid "Cancel this invoice? The number is kept and cannot be reused."
+msgid "The number is kept and cannot be reused."
+msgstr "يُحتفظ بالرقم ولا يمكن إعادة استخدامه."
+
+#| msgid "Cancel invoice"
+msgid "Cancel this invoice?"
+msgstr "إلغاء هذه الفاتورة؟"
 
 msgid "Cancel invoice"
 msgstr "إلغاء الفاتورة"
@@ -795,10 +800,14 @@ msgstr "مؤرشف"
 msgid "Edit"
 msgstr "تعديل"
 
-msgid ""
-"Archive this entry? It stays on past records but is no longer offered on new "
-"ones."
-msgstr "أرشفة هذا البند؟ يبقى على السجلات السابقة لكنه لن يُعرض في الجديدة."
+#| msgid ""
+#| "Archive this entry? It stays on past records but is no longer offered on "
+#| "new ones."
+msgid "It stays on past records but is no longer offered on new ones."
+msgstr "يبقى على السجلات السابقة لكنه لن يُعرض في الجديدة."
+
+msgid "Archive this entry?"
+msgstr "أرشفة هذا البند؟"
 
 msgid "Archive"
 msgstr "أرشفة"
@@ -892,23 +901,18 @@ msgstr "تم تسجيل الدفعة."
 msgid "document type"
 msgstr "نوع مستند"
 
-#| msgid "document type"
 msgid "document id"
 msgstr "معرّف المستند"
 
-#| msgid "Document"
 msgid "comment"
 msgstr "تعليق"
 
-#| msgid "Documents"
 msgid "comments"
 msgstr "التعليقات"
 
-#| msgid "Documents"
 msgid "Comments"
 msgstr "التعليقات"
 
-#| msgid "Remove line"
 msgid "Removed user"
 msgstr "مستخدم محذوف"
 
@@ -916,25 +920,24 @@ msgstr "مستخدم محذوف"
 msgid "%(when)s ago"
 msgstr "منذ %(when)s"
 
+msgid "This cannot be undone."
+msgstr "لا يمكن التراجع عن هذا."
+
 msgid "Delete this comment?"
 msgstr "حذف هذا التعليق؟"
 
 msgid "Delete"
 msgstr "حذف"
 
-#| msgid "No items yet — add a row."
 msgid "No comments yet — add the first one."
 msgstr "لا توجد تعليقات بعد — أضف أول تعليق."
 
-#| msgid "Add a company"
 msgid "Add a comment"
 msgstr "أضف تعليقًا"
 
-#| msgid "Add a company"
 msgid "Add a comment…"
 msgstr "أضف تعليقًا…"
 
-#| msgid "Document"
 msgid "Comment"
 msgstr "تعليق"
 
@@ -1368,6 +1371,14 @@ msgstr "إضافة كفيل"
 msgid "Active"
 msgstr "نشط"
 
+#, python-format
+msgid "%(name)s will no longer appear when choosing a sponsor."
+msgstr "لن يظهر %(name)s عند اختيار كفيل."
+
+#| msgid "Search sponsors"
+msgid "Archive sponsor?"
+msgstr "أرشفة الكفيل؟"
+
 msgid "No sponsors yet"
 msgstr "لا يوجد كفلاء بعد"
 
@@ -1397,8 +1408,16 @@ msgstr "طباعة الاتفاقية"
 msgid "Mark %(name)s"
 msgstr "تحديد كـ %(name)s"
 
-msgid "Cancel this placement and free the worker?"
-msgstr "إلغاء عملية التوظيف وإتاحة العامل؟"
+msgid "This frees the worker to be offered again."
+msgstr "يؤدي هذا إلى إتاحة العامل للعرض مجددًا."
+
+#| msgid "Cancel this placement and free the worker?"
+msgid "Cancel this placement?"
+msgstr "إلغاء هذا التعيين؟"
+
+#| msgid "Manage placements"
+msgid "Cancel placement"
+msgstr "إلغاء التعيين"
 
 msgid "Parties"
 msgstr "الأطراف"
@@ -1761,8 +1780,13 @@ msgid "Create branch"
 msgstr "إنشاء الفرع"
 
 #, python-format
-msgid "Archive %(name)s and its departments?"
-msgstr "هل تريد أرشفة %(name)s وأقسامه؟"
+#| msgid "Archive %(name)s and its departments?"
+msgid "This archives %(name)s and its departments."
+msgstr "يؤدي هذا إلى أرشفة %(name)s وأقسامه."
+
+#| msgid "Create branch"
+msgid "Archive branch?"
+msgstr "أرشفة الفرع؟"
 
 #, python-format
 msgid "Archive %(name)s"
@@ -1788,8 +1812,13 @@ msgid "Create company"
 msgstr "إنشاء الشركة"
 
 #, python-format
-msgid "Archive %(name)s and all its branches and departments?"
-msgstr "هل تريد أرشفة %(name)s وجميع فروعها وأقسامها؟"
+#| msgid "Archive %(name)s and all its branches and departments?"
+msgid "This archives %(name)s and all its branches and departments."
+msgstr "يؤدي هذا إلى أرشفة %(name)s وجميع فروعه وأقسامه."
+
+#| msgid "Create company"
+msgid "Archive company?"
+msgstr "أرشفة الشركة؟"
 
 msgid "Create department"
 msgstr "إنشاء القسم"
@@ -1804,8 +1833,13 @@ msgid "Departments"
 msgstr "الأقسام"
 
 #, python-format
-msgid "Archive %(name)s and any departments under it?"
-msgstr "هل تريد أرشفة %(name)s وأي أقسام تابعة له؟"
+#| msgid "Archive %(name)s and any departments under it?"
+msgid "This archives %(name)s and any departments under it."
+msgstr "يؤدي هذا إلى أرشفة %(name)s وأي أقسام تابعة له."
+
+#| msgid "Add department"
+msgid "Archive department?"
+msgstr "أرشفة القسم؟"
 
 msgid "No departments yet"
 msgstr "لا توجد أقسام بعد"
@@ -1906,6 +1940,13 @@ msgstr "الصفحة التالية"
 
 msgid "Switch organisation"
 msgstr "تبديل المؤسسة"
+
+msgid "Are you sure?"
+msgstr "هل أنت متأكد؟"
+
+#| msgid "Confirmed"
+msgid "Confirm"
+msgstr "تأكيد"
 
 msgid "Money"
 msgstr "المالية"

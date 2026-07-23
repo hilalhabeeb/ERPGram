@@ -52,12 +52,12 @@
               {% endif %}
             </div>
             {% if can_manage %}
-              <form method="post" action="{% url 'tenancy:department_archive' pk=company.pk branch_pk=branch.pk department_pk=row.department.pk %}">
+              <form method="post" action="{% url 'tenancy:department_archive' pk=company.pk branch_pk=branch.pk department_pk=row.department.pk %}"
+                    {% if row.department.is_active %}data-confirm="{% blocktrans with name=row.department.name %}This archives {{ name }} and any departments under it.{% endblocktrans %}" data-confirm-title="{% trans 'Archive department?' %}" data-confirm-label="{% trans 'Archive' %}"{% endif %}>
                 {% csrf_token %}
                 <button type="submit"
                         class="rounded-control px-2 py-1 text-sm text-text-secondary hover:bg-subtle hover:text-text-primary"
                         {% if row.department.is_active %}
-                          onclick="return confirm('{% blocktrans with name=row.department.name %}Archive {{ name }} and any departments under it?{% endblocktrans %}')"
                           aria-label="{% blocktrans with name=row.department.name %}Archive {{ name }}{% endblocktrans %}"
                         {% else %}
                           aria-label="{% blocktrans with name=row.department.name %}Restore {{ name }}{% endblocktrans %}"

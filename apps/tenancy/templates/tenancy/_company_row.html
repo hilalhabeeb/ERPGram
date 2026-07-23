@@ -19,12 +19,12 @@
   </td>
   <td class="px-4 py-3">
     {% if can_manage %}
-      <form method="post" action="{% url 'tenancy:company_archive' pk=obj.pk %}" class="flex justify-end">
+      <form method="post" action="{% url 'tenancy:company_archive' pk=obj.pk %}" class="flex justify-end"
+            {% if obj.is_active %}data-confirm="{% blocktrans with name=obj.name %}This archives {{ name }} and all its branches and departments.{% endblocktrans %}" data-confirm-title="{% trans 'Archive company?' %}" data-confirm-label="{% trans 'Archive' %}"{% endif %}>
         {% csrf_token %}
         <button type="submit"
                 class="rounded-control px-2 py-1 text-sm text-text-secondary hover:bg-subtle hover:text-text-primary"
                 {% if obj.is_active %}
-                  onclick="return confirm('{% blocktrans with name=obj.name %}Archive {{ name }} and all its branches and departments?{% endblocktrans %}')"
                   aria-label="{% blocktrans with name=obj.name %}Archive {{ name }}{% endblocktrans %}"
                 {% else %}
                   aria-label="{% blocktrans with name=obj.name %}Restore {{ name }}{% endblocktrans %}"

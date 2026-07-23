@@ -1,0 +1,114 @@
+{% load i18n ui %}
+{% comment %}
+Global confirmation dialog. Mounted once in the shell; any form that carries a
+`data-confirm` attribute is routed through it instead of the browser's confirm().
+
+  <form ... data-confirm="This cannot be undone."
+             data-confirm-title="Delete this?"     {# optional #}
+             data-confirm-label="Delete"            {# optional, the danger button #}
+             data-confirm-tone="danger|primary">    {# optional, default danger #}
+
+Works for a plain POST and an HTMX form alike: the submit is intercepted in the
+capture phase (before HTMX's own handler), the dialog opens, and on confirm the
+form is re-submitted with a flag set so this handler steps aside.
+{% endcomment %}
+<div x-data x-cloak x-show="$store.confirm.open"
+     class="fixed inset-0 z-[70] grid place-items-center p-4"
+     @keydown.escape.window="$store.confirm.cancel()"
+     role="alertdialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
+  <div class="absolute inset-0 bg-text-primary/40" x-transition.opacity
+       @click="$store.confirm.cancel()"></div>
+  <div class="card relative w-full max-w-md p-6" @click.stop
+       x-show="$store.confirm.open" x-transition
+       x-effect="$store.confirm.open && $nextTick(() => $refs.confirmBtn && $refs.confirmBtn.focus())">
+    <div class="flex gap-4">
+      <span class="grid h-10 w-10 shrink-0 place-items-center rounded-pill"
+            :class="$store.confirm.tone === 'primary' ? 'bg-accent-primarySoft text-accent-primary' : 'bg-red-50 text-red-600'">
+        {% icon "alert-triangle" css_class="w-5 h-5" %}
+      </span>
+      <div class="min-w-0">
+        <h2 id="confirm-dialog-title" class="text-heading-sm font-medium text-text-primary"
+            x-text="$store.confirm.title"></h2>
+        <p class="mt-1 text-sm text-text-secondary" x-text="$store.confirm.message"></p>
+      </div>
+    </div>
+    <div class="mt-6 flex justify-end gap-2">
+      <button type="button" @click="$store.confirm.cancel()"
+              class="h-9 rounded-control border border-border px-4 text-sm text-text-primary hover:bg-subtle">
+        {% trans "Cancel" %}
+      </button>
+      <button type="button" x-ref="confirmBtn" @click="$store.confirm.run()"
+              class="h-9 rounded-control px-4 text-sm font-medium text-white"
+              :class="$store.confirm.tone === 'primary' ? 'bg-accent-primary hover:bg-accent-primary/90' : 'bg-red-600 hover:bg-red-700'"
+              x-text="$store.confirm.confirmLabel"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("alpine:init", () => {
+    Alpine.store("confirm", {
+      open: false,
+      title: "",
+      message: "",
+      confirmLabel: "",
+      tone: "danger",
+      _action: null,
+      ask(opts, action) {
+        this.title = opts.title || "{% trans 'Are you sure?' %}";
+        this.message = opts.message || "";
+        this.confirmLabel = opts.confirmLabel || "{% trans 'Confirm' %}";
+        this.tone = opts.tone || "danger";
+        this._action = action;
+        this.open = true;
+      },
+      run() {
+        const action = this._action;
+        this.open = false;
+        this._action = null;
+        if (action) action();
+      },
+      cancel() {
+        this.open = false;
+        this._action = null;
+      },
+    });
+  });
+
+  // Route any data-confirm form through the dialog. Capture phase so we run
+  // before HTMX's submit handler; on confirm we re-submit with a flag set and
+  // this listener steps aside, letting HTMX (or a plain POST) proceed.
+  document.addEventListener(
+    "submit",
+    (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      const message = form.dataset.confirm;
+      if (!message || form.dataset.confirmed === "true") return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      const submitter = event.submitter;
+      const proceed = () => {
+        form.dataset.confirmed = "true";
+        if (form.requestSubmit) form.requestSubmit(submitter);
+        else form.submit();
+      };
+
+      if (window.Alpine && Alpine.store("confirm")) {
+        Alpine.store("confirm").ask(
+          {
+            message,
+            title: form.dataset.confirmTitle,
+            confirmLabel: form.dataset.confirmLabel,
+            tone: form.dataset.confirmTone,
+          },
+          proceed,
+        );
+      } else if (window.confirm(message)) {
+        proceed();
+      }
+    },
+    true,
+  );
+</script>

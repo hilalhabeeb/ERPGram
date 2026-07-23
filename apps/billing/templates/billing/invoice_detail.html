@@ -50,8 +50,10 @@
           {% elif invoice.status == "issued" %}
             {% if not invoice.payments.exists %}
               <form method="post" action="{% url 'billing:invoice_cancel' pk=invoice.pk %}"
-                    x-data="{busy:false}"
-                    @submit="if (!confirm('{% trans "Cancel this invoice? The number is kept and cannot be reused." %}')) { $event.preventDefault(); return } busy=true">
+                    x-data="{busy:false}" @submit="busy=true"
+                    data-confirm="{% trans 'The number is kept and cannot be reused.' %}"
+                    data-confirm-title="{% trans 'Cancel this invoice?' %}"
+                    data-confirm-label="{% trans 'Cancel invoice' %}">
                 {% csrf_token %}
                 {% include "ui/button.html" with label=_("Cancel invoice") type="submit" variant="danger" size="sm" busy_expr="busy" %}
               </form>

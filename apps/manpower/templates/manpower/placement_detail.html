@@ -29,8 +29,8 @@
             {% if value != placement.status and value != "draft" %}
               {% blocktrans with name=label|lower asvar mark_label %}Mark {{ name }}{% endblocktrans %}
               <form method="post" action="{% url 'manpower:placement_status' pk=placement.pk %}"
-                    x-data="{busy:false}"
-                    {% if value == "cancelled" %}@submit="if (!confirm('{% trans "Cancel this placement and free the worker?" %}')) { $event.preventDefault(); return } busy=true"{% else %}@submit="busy=true"{% endif %}>
+                    x-data="{busy:false}" @submit="busy=true"
+                    {% if value == "cancelled" %}data-confirm="{% trans 'This frees the worker to be offered again.' %}" data-confirm-title="{% trans 'Cancel this placement?' %}" data-confirm-label="{% trans 'Cancel placement' %}"{% endif %}>
                 {% csrf_token %}
                 <input type="hidden" name="status" value="{{ value }}">
                 {% if value == "cancelled" %}

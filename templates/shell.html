@@ -150,5 +150,8 @@ width and opacity animate, and `prefers-reduced-motion` disables that globally.
       {% block content %}{% endblock %}
     </main>
   </div>
+
+  {# Global confirmation dialog — every data-confirm form routes through it. #}
+  {% include "ui/confirm_dialog.html" %}
 </div>
 {% endblock %}
